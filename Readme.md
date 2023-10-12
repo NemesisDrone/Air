@@ -5,4 +5,4 @@ Embeded systems for Nemesis
 
 ## Documentation
 
-To open the documentation, click on the doc.html file and open it in your browser.
+To open the documentation, click on the doc.html file and open it in your browser or in pycharm.

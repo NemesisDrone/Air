@@ -12,6 +12,7 @@ Nemesis Air Documentation
 
    self
    docs/getting_started
+   docs/components
 
 .. TIP::
    Welcome to the Nemesis Air documentation, you can start by reading the :ref:`getting started <docs/getting_started>` guide.
