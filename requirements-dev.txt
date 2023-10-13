@@ -1,5 +1,1 @@
 pytest
-sphinx
-myst_parser
-sphinx-rtd-theme
-sphinx_markdown_tables
