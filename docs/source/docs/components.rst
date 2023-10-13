@@ -7,7 +7,7 @@ Components
 
     components/nemesis_utilities
 
-Nemesis Air project follow a modular approach. The project is divided in several components,
+Project follows a modular approach. The project is divided in several components,
 each one with its own purpose. The following table shows the components and their purpose:
 
 .. list-table::
