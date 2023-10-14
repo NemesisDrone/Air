@@ -4,7 +4,7 @@ Overview & Usage
 This module implements a simple IPC system based on Redis.
 
 The :meth:`IpcNode <IpcNode>` class allow you to communicate with other nodes with
-a route based system. A route is a function decorated with
+a route based system and to log messages. A route is a function decorated with
 :meth:`route <route>`, this function will be called when a message is
 received on the channel matching the regexes provided in the decorator.
 
@@ -15,7 +15,7 @@ received on the channel matching the regexes provided in the decorator.
     # I register a ping route, all messages sent to `ping` route will be received by this function
     @route("ping")
     def ping(self, payload: dict):
-        print("Ping!", flush=True)
+        self.log("Ping!")
 
         # I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.
         self.send("pong", {"extra_message": "Hello World!"}, loopback=True)
@@ -23,9 +23,9 @@ received on the channel matching the regexes provided in the decorator.
     # I register a pong route, all messages sent to `pong` route will be received by this function
     @route("pong")
     def pong(self, payload: dict):
-        print("Pong!", flush=True)
+        self.log("Pong!")
         # I can access the data sent by the ping function
-        print(payload["extra_message"], flush=True)
+        self.log(payload["extra_message"])
 
     # I register a blocking route, all messages sent to `return_pi` route will be received by this function
     # Value will be sent back to the sender
@@ -41,16 +41,16 @@ received on the channel matching the regexes provided in the decorator.
     # I send a message to the `ping` route and use `loopback` since I want to receive it with the same node
     n.send("ping", {}, loopback=True)
     # I send a message to the `return_pi`  blocking route, this will wait for the response
-    print(n.send_blocking("return_pi", {}, loopback=True), flush=True)
+    n.log(n.send_blocking("return_pi", {}, loopback=True), level=LogLevels.DEBUG)
     # I don't forget to stop the node !
     n.stop()
 
     '''
     Output:
-    Ping!
-    Pong!
-    Hello World!
-    3.14159265359
+    INFO [PingPongNode] Ping!
+    INFO [PingPongNode] Pong!
+    INFO [PingPongNode] Hello World!
+    DEBUG [PingPongNode] 3.14159265359
     '''
 
 .. tip::
@@ -128,9 +128,21 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
     return decorator
 
 
+@dataclasses.dataclass
+class LogLevels:
+    """
+    An enum containing all log levels.
+    """
+    DEBUG: str = "DEBUG"
+    INFO: str = "INFO"
+    WARNING: str = "WARNING"
+    ERROR: str = "ERROR"
+    CRITICAL: str = "CRITICAL"
+
+
 class IpcNode:
     """
-    An IPC node used to communicate with other nodes.
+    An IPC node used to communicate with other nodes and to log messages.
 
     .. note::
         This class is not meant to be used directly except if you just need to send messages,
@@ -287,6 +299,20 @@ class IpcNode:
         else:
             return r
 
+    def log(self, message: str, level: str = LogLevels.INFO, label: str = None):
+        """
+        Log a message to stdout and to ipc system as "log.{level}.{label}" route.
+
+        :param str message: The message to log.
+        :param str level: The log level, pick it from :meth:`LogLevels <LogLevels>`, defaults to LogLevels.INFO.
+        :param str label: A label, generally the name of the service or the component that is logging the message,
+            defaults to class name.
+        """
+        label = label if label is not None else self.__class__.__name__
+        log = {"label": label, "level": level, "message": message}
+        self.send(f"log.{level}.{label}", log, loopback=True)
+        print(f"{level} [{label}] {message}", flush=True)
+
 
 if __name__ == '__main__':
     class PingPongNode(IpcNode):
@@ -294,7 +320,7 @@ if __name__ == '__main__':
         # I register a ping route, all messages sent to `ping` route will be received by this function
         @route("ping")
         def ping(self, payload: dict):
-            print("Ping!", flush=True)
+            self.log("Ping!")
 
             # I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.
             self.send("pong", {"extra_message": "Hello World!"}, loopback=True)
@@ -302,9 +328,9 @@ if __name__ == '__main__':
         # I register a pong route, all messages sent to `pong` route will be received by this function
         @route("pong")
         def pong(self, payload: dict):
-            print("Pong!", flush=True)
+            self.log("Pong!")
             # I can access the data sent by the ping function
-            print(payload["extra_message"], flush=True)
+            self.log(payload["extra_message"])
 
         # I register a blocking route, all messages sent to `return_pi` route will be received by this function
         # Value will be sent back to the sender
@@ -320,6 +346,6 @@ if __name__ == '__main__':
     # I send a message to the `ping` route and use `loopback` since I want to receive it with the same node
     n.send("ping", {}, loopback=True)
     # I send a message to the `return_pi`  blocking route, this will wait for the response
-    print(n.send_blocking("return_pi", {}, loopback=True), flush=True)
+    n.log(n.send_blocking("return_pi", {}, loopback=True), level=LogLevels.DEBUG)
     # I don't forget to stop the node !
     n.stop()
