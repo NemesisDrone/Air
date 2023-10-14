@@ -55,3 +55,5 @@ html_theme_options = {
 html_title = "Shaft doc"
 html_logo = "logo.png"
 html_favicon = "logo.png"
+
+html_static_path = ['_static']
