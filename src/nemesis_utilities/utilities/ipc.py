@@ -58,6 +58,7 @@ received on the channel matching the regexes provided in the decorator.
     decorator and :meth:`IpcNode <IpcNode>` class bellow.
 """
 import dataclasses
+import os
 import pickle
 import re
 import threading
@@ -314,7 +315,8 @@ class IpcNode:
         label = label if label is not None else self.__class__.__name__
         log = {"label": label, "level": level, "message": message}
         self.send(route, log, loopback=True)
-        print(f"{level} [{label}] {message}", flush=True)
+        if not level == LogLevels.DEBUG or os.environ["DEBUG"] == "1":
+            print(f"{level} [{label}] {message}", flush=True)
 
 
 # Override stdout & stderr

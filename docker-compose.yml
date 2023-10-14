@@ -17,6 +17,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
         - NEMESIS_CONFIG=$c
+        - DEBUG=$d
     networks:
       - ipc
     depends_on:
@@ -30,6 +31,7 @@ services:
       - .:/app
     environment:
       - NEMESIS_CONFIG=$c
+      - DEBUG=$d
     networks:
       - ipc
     depends_on:
