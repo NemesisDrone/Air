@@ -31,7 +31,7 @@ RUN python3 -m pip install -r requirements.txt
 RUN python3 -m pip install -r requirements-dev.txt
 
 # --- Utilities ---
-WORKDIR /app/nemesis_utilities
+WORKDIR /app/src/nemesis_utilities
 RUN python3 -m pip install -e .
 
 # ----------------------------------------------------------------------------------------------------------------------
