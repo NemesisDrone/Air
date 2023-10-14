@@ -20,10 +20,11 @@ Logs
       - Data structure
       - Purpose
 
-    * - log.<level>.<label>
+    * - log.<level>.<label>.*
       - {"label": <label>, "level": <level>, "message": <message>}
-      - Used to send a log message from <label> to the log system using <level> as log level.
-        This route is used by the :meth:`src.nemesis_utilities.utilities.ipc.IpcNode.log` method.
+      - Used to send a log message from <label> to the log system using <level> as log level, this route can be
+        completed with any additional filter. This route is used by the
+        :meth:`src.nemesis_utilities.utilities.ipc.IpcNode.log` method.
 
     * - stdout
       - {"message": <message>}

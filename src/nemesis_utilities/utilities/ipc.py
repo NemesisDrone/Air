@@ -298,7 +298,7 @@ class IpcNode:
         else:
             return r
 
-    def log(self, message: str, level: str = LogLevels.INFO, label: str = None):
+    def log(self, message: str, level: str = LogLevels.INFO, label: str = None, filter: str = ""):
         """
         Log a message to stdout and to ipc system as "log.{level}.{label}" route.
 
@@ -306,10 +306,14 @@ class IpcNode:
         :param str level: The log level, pick it from :meth:`LogLevels <LogLevels>`, defaults to LogLevels.INFO.
         :param str label: A label, generally the name of the service or the component that is logging the message,
             defaults to class name.
+        :param str filter: An additional filter that will be appended to the route, for example, if I give `a.b.c` as
+            filter, the message will be sent to `log.{level}.{label}.a.b.c` route, defaults to "" (resulting in
+            `log.{level}.{label}` route).
         """
+        route = f"log.{level}.{label}.{filter}" if filter != "" else f"log.{level}.{label}"
         label = label if label is not None else self.__class__.__name__
         log = {"label": label, "level": level, "message": message}
-        self.send(f"log.{level}.{label}", log, loopback=True)
+        self.send(route, log, loopback=True)
         print(f"{level} [{label}] {message}", flush=True)
 
 
