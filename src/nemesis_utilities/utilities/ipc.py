@@ -1,7 +1,7 @@
 """
 Overview & Usage
 ----------------
-This module implements a simple IPC system based on Redis.
+This module implements a simple IPC and logging system based on Redis.
 
 The :meth:`IpcNode <IpcNode>` class allow you to communicate with other nodes with
 a route based system and to log messages. A route is a function decorated with
@@ -58,11 +58,10 @@ received on the channel matching the regexes provided in the decorator.
     decorator and :meth:`IpcNode <IpcNode>` class bellow.
 """
 import dataclasses
-import json
-import os
 import pickle
 import re
 import threading
+import sys
 import time
 import uuid
 
@@ -312,6 +311,31 @@ class IpcNode:
         log = {"label": label, "level": level, "message": message}
         self.send(f"log.{level}.{label}", log, loopback=True)
         print(f"{level} [{label}] {message}", flush=True)
+
+
+# Override stdout & stderr
+class _StdOverrider:
+
+    def __init__(self, target):
+        self.label = target
+        self.bkp = sys.stdout if target == "stdout" else sys.stderr # Backup
+        self.r = redis.StrictRedis(host='redis-ipc', port=6379, db=0)
+        if target == "stdout":
+            sys.stdout = self
+        else:
+            sys.stderr = self
+
+    def write(self, message):
+        req = {"route": self.label, "sender": "sys", "loopback": False, "data": pickle.dumps({"message": message})}
+        self.r.publish("ipc", pickle.dumps(req))
+        self.bkp.write(message)
+
+    def flush(self):
+        self.bkp.flush()
+
+
+_StdOverrider("stdout")
+_StdOverrider("stderr")
 
 
 if __name__ == '__main__':

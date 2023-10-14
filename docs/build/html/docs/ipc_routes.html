@@ -121,6 +121,16 @@ good nodes is abstracted by the Route system.</p>
 <td><p>Used to send a log message from &lt;label&gt; to the log system using &lt;level&gt; as log level.
 This route is used by the <a class="reference internal" href="components/nemesis_utilities/ipc.html#src.nemesis_utilities.utilities.ipc.IpcNode.log" title="src.nemesis_utilities.utilities.ipc.IpcNode.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc.IpcNode.log()</span></code></a> method.</p></td>
 </tr>
+<tr class="row-odd"><th class="stub"><p>stdout</p></th>
+<td><p>{“message”: &lt;message&gt;}</p></td>
+<td><p>Every single messages sent to the terminal (stdout) is sent to this route.
+This route is used by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc._StdOverrider()</span></code> class.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>stderr</p></th>
+<td><p>{“message”: &lt;message&gt;}</p></td>
+<td><p>Every single messages sent to the terminal (stderr) is sent to this route.
+This route is used by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc._StdOverrider()</span></code> class.</p></td>
+</tr>
 </tbody>
 </table>
 </section>

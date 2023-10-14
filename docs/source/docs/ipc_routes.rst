@@ -24,3 +24,13 @@ Logs
       - {"label": <label>, "level": <level>, "message": <message>}
       - Used to send a log message from <label> to the log system using <level> as log level.
         This route is used by the :meth:`src.nemesis_utilities.utilities.ipc.IpcNode.log` method.
+
+    * - stdout
+      - {"message": <message>}
+      - Every single messages sent to the terminal (stdout) is sent to this route.
+        This route is used by the :meth:`src.nemesis_utilities.utilities.ipc._StdOverrider` class.
+
+    * - stderr
+      - {"message": <message>}
+      - Every single messages sent to the terminal (stderr) is sent to this route.
+        This route is used by the :meth:`src.nemesis_utilities.utilities.ipc._StdOverrider` class.
