@@ -64,6 +64,7 @@ import re
 import threading
 import sys
 import time
+import traceback
 import uuid
 
 import redis
@@ -191,6 +192,7 @@ class IpcNode:
         Listener thread, this thread will listen for new messages and call the appropriate callbacks.
         """
         self.listening = True
+        self.log(f"{self.__class__.__name__}(IpcNode) listening on {self.ipc_id}", level=LogLevels.DEBUG)
         while self.subscribed:
             message = self.pubsub.get_message()
 
@@ -203,26 +205,35 @@ class IpcNode:
                 payload = pickle.loads(message["data"])
                 if "sender" not in payload or "loopback" not in payload or "data" not in payload or "route" not in payload:
                     raise Exception("Malformed request")
+                data = pickle.loads(payload["data"])
             except Exception as e:
-                print(f"IpcNode[{self.ipc_id}] ERROR, malformed request: {message}", flush=True)
+                self.log(f"{self.__class__.__name__}(IpcNode) received malformed request: {message}, "
+                        f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
+                        level=LogLevels.ERROR)
                 continue
 
             if not payload["loopback"] and payload["sender"] == self.ipc_id:
                 continue
 
             if payload["route"] in self.blocking_responses:
-                self.blocking_responses[payload["route"]][1] = pickle.loads(payload["data"])
+                self.log(f"{self.__class__.__name__}(IpcNode) received blocking request {payload['route']}:"
+                        f" {data}", level=LogLevels.DEBUG)
+                self.blocking_responses[payload["route"]][1] = data
                 self.blocking_responses[payload["route"]][0].release()
                 continue
 
             for regex in self.regexes:
                 if re.match(regex, payload["route"]) is not None:
                     try:
-                        self.regexes[regex][0](pickle.loads(payload["data"])) if not self.regexes[regex][1] else threading.Thread(
-                            target=self.regexes[regex][0], args=(pickle.loads(payload["data"]),)).start()
+                        self.log(f"{self.__class__.__name__}(IpcNode) received request {payload['route']}:"
+                                f" {data}", level=LogLevels.DEBUG)
+                        self.regexes[regex][0](data) if not self.regexes[regex][1] else threading.Thread(
+                            target=self.regexes[regex][0], args=(data,)).start()
                     except Exception as e:
-                        print(f"IpcNode[{self.ipc_id}] ERROR, callback raised exception {regex} {payload['data']}: {e}",
-                                flush=True)
+                        self.log(f"{self.__class__.__name__}(IpcNode) failed to process request {regex} "
+                                 f"{payload['route']}:  {data}, "
+                                 f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
+                                level=LogLevels.ERROR)
 
         self.listening = False
 
@@ -249,9 +260,10 @@ class IpcNode:
         self.subscribed = False
         self.pubsub.unsubscribe("ipc")
         self.pubsub.close()
+        self.log(f"{self.__class__.__name__}(IpcNode) stopped listening on {self.ipc_id}", level=LogLevels.DEBUG)
         self.r.close()
 
-    def send(self, route: str, data: object, loopback: bool = False):
+    def send(self, route: str, data: object, loopback: bool = False, _nolog: bool = False):
         """
         Send a message to a route.
 
@@ -262,6 +274,8 @@ class IpcNode:
         """
         req = {"route": route, "sender": self.ipc_id, "loopback": loopback, "data": pickle.dumps(data)}
         self.r.publish("ipc", pickle.dumps(req))
+        if not _nolog:
+            self.log(f"{self.__class__.__name__}(IpcNode) sent request {req}", level=LogLevels.DEBUG)
 
     def send_blocking(self, route: str, data: dict, loopback: bool = False, timeout: float = 5.0):
         """
@@ -290,6 +304,7 @@ class IpcNode:
         self.pubsub.subscribe(blocking_route)
         self.blocking_responses[blocking_route] = [threading.Semaphore(0), None]
         self.r.publish("ipc", pickle.dumps(req))
+        self.log(f"{self.__class__.__name__}(IpcNode) sent blocking request {req}", level=LogLevels.DEBUG)
         self.blocking_responses[blocking_route][0].acquire(timeout=timeout)
         self.pubsub.unsubscribe(blocking_route)
         r = self.blocking_responses[blocking_route][1]
@@ -314,7 +329,7 @@ class IpcNode:
         route = f"log.{level}.{label}.{filter}" if filter != "" else f"log.{level}.{label}"
         label = label if label is not None else self.__class__.__name__
         log = {"label": label, "level": level, "message": message}
-        self.send(route, log, loopback=True)
+        self.send(route, log, loopback=True, _nolog=True)
         if not level == LogLevels.DEBUG or os.environ["DEBUG"] == "1":
             print(f"{level} [{label}] {message}", flush=True)
 
@@ -325,7 +340,7 @@ class _StdOverrider:
     def __init__(self, target):
         self.label = target
         self.bkp = sys.stdout if target == "stdout" else sys.stderr # Backup
-        self.r = redis.StrictRedis(host='redis-ipc', port=6379, db=0)
+        self.r = redis.Redis(host='redis-ipc', port=6379, db=0)
         if target == "stdout":
             sys.stdout = self
         else:
