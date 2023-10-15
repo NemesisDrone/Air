@@ -108,26 +108,26 @@ a route based system and to log messages. A route is a function decorated with
 received on the channel matching the regexes provided in the decorator.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingPongNode</span><span class="p">(</span><span class="n">IpcNode</span><span class="p">):</span>
 
-<span class="c1"># I register a ping route, all messages sent to `ping` route will be received by this function</span>
-<span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;ping&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Ping!&quot;</span><span class="p">)</span>
+    <span class="c1"># I register a ping route, all messages sent to `ping` route will be received by this function</span>
+    <span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;ping&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Ping!&quot;</span><span class="p">)</span>
 
-    <span class="c1"># I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;pong&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;extra_message&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello World!&quot;</span><span class="p">},</span> <span class="n">loopback</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;pong&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;extra_message&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello World!&quot;</span><span class="p">},</span> <span class="n">loopback</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="c1"># I register a pong route, all messages sent to `pong` route will be received by this function</span>
-<span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;pong&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Pong!&quot;</span><span class="p">)</span>
-    <span class="c1"># I can access the data sent by the ping function</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;extra_message&quot;</span><span class="p">])</span>
+    <span class="c1"># I register a pong route, all messages sent to `pong` route will be received by this function</span>
+    <span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;pong&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Pong!&quot;</span><span class="p">)</span>
+        <span class="c1"># I can access the data sent by the ping function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;extra_message&quot;</span><span class="p">])</span>
 
-<span class="c1"># I register a blocking route, all messages sent to `return_pi` route will be received by this function</span>
-<span class="c1"># Value will be sent back to the sender</span>
-<span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;return_pi&quot;</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">thread</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">return_pi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="k">return</span> <span class="mf">3.14159265359</span>
+    <span class="c1"># I register a blocking route, all messages sent to `return_pi` route will be received by this function</span>
+    <span class="c1"># Value will be sent back to the sender</span>
+    <span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;return_pi&quot;</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">thread</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">return_pi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">3.14159265359</span>
 
 
 <span class="c1"># I create a new node called `ipc-node-test`</span>
