@@ -101,13 +101,8 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
     def decorator(func):
 
         def wrapper(self, payload):
-            if blocking:
-                if IPC_BLOCKING_RESPONSE_ROUTE not in payload:
-                    print(f"IpcNode[{self.ipc_id}][{self.__class__.__name__}] ERROR, blocking route {regex} "
-                          f"received a request that was not sent with blocking mode, ignoring request", flush=True)
-                    return
-                else:
-                    blocking_route = payload.pop(IPC_BLOCKING_RESPONSE_ROUTE)
+            if blocking and IPC_BLOCKING_RESPONSE_ROUTE in payload:
+                blocking_route = payload.pop(IPC_BLOCKING_RESPONSE_ROUTE)
 
                 try:
                     r = func(self, payload)
@@ -265,7 +260,7 @@ class IpcNode:
 
     def send(self, route: str, data: object, loopback: bool = False, _nolog: bool = False):
         """
-        Send a message to a route.
+        Send a message to a route or a blocking route without waiting for the response.
 
         :param str route: The route that will be matched with regexes given in :meth:`route <route>` decorator.
         :param object data: Extra data to send as a dict, this data will be passed to the callback function. This data
