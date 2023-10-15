@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPC &mdash; Shaft doc</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/logo.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Component" href="component.html" />
+    <link rel="prev" title="Nemesis utilities" href="../nemesis_utilities.html" />
+    <link href="../../../_static/custom.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Nemesis Air Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../getting_started.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../getting_started.html#run-this-project">Run this project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../getting_started.html#document-this-project">Document this project</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../components.html">Components</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../nemesis_utilities.html">Nemesis utilities</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">IPC Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="component.html">Component Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nemesis_utilities.html#how-to-use">How to use</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nemesis_utilities.html#modules">Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../ipc_routes.html">IPC Routes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../ipc_routes.html#logs">Logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ipc_routes.html#state">State</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#set">Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#events">Events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#current-state">Current state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#other">Other</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Nemesis Air</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../components.html">Components</a></li>
+          <li class="breadcrumb-item"><a href="../nemesis_utilities.html">Nemesis utilities</a></li>
+      <li class="breadcrumb-item active">IPC</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/docs/components/nemesis_utilities/ipc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ipc">
+<h1>IPC<a class="headerlink" href="#ipc" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound" id="docs-components-nemesis-utilities-ipc">
+</div>
+<section id="overview-usage">
+<span id="module-src.nemesis_utilities.utilities.ipc"></span><h2>Overview &amp; Usage<a class="headerlink" href="#overview-usage" title="Link to this heading"></a></h2>
+<p>This module implements a simple IPC and logging system based on Redis.</p>
+<p>The <a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.IpcNode" title="src.nemesis_utilities.utilities.ipc.IpcNode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IpcNode</span></code></a> class allow you to communicate with other nodes with
+a route based system and to log messages. A route is a function decorated with
+<a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.route" title="src.nemesis_utilities.utilities.ipc.route"><code class="xref py py-meth docutils literal notranslate"><span class="pre">route</span></code></a>, this function will be called when a message is
+received on the channel matching the regexes provided in the decorator.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingPongNode</span><span class="p">(</span><span class="n">IpcNode</span><span class="p">):</span>
+
+    <span class="c1"># I register a ping route, all messages sent to `ping` route will be received by this function</span>
+    <span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;ping&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Ping!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;pong&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;extra_message&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello World!&quot;</span><span class="p">},</span> <span class="n">loopback</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># I register a pong route, all messages sent to `pong` route will be received by this function</span>
+    <span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;pong&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Pong!&quot;</span><span class="p">)</span>
+        <span class="c1"># I can access the data sent by the ping function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;extra_message&quot;</span><span class="p">])</span>
+
+    <span class="c1"># I register a blocking route, all messages sent to `return_pi` route will be received by this function</span>
+    <span class="c1"># Value will be sent back to the sender</span>
+    <span class="nd">@route</span><span class="p">(</span><span class="s2">&quot;return_pi&quot;</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">thread</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">return_pi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">3.14159265359</span>
+
+
+<span class="c1"># I create a new node called `ipc-node-test`</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">PingPongNode</span><span class="p">(</span><span class="s2">&quot;ipc-node-test&quot;</span><span class="p">)</span>
+<span class="c1"># I start the node</span>
+<span class="n">n</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="c1"># I send a message to the `ping` route and use `loopback` since I want to receive it with the same node</span>
+<span class="n">n</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;ping&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">loopback</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># I send a message to the `return_pi`  blocking route, this will wait for the response</span>
+<span class="n">n</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">send_blocking</span><span class="p">(</span><span class="s2">&quot;return_pi&quot;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">loopback</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="n">LogLevels</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="c1"># I don&#39;t forget to stop the node !</span>
+<span class="n">n</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Output:</span>
+<span class="sd">[15-10-2023 13:06:51] INFO@PingPongNode: Ping!</span>
+<span class="sd">[15-10-2023 13:06:51] INFO@PingPongNode: Pong!</span>
+<span class="sd">[15-10-2023 13:06:51] INFO@PingPongNode: Hello World!</span>
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For more advanced usage, see the documentation of <a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.route" title="src.nemesis_utilities.utilities.ipc.route"><code class="xref py py-meth docutils literal notranslate"><span class="pre">route</span></code></a>
+decorator and <a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.IpcNode" title="src.nemesis_utilities.utilities.ipc.IpcNode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IpcNode</span></code></a> class bellow.</p>
+</div>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.route">
+<span class="sig-prename descclassname"><span class="pre">src.nemesis_utilities.utilities.ipc.</span></span><span class="sig-name descname"><span class="pre">route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thread</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.route" title="Link to this definition"></a></dt>
+<dd><p>Decorate a method with this decorator to register it as a route.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The decorated method must have a single parameter called <cite>payload</cite> to receive the data sent by the sender.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>regex</strong> – A regex to match the route. For example, if a message is sent to <cite>a:b:c</cite>, I can receive it by giving
+<cite>a:*:c</cite> as regex to this function, this will also work by giving <cite>a:*</cite>, <cite>a:b:*</cite>, <cite>a:b:c</cite> and more.</p></li>
+<li><p><strong>args</strong> – Additional regexes, to listen to multiple routes.</p></li>
+<li><p><strong>thread</strong> – If True, the decorated function will be called in a new thread. If this parameter is set to False,
+when the decorated function is called, the IPC node will not be able to receive new messages until the function
+returns.</p></li>
+<li><p><strong>blocking</strong> – If true, the decorated function return value will be sent back to the sender, the sender will
+wait for the response before continuing.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>With blocking mode, your function has to return None or a json serializable object only, otherwise a
+warning will be printed and the function will return None.</p>
+<p>Be also sure that your blocking route is registered ONLY ONCE. If you register it multiple times, the sender
+will receive only the first response, but multiple callbacks will be called.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If your function raises an exception, the exception will be automatically raised on the sender side.</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.LogLevels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.nemesis_utilities.utilities.ipc.</span></span><span class="sig-name descname"><span class="pre">LogLevels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DEBUG</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'DEBUG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">INFO</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WARNING</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'WARNING'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ERROR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ERROR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CRITICAL</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.LogLevels" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An enum containing all log levels.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.LogLevels.DEBUG">
+<span class="sig-name descname"><span class="pre">DEBUG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DEBUG'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.LogLevels.DEBUG" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.LogLevels.INFO">
+<span class="sig-name descname"><span class="pre">INFO</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'INFO'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.LogLevels.INFO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.LogLevels.WARNING">
+<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'WARNING'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.LogLevels.WARNING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.LogLevels.ERROR">
+<span class="sig-name descname"><span class="pre">ERROR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ERROR'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.LogLevels.ERROR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.LogLevels.CRITICAL">
+<span class="sig-name descname"><span class="pre">CRITICAL</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CRITICAL'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.LogLevels.CRITICAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.LogLevels.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DEBUG</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'DEBUG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">INFO</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WARNING</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'WARNING'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ERROR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ERROR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CRITICAL</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.LogLevels.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.nemesis_utilities.utilities.ipc.</span></span><span class="sig-name descname"><span class="pre">IpcNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipc_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'redis-ipc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An IPC node used to communicate with other nodes and to log messages.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This class is not meant to be used directly except if you just need to send messages,
+you should inherit from it and implement your own routes.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipc_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'redis-ipc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a new IPC node used to communicate with other nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ipc_id</strong> (<em>str</em>) – IPC node id, if default value is used, a random uuid will be generated, defaults to None.</p></li>
+<li><p><strong>host</strong> (<em>str</em>) – Redis server hostname, when using IPC from container to container, use the container name,
+defaults to ‘redis-ipc’.</p></li>
+<li><p><strong>port</strong> (<em>int</em>) – Redis server port, defaults to 6379.</p></li>
+<li><p><strong>db</strong> (<em>int</em>) – Redis server db, defaults to 0.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.ipc_id">
+<span class="sig-name descname"><span class="pre">ipc_id</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.ipc_id" title="Link to this definition"></a></dt>
+<dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">str()</span></code> IPC node id</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.r">
+<span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.r" title="Link to this definition"></a></dt>
+<dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">redis.StrictRedis()</span></code> Redis client</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.pubsub">
+<span class="sig-name descname"><span class="pre">pubsub</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.pubsub" title="Link to this definition"></a></dt>
+<dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">redis.client.PubSub()</span></code> Redis pubsub client</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.subscribed">
+<span class="sig-name descname"><span class="pre">subscribed</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.subscribed" title="Link to this definition"></a></dt>
+<dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">bool()</span></code> Flag for the listen thread, while True, the listen thread will continue
+to listen for new messages.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.listening">
+<span class="sig-name descname"><span class="pre">listening</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.listening" title="Link to this definition"></a></dt>
+<dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">bool()</span></code> Listening flag, while True, the listen thread is listening for new messages.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.regexes">
+<span class="sig-name descname"><span class="pre">regexes</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.regexes" title="Link to this definition"></a></dt>
+<dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict()</span></code> A dict mapping all regexes to their callbacks.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.blocking_responses">
+<span class="sig-name descname"><span class="pre">blocking_responses</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.blocking_responses" title="Link to this definition"></a></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> A dict mapping a blocking_response_route` to a semaphore and a response field in a list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.start" title="Link to this definition"></a></dt>
+<dd><p>Start the ipc node.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Ensure this method is called when the node is stopped.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.stop" title="Link to this definition"></a></dt>
+<dd><p>Stop the ipc node.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Ensure this method is called when the node is started.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_nolog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.send" title="Link to this definition"></a></dt>
+<dd><p>Send a message to a route or a blocking route without waiting for the response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>route</strong> (<em>str</em>) – The route that will be matched with regexes given in <a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.route" title="src.nemesis_utilities.utilities.ipc.route"><code class="xref py py-meth docutils literal notranslate"><span class="pre">route</span></code></a> decorator.</p></li>
+<li><p><strong>data</strong> (<em>object</em>) – Extra data to send as a dict, this data will be passed to the callback function. This data
+must be pickle serializable.</p></li>
+<li><p><strong>loopback</strong> (<em>bool</em>) – If True, this node will be able to receive the message. defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.send_blocking">
+<span class="sig-name descname"><span class="pre">send_blocking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.send_blocking" title="Link to this definition"></a></dt>
+<dd><p>Send a message to a blocking route and wait for the response / raise the exception.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>route</strong> (<em>str</em>) – The route that will be matched with regexes given in <a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.route" title="src.nemesis_utilities.utilities.ipc.route"><code class="xref py py-meth docutils literal notranslate"><span class="pre">route</span></code></a> decorator.</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The given route has to match only one blocking route regex, see <a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.route" title="src.nemesis_utilities.utilities.ipc.route"><code class="xref py py-meth docutils literal notranslate"><span class="pre">route</span></code></a> decorator.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>dict</em>) – Extra data to send as a dict, this data will be passed to the callback function.</p></li>
+<li><p><strong>loopback</strong> (<em>bool</em>) – If True, this node will be able to receive the message. defaults to False.</p></li>
+<li><p><strong>timeout</strong> (<em>float</em>) – Timeout in seconds, defaults to 5.0, will return None if timeout is reached.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The response data of the blocking callback, None if this was returned by the callback or if timeout
+is reached or if an error occurred in the callback return value serialization.</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Always correctly check the return value of this function and catch the exception if any.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The exception raised by the callback if any.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.log" title="Link to this definition"></a></dt>
+<dd><p>Log a message to stdout and to ipc system as “log.{level}.{label}” route.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>) – The message to log.</p></li>
+<li><p><strong>level</strong> (<em>str</em>) – The log level, pick it from <a class="reference internal" href="#src.nemesis_utilities.utilities.ipc.LogLevels" title="src.nemesis_utilities.utilities.ipc.LogLevels"><code class="xref py py-meth docutils literal notranslate"><span class="pre">LogLevels</span></code></a>, defaults to LogLevels.INFO.</p></li>
+<li><p><strong>label</strong> (<em>str</em>) – A label, generally the name of the service or the component that is logging the message,
+defaults to class name.</p></li>
+<li><p><strong>extra_route</strong> (<em>str</em>) – An additional extra route that will be appended to the route, for example, if I give
+<cite>a:b:c</cite> as extra route, the message will be sent to <cite>log:{level}:{label}:a:b:c</cite> route, defaults to “”
+(resulting in <cite>log:{level}:{label}</cite> route).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../nemesis_utilities.html" class="btn btn-neutral float-left" title="Nemesis utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="component.html" class="btn btn-neutral float-right" title="Component" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Nemesis Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

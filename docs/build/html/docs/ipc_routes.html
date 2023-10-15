@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPC Routes &mdash; Shaft doc</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/logo.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Component" href="components/nemesis_utilities/component.html" />
+    <link href="../_static/custom.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Nemesis Air Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#run-this-project">Run this project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#document-this-project">Document this project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="components/nemesis_utilities.html">Nemesis utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="components/nemesis_utilities/ipc.html">IPC Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="components/nemesis_utilities/component.html">Component Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="components/nemesis_utilities.html#how-to-use">How to use</a></li>
+<li class="toctree-l3"><a class="reference internal" href="components/nemesis_utilities.html#modules">Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">IPC Routes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#logs">Logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#state">State</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#set">Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#events">Events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#current-state">Current state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other">Other</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Nemesis Air</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">IPC Routes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/docs/ipc_routes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ipc-routes">
+<h1>IPC Routes<a class="headerlink" href="#ipc-routes" title="Link to this heading"></a></h1>
+<p>Redis in-memory db is used as IPC mechanism, all IpcNode subscribes to pubsub “ipc” channel, the messages routing to the
+good nodes is abstracted by the Route system.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>See <a class="reference internal" href="components/nemesis_utilities/ipc.html#docs-components-nemesis-utilities-ipc"><span class="std std-ref">ipc</span></a> for more details about the IPC system.</p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Never use other characters than letters and ‘:’ in routes, it will break the routing system.</p>
+</div>
+<p>This page describes and references all IPC Routes used by components.</p>
+<section id="logs">
+<h2>Logs<a class="headerlink" href="#logs" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>log:&lt;level&gt;:&lt;label&gt;:*</p></th>
+<td><p>{“label”: &lt;label&gt;, “level”: &lt;level&gt;, “message”: &lt;message&gt;, “timestamp”: &lt;timestamp&gt;}</p></td>
+<td><p>Used to send a log message from &lt;label&gt; to the log system using &lt;level&gt; as log level, this route can be
+completed with any additional filter. This route is used by the
+<a class="reference internal" href="components/nemesis_utilities/ipc.html#src.nemesis_utilities.utilities.ipc.IpcNode.log" title="src.nemesis_utilities.utilities.ipc.IpcNode.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc.IpcNode.log()</span></code></a> method.</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>stdout</p></th>
+<td><p>{“message”: &lt;message&gt;}</p></td>
+<td><p>Every single messages sent to the terminal (stdout) is sent to this route.
+This route is used by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc._StdOverrider()</span></code> class.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>stderr</p></th>
+<td><p>{“message”: &lt;message&gt;}</p></td>
+<td><p>Every single messages sent to the terminal (stderr) is sent to this route.
+This route is used by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc._StdOverrider()</span></code> class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="state">
+<h2>State<a class="headerlink" href="#state" title="Link to this heading"></a></h2>
+<section id="set">
+<h3>Set<a class="headerlink" href="#set" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>state:start:&lt;component&gt;</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Ask the manager to start the component &lt;component&gt;. If the component is already started, nothing happens.</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>state:stop:&lt;component&gt;</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Ask the manager to stop the component &lt;component&gt;. If the component is already stopped, nothing happens.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>state:restart:&lt;component&gt;</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><dl class="simple">
+<dt>Ask the manager to restart the component &lt;component&gt;. If the component is already stopped, it will be started.</dt><dd><p>If the component is already started, it will be stopped and started again.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>state:stop_all</p></th>
+<td><p>{}</p></td>
+<td><p>Ask the manager to stop all components.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>state:restart_all</p></th>
+<td><p>{}</p></td>
+<td><p>Ask the manager to restart all components.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="events">
+<h3>Events<a class="headerlink" href="#events" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:starting</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is starting.</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>state:&lt;component&gt;:started</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is started.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:stopping</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is stopping.</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>state:&lt;component&gt;:stopped</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is stopped.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="current-state">
+<h3>Current state<a class="headerlink" href="#current-state" title="Link to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Current states are stored as key/value in the Redis db.</p>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Key</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:state</p></th>
+<td><p>“&lt;state&gt;”</p></td>
+<td><p>Sent by the component when it is started or stopped to update its current state.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="other">
+<h3>Other<a class="headerlink" href="#other" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:stop</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the manager to the component to ask it to stop.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="components/nemesis_utilities/component.html" class="btn btn-neutral float-left" title="Component" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Nemesis Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>
