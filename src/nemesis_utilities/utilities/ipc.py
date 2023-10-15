@@ -58,6 +58,7 @@ received on the channel matching the regexes provided in the decorator.
     decorator and :meth:`IpcNode <IpcNode>` class bellow.
 """
 import dataclasses
+import datetime
 import os
 import pickle
 import re
@@ -208,8 +209,8 @@ class IpcNode:
                 data = pickle.loads(payload["data"])
             except Exception as e:
                 self.log(f"{self.__class__.__name__}(IpcNode) received malformed request: {message}, "
-                        f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
-                        level=LogLevels.ERROR)
+                         f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
+                         level=LogLevels.ERROR)
                 continue
 
             if not payload["loopback"] and payload["sender"] == self.ipc_id:
@@ -217,7 +218,7 @@ class IpcNode:
 
             if payload["route"] in self.blocking_responses:
                 self.log(f"{self.__class__.__name__}(IpcNode) received blocking request {payload['route']}:"
-                        f" {data}", level=LogLevels.DEBUG)
+                         f" {data}", level=LogLevels.DEBUG)
                 self.blocking_responses[payload["route"]][1] = data
                 self.blocking_responses[payload["route"]][0].release()
                 continue
@@ -226,14 +227,14 @@ class IpcNode:
                 if re.match(regex, payload["route"]) is not None:
                     try:
                         self.log(f"{self.__class__.__name__}(IpcNode) received request {payload['route']}:"
-                                f" {data}", level=LogLevels.DEBUG)
+                                 f" {data}", level=LogLevels.DEBUG)
                         self.regexes[regex][0](data) if not self.regexes[regex][1] else threading.Thread(
                             target=self.regexes[regex][0], args=(data,)).start()
                     except Exception as e:
                         self.log(f"{self.__class__.__name__}(IpcNode) failed to process request {regex} "
                                  f"{payload['route']}:  {data}, "
                                  f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
-                                level=LogLevels.ERROR)
+                                 level=LogLevels.ERROR)
 
         self.listening = False
 
@@ -314,7 +315,7 @@ class IpcNode:
         else:
             return r
 
-    def log(self, message: str, level: str = LogLevels.INFO, label: str = None, filter: str = ""):
+    def log(self, message: str, level: str = LogLevels.INFO, label: str = None, extra_route: str = ""):
         """
         Log a message to stdout and to ipc system as "log.{level}.{label}" route.
 
@@ -322,16 +323,17 @@ class IpcNode:
         :param str level: The log level, pick it from :meth:`LogLevels <LogLevels>`, defaults to LogLevels.INFO.
         :param str label: A label, generally the name of the service or the component that is logging the message,
             defaults to class name.
-        :param str filter: An additional filter that will be appended to the route, for example, if I give `a.b.c` as
-            filter, the message will be sent to `log.{level}.{label}.a.b.c` route, defaults to "" (resulting in
-            `log.{level}.{label}` route).
+        :param str extra_route: An additional extra route that will be appended to the route, for example, if I give
+            `a.b.c` as extra route, the message will be sent to `log.{level}.{label}.a.b.c` route, defaults to ""
+            (resulting in `log.{level}.{label}` route).
         """
-        route = f"log.{level}.{label}.{filter}" if filter != "" else f"log.{level}.{label}"
         label = label if label is not None else self.__class__.__name__
-        log = {"label": label, "level": level, "message": message}
+        route = f"log.{level}.{label}.{extra_route}" if extra_route != "" else f"log.{level}.{label}"
+        log = {"label": label, "level": level, "message": message, "timestamp": time.time()}
         self.send(route, log, loopback=True, _nolog=True)
         if not level == LogLevels.DEBUG or os.environ["DEBUG"] == "1":
-            print(f"{level} [{label}] {message}", flush=True)
+            print(f"[{datetime.datetime.fromtimestamp(log['timestamp']).strftime('%d-%m-%Y %H:%M:%S')}] "
+                  f"{level.upper()}@{label}: {message}", flush=True)
 
 
 # Override stdout & stderr
@@ -339,7 +341,7 @@ class _StdOverrider:
 
     def __init__(self, target):
         self.label = target
-        self.bkp = sys.stdout if target == "stdout" else sys.stderr # Backup
+        self.bkp = sys.stdout if target == "stdout" else sys.stderr  # Backup
         self.r = redis.Redis(host='redis-ipc', port=6379, db=0)
         if target == "stdout":
             sys.stdout = self
@@ -357,7 +359,6 @@ class _StdOverrider:
 
 _StdOverrider("stdout")
 _StdOverrider("stderr")
-
 
 if __name__ == '__main__':
     class PingPongNode(IpcNode):
