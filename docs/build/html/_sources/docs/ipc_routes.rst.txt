@@ -12,7 +12,6 @@ Logs
 ----
 
 .. list-table::
-    :widths: 20 30 50
     :header-rows: 1
     :stub-columns: 1
 
@@ -35,3 +34,80 @@ Logs
       - {"message": <message>}
       - Every single messages sent to the terminal (stderr) is sent to this route.
         This route is used by the :meth:`src.nemesis_utilities.utilities.ipc._StdOverrider` class.
+
+Status
+------
+
+Set
+~~~
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Route
+      - Data structure
+      - Purpose
+
+    * - status.start
+      - {"component": <component>}
+      - Ask the manager to start the component <component>. If the component is already started, nothing happens.
+
+    * - status.stop
+      - {"component": <component>}
+      - Ask the manager to stop the component <component>. If the component is already stopped, nothing happens.
+
+    * - status.restart
+      - {"component": <component>}
+      - Ask the manager to restart the component <component>. If the component is already stopped, it will be started.
+          If the component is already started, it will be stopped and started again.
+
+    * - status.stop_all
+      - {}
+      - Ask the manager to stop all components.
+
+    * - status.restart_all
+      - {}
+      - Ask the manager to restart all components.
+
+Events
+~~~~~~
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Route
+      - Data structure
+      - Purpose
+
+    * - status.starting.<component>
+      - {"component": <component>}
+      - Sent by the component when it is starting.
+
+    * - status.started.<component>
+      - {"component": <component>}
+      - Sent by the component when it is started.
+
+    * - status.stopping.<component>
+      - {"component": <component>}
+      - Sent by the component when it is stopping.
+
+    * - status.stopped.<component>
+      - {"component": <component>}
+      - Sent by the component when it is stopped.
+
+Other
+~~~~~
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Route
+      - Data structure
+      - Purpose
+
+    * - status.<component>.stop
+      - {"component": <component>}
+      - Sent by the manager to the component to ask it to stop.

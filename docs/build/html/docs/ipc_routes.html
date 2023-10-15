@@ -65,6 +65,12 @@
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">IPC Routes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#logs">Logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#status">Status</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#set">Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#events">Events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other">Other</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -105,11 +111,6 @@ good nodes is abstracted by the Route system.</p>
 <section id="logs">
 <h2>Logs<a class="headerlink" href="#logs" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 20%" />
-<col style="width: 30%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head stub"><p>Route</p></th>
 <th class="head"><p>Data structure</p></th>
@@ -135,6 +136,92 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </tr>
 </tbody>
 </table>
+</section>
+<section id="status">
+<h2>Status<a class="headerlink" href="#status" title="Link to this heading"></a></h2>
+<section id="set">
+<h3>Set<a class="headerlink" href="#set" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>status.start</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Ask the manager to start the component &lt;component&gt;. If the component is already started, nothing happens.</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>status.stop</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Ask the manager to stop the component &lt;component&gt;. If the component is already stopped, nothing happens.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>status.restart</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><dl class="simple">
+<dt>Ask the manager to restart the component &lt;component&gt;. If the component is already stopped, it will be started.</dt><dd><p>If the component is already started, it will be stopped and started again.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>status.stop_all</p></th>
+<td><p>{}</p></td>
+<td><p>Ask the manager to stop all components.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>status.restart_all</p></th>
+<td><p>{}</p></td>
+<td><p>Ask the manager to restart all components.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="events">
+<h3>Events<a class="headerlink" href="#events" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>status.starting.&lt;component&gt;</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is starting.</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>status.started.&lt;component&gt;</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is started.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>status.stopping.&lt;component&gt;</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is stopping.</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>status.stopped.&lt;component&gt;</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the component when it is stopped.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="other">
+<h3>Other<a class="headerlink" href="#other" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>status.&lt;component&gt;.stop</p></th>
+<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><p>Sent by the manager to the component to ask it to stop.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 </section>
 
