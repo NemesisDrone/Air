@@ -77,7 +77,10 @@ class Component(ipc.IpcNode):
         self.start = self._start_method(self.start)
         self.stop = self._stop_method(self.stop)
 
-    @ipc.route("state.{component}.stop")
+        # Override stop regex
+        self.regexes[f"state.{self.NAME}.stop"] = self.regexes.pop("state.{NAME}.stop")
+
+    @ipc.route("state.{NAME}.stop")
     def _call_stop(self, payload: dict):
         """
         Route to stop the component, should only be used by the manager.
