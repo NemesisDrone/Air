@@ -65,7 +65,7 @@
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">IPC Routes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#logs">Logs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#status">Status</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#state">State</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#set">Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#events">Events</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#other">Other</a></li>
@@ -137,8 +137,8 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </tbody>
 </table>
 </section>
-<section id="status">
-<h2>Status<a class="headerlink" href="#status" title="Link to this heading"></a></h2>
+<section id="state">
+<h2>State<a class="headerlink" href="#state" title="Link to this heading"></a></h2>
 <section id="set">
 <h3>Set<a class="headerlink" href="#set" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
@@ -149,15 +149,15 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><th class="stub"><p>status.start</p></th>
+<tr class="row-even"><th class="stub"><p>state.start.&lt;component&gt;</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><p>Ask the manager to start the component &lt;component&gt;. If the component is already started, nothing happens.</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>status.stop</p></th>
+<tr class="row-odd"><th class="stub"><p>state.stop.&lt;component&gt;</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><p>Ask the manager to stop the component &lt;component&gt;. If the component is already stopped, nothing happens.</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>status.restart</p></th>
+<tr class="row-even"><th class="stub"><p>state.restart.&lt;component&gt;</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><dl class="simple">
 <dt>Ask the manager to restart the component &lt;component&gt;. If the component is already stopped, it will be started.</dt><dd><p>If the component is already started, it will be stopped and started again.</p>
@@ -165,11 +165,11 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>status.stop_all</p></th>
+<tr class="row-odd"><th class="stub"><p>state.stop_all</p></th>
 <td><p>{}</p></td>
 <td><p>Ask the manager to stop all components.</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>status.restart_all</p></th>
+<tr class="row-even"><th class="stub"><p>state.restart_all</p></th>
 <td><p>{}</p></td>
 <td><p>Ask the manager to restart all components.</p></td>
 </tr>
@@ -186,19 +186,19 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><th class="stub"><p>status.starting.&lt;component&gt;</p></th>
+<tr class="row-even"><th class="stub"><p>state.starting.&lt;component&gt;</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><p>Sent by the component when it is starting.</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>status.started.&lt;component&gt;</p></th>
+<tr class="row-odd"><th class="stub"><p>state.started.&lt;component&gt;</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><p>Sent by the component when it is started.</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>status.stopping.&lt;component&gt;</p></th>
+<tr class="row-even"><th class="stub"><p>state.stopping.&lt;component&gt;</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><p>Sent by the component when it is stopping.</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>status.stopped.&lt;component&gt;</p></th>
+<tr class="row-odd"><th class="stub"><p>state.stopped.&lt;component&gt;</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><p>Sent by the component when it is stopped.</p></td>
 </tr>
@@ -215,7 +215,7 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><th class="stub"><p>status.&lt;component&gt;.stop</p></th>
+<tr class="row-even"><th class="stub"><p>state.&lt;component&gt;.stop</p></th>
 <td><p>{“component”: &lt;component&gt;}</p></td>
 <td><p>Sent by the manager to the component to ask it to stop.</p></td>
 </tr>

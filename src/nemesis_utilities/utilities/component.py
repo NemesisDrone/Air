@@ -77,7 +77,7 @@ class Component(ipc.IpcNode):
         self.start = self._start_method(self.start)
         self.stop = self._stop_method(self.stop)
 
-    @ipc.route("status.{component}.stop")
+    @ipc.route("state.{component}.stop")
     def _call_stop(self, payload: dict):
         """
         Route to stop the component, should only be used by the manager.
@@ -120,8 +120,8 @@ class Component(ipc.IpcNode):
             return False
         super().start()
         self.state = State.STARTING
-        self.send(f"status.{self.__class__.NAME}.starting", {"component": self.__class__.NAME})
-        self.log(f"component starting", ipc.LogLevels.DEBUG, "status")
+        self.send(f"state.{self.__class__.NAME}.starting", {"component": self.__class__.NAME})
+        self.log(f"component starting", ipc.LogLevels.DEBUG, "state")
         return True
 
     def _set_started(self) -> bool:
@@ -131,8 +131,8 @@ class Component(ipc.IpcNode):
         if self.state != State.STARTING:
             return False
         self.state = State.STARTED
-        self.send(f"status.{self.__class__.NAME}.started", {"component": self.__class__.NAME})
-        self.log(f"component started", ipc.LogLevels.DEBUG, "status")
+        self.send(f"state.{self.__class__.NAME}.started", {"component": self.__class__.NAME})
+        self.log(f"component started", ipc.LogLevels.DEBUG, "state")
         return True
 
     def _set_stopping(self) -> bool:
@@ -142,8 +142,8 @@ class Component(ipc.IpcNode):
         if self.state != State.STARTED:
             return False
         self.state = State.STOPPING
-        self.send(f"status.{self.__class__.NAME}.stopping", {"component": self.__class__.NAME})
-        self.log(f"component stopping", ipc.LogLevels.DEBUG, "status")
+        self.send(f"state.{self.__class__.NAME}.stopping", {"component": self.__class__.NAME})
+        self.log(f"component stopping", ipc.LogLevels.DEBUG, "state")
         return True
 
     def _set_stopped(self) -> bool:
@@ -153,8 +153,8 @@ class Component(ipc.IpcNode):
         if self.state != State.STOPPING:
             return False
         self.state = State.STOPPED
-        self.send(f"status.{self.__class__.NAME}.stopped", {"component": self.__class__.NAME})
-        self.log(f"component stopped", ipc.LogLevels.DEBUG, "status")
+        self.send(f"state.{self.__class__.NAME}.stopped", {"component": self.__class__.NAME})
+        self.log(f"component stopped", ipc.LogLevels.DEBUG, "state")
         super().stop()
         return True
 
