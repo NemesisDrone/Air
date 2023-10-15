@@ -77,6 +77,13 @@ class Component(ipc.IpcNode):
         self.start = self._start_method(self.start)
         self.stop = self._stop_method(self.stop)
 
+    @ipc.route("status.{component}.stop")
+    def _call_stop(self, payload: dict):
+        """
+        Route to stop the component, should only be used by the manager.
+        """
+        self.stop()
+
     def _start_method(self, func):
 
         def wrapper():
