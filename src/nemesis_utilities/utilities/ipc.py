@@ -332,7 +332,7 @@ class IpcNode:
         self.send(route, log, loopback=True, _nolog=True)
         if not level == LogLevels.DEBUG or os.environ["DEBUG"] == "1":
             print(f"[{datetime.datetime.fromtimestamp(log['timestamp']).strftime('%d-%m-%Y %H:%M:%S')}] "
-                  f"{level.upper()}@{label}: {message}", flush=True)
+                  f"{level.upper()}@{label}: {message}\n", flush=True, end="")
 
 
 # Override stdout & stderr
