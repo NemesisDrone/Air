@@ -20,7 +20,7 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="IPC Routes" href="../../ipc_routes.html" />
+    <link rel="next" title="Component" href="component.html" />
     <link rel="prev" title="Nemesis utilities" href="../nemesis_utilities.html" />
     <link href="../../../_static/custom.css" rel="stylesheet" type="text/css">
 
@@ -57,6 +57,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../components.html">Components</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../nemesis_utilities.html">Nemesis utilities</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">IPC Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="component.html">Component Module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../nemesis_utilities.html#how-to-use">How to use</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../nemesis_utilities.html#modules">Modules</a></li>
 </ul>
@@ -143,10 +144,9 @@ received on the channel matching the regexes provided in the decorator.</p>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Output:</span>
-<span class="sd">INFO [PingPongNode] Ping!</span>
-<span class="sd">INFO [PingPongNode] Pong!</span>
-<span class="sd">INFO [PingPongNode] Hello World!</span>
-<span class="sd">DEBUG [PingPongNode] 3.14159265359</span>
+<span class="sd">[15-10-2023 13:06:51] INFO@PingPongNode: Ping!</span>
+<span class="sd">[15-10-2023 13:06:51] INFO@PingPongNode: Pong!</span>
+<span class="sd">[15-10-2023 13:06:51] INFO@PingPongNode: Hello World!</span>
 <span class="sd">&#39;&#39;&#39;</span>
 </pre></div>
 </div>
@@ -295,11 +295,7 @@ to listen for new messages.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.blocking_responses">
 <span class="sig-name descname"><span class="pre">blocking_responses</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.blocking_responses" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Meth<span class="colon">:</span></dt>
-<dd class="field-odd"><p><cite>dict</cite> A dict mapping a blocking_response_route` to a semaphore and a response field in a list.</p>
-</dd>
-</dl>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> A dict mapping a blocking_response_route` to a semaphore and a response field in a list.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -403,7 +399,7 @@ defaults to class name.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../nemesis_utilities.html" class="btn btn-neutral float-left" title="Nemesis utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../ipc_routes.html" class="btn btn-neutral float-right" title="IPC Routes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="component.html" class="btn btn-neutral float-right" title="Component" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

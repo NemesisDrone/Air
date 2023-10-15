@@ -9,6 +9,7 @@ Nemesis utilities
     :hidden:
 
     IPC Module <nemesis_utilities/ipc>
+    Component Module <nemesis_utilities/component>
 
 
 How to use
@@ -34,5 +35,10 @@ Modules
 
     * - Modules
       - Purposes
+
     * - :ref:`ipc <docs/components/nemesis_utilities/ipc>`
       - Exposes the `IpcNode` class used by each component to communicate together.
+
+    * - :ref:`component <docs/components/nemesis_utilities/component>`
+      - Exposes the `Component` class used to create a microservice running in its own process.
+

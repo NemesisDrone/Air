@@ -47,10 +47,9 @@ received on the channel matching the regexes provided in the decorator.
 
     '''
     Output:
-    INFO [PingPongNode] Ping!
-    INFO [PingPongNode] Pong!
-    INFO [PingPongNode] Hello World!
-    DEBUG [PingPongNode] 3.14159265359
+    [15-10-2023 13:06:51] INFO@PingPongNode: Ping!
+    [15-10-2023 13:06:51] INFO@PingPongNode: Pong!
+    [15-10-2023 13:06:51] INFO@PingPongNode: Hello World!
     '''
 
 .. tip::
@@ -185,7 +184,7 @@ class IpcNode:
                 for regex in getattr(getattr(self, func), "regexes"):
                     self.regexes[regex] = (getattr(self, func), getattr(getattr(self, func), "thread"))
 
-        #: :meth: `dict` A dict mapping a blocking_response_route` to a semaphore and a response field in a list.
+        #: :class:`dict` A dict mapping a blocking_response_route` to a semaphore and a response field in a list.
         self.blocking_responses = {}
 
     def _listen(self):
