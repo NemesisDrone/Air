@@ -49,15 +49,15 @@ Set
       - Data structure
       - Purpose
 
-    * - status.start
+    * - status.start.<component>
       - {"component": <component>}
       - Ask the manager to start the component <component>. If the component is already started, nothing happens.
 
-    * - status.stop
+    * - status.stop.<component>
       - {"component": <component>}
       - Ask the manager to stop the component <component>. If the component is already stopped, nothing happens.
 
-    * - status.restart
+    * - status.restart.<component>
       - {"component": <component>}
       - Ask the manager to restart the component <component>. If the component is already stopped, it will be started.
           If the component is already started, it will be stopped and started again.
