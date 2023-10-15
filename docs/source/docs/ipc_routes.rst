@@ -81,21 +81,39 @@ Events
       - Data structure
       - Purpose
 
-    * - state.starting.<component>
+    * - state.<component>.starting
       - {"component": <component>}
       - Sent by the component when it is starting.
 
-    * - state.started.<component>
+    * - state.<component>.started
       - {"component": <component>}
       - Sent by the component when it is started.
 
-    * - state.stopping.<component>
+    * - state.<component>.stopping
       - {"component": <component>}
       - Sent by the component when it is stopping.
 
-    * - state.stopped.<component>
+    * - state.<component>.stopped
       - {"component": <component>}
       - Sent by the component when it is stopped.
+
+Current state
+~~~~~~~~~~~~~
+
+.. note::
+    Current states are stored as key/value in the Redis db.
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Key
+      - Data structure
+      - Purpose
+
+    * - state.<component>.state
+      - "<state>"
+      - Sent by the component when it is started or stopped to update its current state.
 
 Other
 ~~~~~
