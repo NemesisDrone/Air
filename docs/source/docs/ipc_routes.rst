@@ -6,6 +6,8 @@ good nodes is abstracted by the Route system.
 
 .. tip:: See :ref:`ipc <docs/components/nemesis_utilities/ipc>` for more details about the IPC system.
 
+.. danger:: Never use other characters than letters and ':' in routes, it will break the routing system.
+
 This page describes and references all IPC Routes used by components.
 
 Logs
@@ -19,7 +21,7 @@ Logs
       - Data structure
       - Purpose
 
-    * - log.<level>.<label>.*
+    * - log:<level>:<label>:*
       - {"label": <label>, "level": <level>, "message": <message>, "timestamp": <timestamp>}
       - Used to send a log message from <label> to the log system using <level> as log level, this route can be
         completed with any additional filter. This route is used by the
@@ -49,24 +51,24 @@ Set
       - Data structure
       - Purpose
 
-    * - state.start.<component>
+    * - state:start:<component>
       - {"component": <component>}
       - Ask the manager to start the component <component>. If the component is already started, nothing happens.
 
-    * - state.stop.<component>
+    * - state:stop:<component>
       - {"component": <component>}
       - Ask the manager to stop the component <component>. If the component is already stopped, nothing happens.
 
-    * - state.restart.<component>
+    * - state:restart:<component>
       - {"component": <component>}
       - Ask the manager to restart the component <component>. If the component is already stopped, it will be started.
           If the component is already started, it will be stopped and started again.
 
-    * - state.stop_all
+    * - state:stop_all
       - {}
       - Ask the manager to stop all components.
 
-    * - state.restart_all
+    * - state:restart_all
       - {}
       - Ask the manager to restart all components.
 
@@ -81,19 +83,19 @@ Events
       - Data structure
       - Purpose
 
-    * - state.<component>.starting
+    * - state:<component>:starting
       - {"component": <component>}
       - Sent by the component when it is starting.
 
-    * - state.<component>.started
+    * - state:<component>:started
       - {"component": <component>}
       - Sent by the component when it is started.
 
-    * - state.<component>.stopping
+    * - state:<component>:stopping
       - {"component": <component>}
       - Sent by the component when it is stopping.
 
-    * - state.<component>.stopped
+    * - state:<component>:stopped
       - {"component": <component>}
       - Sent by the component when it is stopped.
 
@@ -111,7 +113,7 @@ Current state
       - Data structure
       - Purpose
 
-    * - state.<component>.state
+    * - state:<component>:state
       - "<state>"
       - Sent by the component when it is started or stopped to update its current state.
 
@@ -126,6 +128,6 @@ Other
       - Data structure
       - Purpose
 
-    * - state.<component>.stop
+    * - state:<component>:stop
       - {"component": <component>}
       - Sent by the manager to the component to ask it to stop.

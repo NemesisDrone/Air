@@ -66,6 +66,13 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../ipc_routes.html">IPC Routes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../ipc_routes.html#logs">Logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ipc_routes.html#state">State</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#set">Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#events">Events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#current-state">Current state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#other">Other</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -167,8 +174,8 @@ decorator and <a class="reference internal" href="#src.nemesis_utilities.utiliti
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>regex</strong> – A regex to match the route. For example, if a message is sent to <cite>a.b.c</cite>, I can receive it by giving
-<cite>a.*.c</cite> as regex to this function, this will also work by giving <cite>a.*</cite>, <cite>a.b.*</cite>, <cite>a.b.c</cite> and more.</p></li>
+<li><p><strong>regex</strong> – A regex to match the route. For example, if a message is sent to <cite>a:b:c</cite>, I can receive it by giving
+<cite>a:*:c</cite> as regex to this function, this will also work by giving <cite>a:*</cite>, <cite>a:b:*</cite>, <cite>a:b:c</cite> and more.</p></li>
 <li><p><strong>args</strong> – Additional regexes, to listen to multiple routes.</p></li>
 <li><p><strong>thread</strong> – If True, the decorated function will be called in a new thread. If this parameter is set to False,
 when the decorated function is called, the IPC node will not be able to receive new messages until the function
@@ -321,7 +328,7 @@ to listen for new messages.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.ipc.IpcNode.send">
 <span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_nolog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.ipc.IpcNode.send" title="Link to this definition"></a></dt>
-<dd><p>Send a message to a route.</p>
+<dd><p>Send a message to a route or a blocking route without waiting for the response.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -383,8 +390,8 @@ is reached or if an error occurred in the callback return value serialization.</
 <li><p><strong>label</strong> (<em>str</em>) – A label, generally the name of the service or the component that is logging the message,
 defaults to class name.</p></li>
 <li><p><strong>extra_route</strong> (<em>str</em>) – An additional extra route that will be appended to the route, for example, if I give
-<cite>a.b.c</cite> as extra route, the message will be sent to <cite>log.{level}.{label}.a.b.c</cite> route, defaults to “”
-(resulting in <cite>log.{level}.{label}</cite> route).</p></li>
+<cite>a:b:c</cite> as extra route, the message will be sent to <cite>log:{level}:{label}:a:b:c</cite> route, defaults to “”
+(resulting in <cite>log:{level}:{label}</cite> route).</p></li>
 </ul>
 </dd>
 </dl>

@@ -79,8 +79,8 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
     .. warning::
         The decorated method must have a single parameter called `payload` to receive the data sent by the sender.
 
-    :param regex: A regex to match the route. For example, if a message is sent to `a.b.c`, I can receive it by giving
-        `a.*.c` as regex to this function, this will also work by giving `a.*`, `a.b.*`, `a.b.c` and more.
+    :param regex: A regex to match the route. For example, if a message is sent to `a:b:c`, I can receive it by giving
+        `a:*:c` as regex to this function, this will also work by giving `a:*`, `a:b:*`, `a:b:c` and more.
     :param args: Additional regexes, to listen to multiple routes.
     :param thread: If True, the decorated function will be called in a new thread. If this parameter is set to False,
         when the decorated function is called, the IPC node will not be able to receive new messages until the function
@@ -116,7 +116,8 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
             else:
                 func(self, payload)
 
-        wrapper.regexes = [regex, *args]
+        _regex = f"^{regex.replace('*', '.*')}$"
+        wrapper.regexes = [_regex, *args]
         wrapper.thread = thread
 
         return wrapper
@@ -212,10 +213,9 @@ class IpcNode:
 
             if payload["route"] in self.blocking_responses:
                 self.log(f"{self.__class__.__name__}(IpcNode) received blocking request {payload['route']}:"
-                         f" {data}", level=LogLevels.DEBUG)
+                     f" {data}", level=LogLevels.DEBUG)
                 self.blocking_responses[payload["route"]][1] = data
                 self.blocking_responses[payload["route"]][0].release()
-                continue
 
             for regex in self.regexes:
                 if re.match(regex, payload["route"]) is not None:
@@ -318,11 +318,11 @@ class IpcNode:
         :param str label: A label, generally the name of the service or the component that is logging the message,
             defaults to class name.
         :param str extra_route: An additional extra route that will be appended to the route, for example, if I give
-            `a.b.c` as extra route, the message will be sent to `log.{level}.{label}.a.b.c` route, defaults to ""
-            (resulting in `log.{level}.{label}` route).
+            `a:b:c` as extra route, the message will be sent to `log:{level}:{label}:a:b:c` route, defaults to ""
+            (resulting in `log:{level}:{label}` route).
         """
         label = label if label is not None else self.__class__.__name__
-        route = f"log.{level}.{label}.{extra_route}" if extra_route != "" else f"log.{level}.{label}"
+        route = f"log:{level}:{label}:{extra_route}" if extra_route != "" else f"log:{level}:{label}"
         log = {"label": label, "level": level, "message": message, "timestamp": time.time()}
         self.send(route, log, loopback=True, _nolog=True)
         if not level == LogLevels.DEBUG or os.environ["DEBUG"] == "1":
