@@ -22,7 +22,7 @@ services:
       - ipc
     depends_on:
       - redis
-    command: [ "python3", "/app/manager.py" ]
+    command: [ "python3", "/app/src/manager.py" ]
 
   dev:
     build:
@@ -36,7 +36,7 @@ services:
       - ipc
     depends_on:
       - redis
-    command: [ "python3", "/app/manager.py" ]
+    command: [ "python3", "/app/src/manager.py" ]
 
 networks:
     ipc:
