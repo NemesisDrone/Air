@@ -9,10 +9,12 @@ services:
   # ---------------------------------------------------------
   # Prod: basic image with no code reloading
   # Dev: same but used code is located in a bound volume
+  # Test: same as dev but runs pytest instead of manager.py
   # ---------------------------------------------------------
   prod:
     build:
       dockerfile: ./Dockerfile
+      context: .
     environment:
         - NEMESIS_CONFIG=$c
         - DEBUG=$d
@@ -23,6 +25,7 @@ services:
   dev:
     build:
       dockerfile: ./Dockerfile
+      context: .
     volumes:
       - .:/app
     environment:
@@ -31,3 +34,17 @@ services:
     depends_on:
       - redis
     command: [ "python3", "/app/src/manager.py" ]
+
+  test:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    volumes:
+      - .:/app
+    environment:
+      - NEMESIS_CONFIG=$c
+      - DEBUG=$d
+    depends_on:
+      - redis
+    user: root
+    command: [ "pytest", "/app/tests" ]
