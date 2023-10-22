@@ -116,8 +116,10 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
             else:
                 func(self, payload)
 
-        _regex = f"^{regex.replace('*', '.*')}$"
-        wrapper.regexes = [_regex, *args]
+        wrapper.regexes = [regex, *args]
+        for i in range(len(wrapper.regexes)):
+            wrapper.regexes[i] = f"^{wrapper.regexes[i].replace('*', '.*')}$"
+
         wrapper.thread = thread
 
         return wrapper
