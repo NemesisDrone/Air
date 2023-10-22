@@ -5,8 +5,6 @@ services:
     ports:
       - "6379:6379"
     container_name: redis-ipc
-    networks:
-      - ipc
 
   # ---------------------------------------------------------
   # Prod: basic image with no code reloading
@@ -18,8 +16,6 @@ services:
     environment:
         - NEMESIS_CONFIG=$c
         - DEBUG=$d
-    networks:
-      - ipc
     depends_on:
       - redis
     command: [ "python3", "/app/src/manager.py" ]
@@ -32,12 +28,6 @@ services:
     environment:
       - NEMESIS_CONFIG=$c
       - DEBUG=$d
-    networks:
-      - ipc
     depends_on:
       - redis
     command: [ "python3", "/app/src/manager.py" ]
-
-networks:
-    ipc:
-        driver: bridge
