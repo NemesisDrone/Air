@@ -36,7 +36,8 @@ services:
       - ipc
     depends_on:
       - redis
-    command: [ "python3", "/app/manager.py" ]
+    command: [ "python3", "/app/src/manager.py" ]
+    privileged: true
 
 networks:
     ipc:

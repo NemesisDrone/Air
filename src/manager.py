@@ -10,6 +10,7 @@ from utilities.component import State as State
 # --- Components Imports ---
 # import ...
 import hello
+import rc
 
 # --------------------------
 
@@ -22,6 +23,7 @@ STOP_TIMOUT = 5
 components = {
     # name: function_to_call
     "hello": hello.run,
+    "rc": rc.run
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -29,7 +31,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello"]
+    "default": ["hello", "rc"]
 }
 
 
