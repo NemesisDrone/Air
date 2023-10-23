@@ -16,6 +16,9 @@ COPY . /app
 RUN apt update
 RUN apt install wget build-essential nano -y
 
+# --- GST, V4L, OCV for Video Streaming ---
+RUN apt install libgstreamer1.0-0 libgstreamer-opencv1.0-0 libv4l-0 python3-gst-1.0 python3-opencv python3-websockets
+
 # --- RTIMULib (SenseHat & GPIO) ---
 RUN mkdir -p /tmp/nemesis
 WORKDIR /tmp/nemesis
