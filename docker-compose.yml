@@ -7,6 +7,7 @@ services:
     container_name: redis-ipc
     networks:
       - ipc
+      - ground_network
 
   # ---------------------------------------------------------
   # Prod: basic image with no code reloading
@@ -22,7 +23,7 @@ services:
       - ipc
     depends_on:
       - redis
-    command: [ "python3", "/app/manager.py" ]
+    command: [ "python3", "/app/src/manager.py" ]
 
   dev:
     build:
@@ -32,12 +33,17 @@ services:
     environment:
       - NEMESIS_CONFIG=$c
       - DEBUG=$d
-    networks:
-      - ipc
     depends_on:
       - redis
-    command: [ "python3", "/app/manager.py" ]
+    command: [ "python3", "/app/src/manager.py" ]
+    env_file:
+      - /src/.env
+    networks:
+      - ipc
+      - ground_network
 
 networks:
-    ipc:
-        driver: bridge
+  ipc:
+      driver: bridge
+  ground_network:
+      external: true

@@ -14,7 +14,7 @@ COPY . /app
 # ----------------------------------------------------------------------------------------------------------------------
 # --- Tools ---
 RUN apt update
-RUN apt install wget build-essential nano -y
+RUN apt install wget build-essential nano dnsutils -y
 
 # --- RTIMULib (SenseHat & GPIO) ---
 RUN mkdir -p /tmp/nemesis
@@ -38,6 +38,7 @@ RUN python3 -m pip install -e .
 #                                              ENVIRONMENT EXECUTION
 # ----------------------------------------------------------------------------------------------------------------------
 USER nemesis
+WORKDIR /app/src/
 
 # CMD defined in docker-compose.yml
 CMD []
