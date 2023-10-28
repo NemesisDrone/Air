@@ -16,7 +16,7 @@ jobs:
 
       - name: Build and run tests
         run: |
-          docker-compose run --rm test
+          docker-compose run -f compose-test.yml --rm
 
       - name: Send Discord success notification
         if: success()
