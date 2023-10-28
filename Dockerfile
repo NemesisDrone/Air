@@ -42,6 +42,6 @@ RUN python3 -m pip install -e .
 # ----------------------------------------------------------------------------------------------------------------------
 USER nemesis
 
-# CMD defined in docker-compose.yml
+# CMD defined in compose.yml
 CMD []
 ENTRYPOINT []
