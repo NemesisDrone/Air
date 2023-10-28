@@ -50,7 +50,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Nemesis Air Documentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#system-requirements">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#run-this-project">Run this project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-this-project">Run this project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-system-requirements">Install system requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-compose">Docker &amp; Compose</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#document-this-project">Document this project</a></li>
 </ul>
 </li>
@@ -123,10 +127,99 @@
 </section>
 <section id="run-this-project">
 <h2>Run this project<a class="headerlink" href="#run-this-project" title="Link to this heading"></a></h2>
+<section id="install-system-requirements">
+<h3>Install system requirements<a class="headerlink" href="#install-system-requirements" title="Link to this heading"></a></h3>
+<p>Refer to the <a class="reference internal" href="#docs-getting-started"><span class="std std-ref">System Requirements</span></a> section to install the system requirements.</p>
+</section>
+<section id="docker-compose">
+<h3>Docker &amp; Compose<a class="headerlink" href="#docker-compose" title="Link to this heading"></a></h3>
+<p>Nemesis air is based on docker and docker-compose. The <cite>Dockerfile</cite> is used to build an isolated environment
+for the project.</p>
+<p>Docker-compose is used to run the project, there is 3 compose files:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">compose.yml</span></code>: used to run the project in development mode, your code changes will be reflected in the container without having to rebuild it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compose-prod.yml</span></code>: used to run the project in production mode, your code changes will not be reflected in the container, you will have to rebuild it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compose-test.yml</span></code>: same as <code class="docutils literal notranslate"><span class="pre">compose.yml</span></code> but with run tests as root.</p></li>
+</ol>
+<section id="run-the-project-using-cli">
+<h4>Run the project using cli<a class="headerlink" href="#run-the-project-using-cli" title="Link to this heading"></a></h4>
+<p>To run the project using cli run this command: <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span></code> in the root directory of the project.
+This command will run the dev configuration running the <code class="xref py py-mod docutils literal notranslate"><span class="pre">src.manager</span></code> module.</p>
+<p>You can specify what configuration to run by using the <code class="docutils literal notranslate"><span class="pre">-f</span></code> flag,
+for example to run the prod configuration run this command: <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">-f</span> <span class="pre">compose-prod.yml</span> <span class="pre">up</span></code>.</p>
+<p>The manager module is the entry point of the project, this module will run components depending on the profile,
+profiles are hardcoded in the manager module and specify a list of components to run. To specify a profile to run,
+prepend your command with c=&lt;profile_name&gt;, for example to run the default profile run this command:
+<code class="docutils literal notranslate"><span class="pre">c=default</span> <span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Coming Soon</p>
+<p>The default profile is the one run by default when running the project without specifying a profile.</p>
 </div>
+<p>You can also use the <code class="docutils literal notranslate"><span class="pre">d=1</span></code> flag to run the project in debug mode, this will run the project in debug mode and show
+debug logs.</p>
+</section>
+<section id="configure-interpreter">
+<h4>Configure interpreter<a class="headerlink" href="#configure-interpreter" title="Link to this heading"></a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This step explains how to configure the interpreter using PyCharm, but this is available on other IDEs.</p>
+</div>
+<p>You can use docker-compose to configure your python interpreter, by following these steps, PyCharm will run the docker-compose
+configuration and then use the interpreter inside the container. This allows to execute code directly in the container
+as if it was executed on the raspberry pi.</p>
+<ol class="arabic simple">
+<li><p>Go to project settings</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/1.png"><img alt="PyCharm configuration" src="../_images/1.png" style="width: 50%;" /></a>
+<ol class="arabic simple" start="2">
+<li><p>Click on <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">interpreter</span></code> and then <code class="docutils literal notranslate"><span class="pre">Docker-compose</span></code></p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/2.png"><img alt="PyCharm configuration" src="../_images/2.png" style="width: 50%;" /></a>
+<ol class="arabic simple" start="3">
+<li><p>The docker server should be automatically detected, click on the configuration file button, then select the
+plus button and select the <code class="docutils literal notranslate"><span class="pre">compose.yml</span></code> file.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can also select the <code class="docutils literal notranslate"><span class="pre">compose-test.yml</span></code> file to run the tests in the container.</p>
+</div>
+<a class="reference internal image-reference" href="../_images/3.png"><img alt="PyCharm configuration" src="../_images/3.png" style="width: 50%;" /></a>
+<ol class="arabic simple" start="4">
+<li><p>To configure env variables, click on the Environment variables button and then fill the name and value fields.</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/4.png"><img alt="PyCharm configuration" src="../_images/4.png" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="../_images/5.png"><img alt="PyCharm configuration" src="../_images/5.png" style="width: 50%;" /></a>
+<ol class="arabic simple" start="6">
+<li><p>You can name the compose project to avoid conflict.</p></li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you want to configure the interpreter to directly test code on your system, you can create two interpreter
+using the same compose file with different environment variables. For example you can create a “classic” and a
+“debug” interpreter.</p>
+</div>
+<a class="reference internal image-reference" href="../_images/6.png"><img alt="PyCharm configuration" src="../_images/6.png" style="width: 50%;" /></a>
+<ol class="arabic simple" start="7">
+<li><p>Wait for the build process and then click on “next”, the interpreter should be be automatically detected. If not,
+check if there is no error in the build process.</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/7.png"><img alt="PyCharm configuration" src="../_images/7.png" style="width: 50%;" /></a>
+<ol class="arabic simple" start="8">
+<li><p>You can see all configured interpreters in the bottom right corner of the IDE. You can easily switch between
+interpreters by clicking on the interpreter name.</p></li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>There is often some issues leading to the list of symbols not being loaded, if there is errors in your files import
+statements, juste switch to your system interpreter and re-switch to the compose interpreter with this menu.</p>
+</div>
+<a class="reference internal image-reference" href="../_images/8.png"><img alt="PyCharm configuration" src="../_images/8.png" style="width: 50%;" /></a>
+<ol class="arabic simple" start="9">
+<li><p>If you run a script manually, this script will be executed in the container.</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/9.png"><img alt="PyCharm configuration" src="../_images/9.png" style="width: 50%;" /></a>
+</section>
+</section>
 </section>
 <section id="document-this-project">
 <h2>Document this project<a class="headerlink" href="#document-this-project" title="Link to this heading"></a></h2>
