@@ -14,7 +14,7 @@ On both Windows and Linux, you will need to install the following software:
 
 #. Docker & docker-compose, both installable through `Docker Desktop <https://www.docker.com/products/docker-desktop>`_.
 #. Python3 for doc generation, installable through `Python <https://www.python.org/downloads/>`_.
-#. The doc python dependencies, installable through ``pip install -r requirements.txt``.
+#. The doc python dependencies, installable through ``pip install -r requirements-system.txt``.
 
 These will be the only requirements to run the project.
 
