@@ -53,7 +53,7 @@ html_theme_options = {
     'includehidden': True,
     'titles_only': False
 }
-html_title = "Shaft doc"
+html_title = "Nemesis Air"
 html_logo = "logo.png"
 html_favicon = "logo.png"
 
