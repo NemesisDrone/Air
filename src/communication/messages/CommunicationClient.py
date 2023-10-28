@@ -15,6 +15,9 @@ import logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 r = redis.Redis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
+r.set("CONNECTED_TO_SERVER", 0)
+r.set("LAST_HEARTBEAT_RECEIVED", 0)
+r.set("LAST_HEARTBEAT_SENT", 0)
 
 """
 Channel regexes to listen to, and send them to the base station
@@ -55,15 +58,17 @@ class CommunicationClient:
         retry = 1
         while True:
             try:
+                logging.info(f"Trying to connect to {self.host}:{self.port}")
                 self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.client_socket.settimeout(5)
                 self.client_socket.connect((self.host, self.port))
                 logging.info("Drone connected to server")
                 break
             except Exception as e:
                 logging.warning(f"Connection error: {e}")
-                logging.warning(f"Retrying in 3 seconds (retry {retry})")
+                logging.warning(f"Retrying in 1 seconds (retry {retry})")
                 retry += 1
-                time.sleep(3)
+                time.sleep(1)
 
     def reconnect(self):
         """
@@ -100,16 +105,44 @@ class CommunicationClient:
         Method used to handle the reception of messages from the server.
         """
         while not self.stop_threads:
-            try:
-                received_data = self.client_socket.recv(2048).decode()
+            if time.time() - float(r.get("LAST_HEARTBEAT_RECEIVED")) > 6 and r.get("CONNECTED_TO_SERVER") == 1:
+                r.set("CONNECTED_TO_SERVER", 0)
+                logging.debug("Drone disconnected from server")
 
-                if not received_data:
+            try:
+                message_length_bytes = self.client_socket.recv(4)
+                message_length = int.from_bytes(message_length_bytes, byteorder='big')
+                if message_length == 0:
                     continue
 
-                # Handle the case when multiple message are received at the same time
-                # The messages are separated by a ~
-                messages = received_data.split('~')
-                print(messages)
+                message = self.client_socket.recv(message_length).decode()
+                if not message:
+                    continue
+
+                print(message)
+
+                """
+                If received message is a heartbeat, set the drone as connected to the server
+                """
+                if message == "heartbeat":
+                    r.set("CONNECTED_TO_SERVER", 1)
+                    r.set("LAST_HEARTBEAT_RECEIVED", time.time())
+                    continue
+
+                try:
+                    message = json.loads(json.loads(message))
+                except:
+                    continue
+
+                logging.info(f"from socket: {message}")
+                r.publish("ipc", pickle.dumps(
+                    {
+                        "route": message["route"],
+                        "sender": "communication-forwarder",
+                        "loopback": False,
+                        "data": pickle.dumps(message["data"])
+                    }
+                ))
 
             except Exception as e:
                 logging.error(f"Reception error: {e}")
@@ -153,6 +186,15 @@ class CommunicationClient:
                             self.client_socket.send(len(data).to_bytes(4, byteorder='big'))
                             self.client_socket.send(data.encode())
                             break
+
+                """
+                If the last heartbeat sent is older than 3 seconds, send a new heartbeat.
+                """
+                if time.time() - float(r.get("LAST_HEARTBEAT_SENT")) > 1.5:
+                    self.client_socket.send(len("heartbeat").to_bytes(4, byteorder='big'))
+                    self.client_socket.send("heartbeat".encode())
+                    r.set("LAST_HEARTBEAT_SENT", time.time())
+                    logging.debug("Heartbeat sent")
 
             except Exception as e:
                 logging.error(f"Sending error: {e}")
