@@ -12,7 +12,7 @@ import re
 import json
 import logging
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 r = redis.Redis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
 r.set("CONNECTED_TO_SERVER", 0)
@@ -29,7 +29,6 @@ LISTENING_ROUTES = [
     "log:WARNING:.*",
     "log:ERROR:.*",
     "log:CRITICAL:.*",
-    "ping",
     "sensor:.*",
     "state:*:*",
 ]
@@ -42,14 +41,25 @@ class CommunicationClient:
         self.stop_threads = False
 
         self.client_socket: Union[socket.socket, None] = None
-        self.connect()
 
         self.thread_emission = None
         self.thread_reception = None
 
-        self.create_threads()
+        self.connection_jobs()
 
-        self.client_socket.close()
+    def connection_jobs(self):
+        """
+        Method used to manage the connection to the server.
+        """
+        while True:
+            self.stop_threads = True
+            if self.client_socket:
+                self.client_socket.close()
+
+            self.connect()
+            time.sleep(1)
+            self.stop_threads = False
+            self.create_threads()
 
     def connect(self):
         """
@@ -71,16 +81,6 @@ class CommunicationClient:
                 retry += 1
                 time.sleep(1)
 
-    def reconnect(self):
-        """
-        Method used to reconnect the client to the server and restart the threads.
-        """
-        self.stop_threads = True
-        self.client_socket.close()
-        self.connect()
-        time.sleep(1)
-        self.stop_threads = False
-        self.create_threads()
 
     def create_threads(self):
         """
@@ -91,13 +91,11 @@ class CommunicationClient:
             daemon=True,
         )
         self.thread_reception.start()
-
         self.thread_emission = threading.Thread(
             target=self.handle_emission,
             daemon=True,
         )
         self.thread_emission.start()
-
         self.thread_reception.join()
         self.thread_emission.join()
 
@@ -145,7 +143,7 @@ class CommunicationClient:
 
             except Exception as e:
                 logging.error(f"Reception error: {e}")
-                self.reconnect()
+                self.stop_threads = True
                 break
 
     def handle_emission(self):
@@ -197,7 +195,7 @@ class CommunicationClient:
 
             except Exception as e:
                 logging.error(f"Sending error: {e}")
-                self.reconnect()
+                self.stop_threads = True
                 break
 
 
