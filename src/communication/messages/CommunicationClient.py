@@ -119,8 +119,6 @@ class CommunicationClient:
                 if not message:
                     continue
 
-                print(message)
-
                 """
                 If received message is a heartbeat, set the drone as connected to the server
                 """
