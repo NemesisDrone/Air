@@ -49,13 +49,6 @@ class TestCompo(component.Component,IpcNode):
             self.send("pong", {"extra_message": "Hello World!"}, loopback=True)
             self.log("RETURN TO HOME", level=LogLevels.WARNING)
 
-            # send random positions gps around, more or less 200 meters {
-            #       lat: -0.7563779,
-            #       lng: 48.0879123
-            #     }
-            lat = -0.7563779 + random.uniform(-0.001, 0.001)
-            lng = 48.0879123 + random.uniform(-0.001, 0.001)
-            self.send("sensor:gps", {"lat": lat, "lng": lng})
             time.sleep(1)
 
 

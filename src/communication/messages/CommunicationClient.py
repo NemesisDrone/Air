@@ -31,6 +31,7 @@ LISTENING_ROUTES = [
     "log:CRITICAL:.*",
     "ping",
     "sensor:.*",
+    "state:*:*",
 ]
 
 
