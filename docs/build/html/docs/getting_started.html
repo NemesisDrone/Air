@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Getting Started &mdash; Nemesis Air</title>
@@ -12,11 +12,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -111,12 +111,12 @@
            <div itemprop="articleBody">
              
   <section id="getting-started">
-<h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound" id="docs-getting-started">
 </div>
 <p>Let’s get started with Nemesis Air repository. This page will guide you through the project workflow.</p>
 <section id="system-requirements">
-<h2>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h2>
+<h2>System Requirements<a class="headerlink" href="#system-requirements" title="Permalink to this heading"></a></h2>
 <p>On both Windows and Linux, you will need to install the following software:</p>
 <ol class="arabic simple">
 <li><p>Docker &amp; docker-compose, both installable through <a class="reference external" href="https://www.docker.com/products/docker-desktop">Docker Desktop</a>.</p></li>
@@ -126,13 +126,13 @@
 <p>These will be the only requirements to run the project.</p>
 </section>
 <section id="run-this-project">
-<h2>Run this project<a class="headerlink" href="#run-this-project" title="Link to this heading"></a></h2>
+<h2>Run this project<a class="headerlink" href="#run-this-project" title="Permalink to this heading"></a></h2>
 <section id="install-system-requirements">
-<h3>Install system requirements<a class="headerlink" href="#install-system-requirements" title="Link to this heading"></a></h3>
+<h3>Install system requirements<a class="headerlink" href="#install-system-requirements" title="Permalink to this heading"></a></h3>
 <p>Refer to the <a class="reference internal" href="#docs-getting-started"><span class="std std-ref">System Requirements</span></a> section to install the system requirements.</p>
 </section>
 <section id="docker-compose">
-<h3>Docker &amp; Compose<a class="headerlink" href="#docker-compose" title="Link to this heading"></a></h3>
+<h3>Docker &amp; Compose<a class="headerlink" href="#docker-compose" title="Permalink to this heading"></a></h3>
 <p>Nemesis air is based on docker and docker-compose. The <cite>Dockerfile</cite> is used to build an isolated environment
 for the project.</p>
 <p>Docker-compose is used to run the project, there is 3 compose files:</p>
@@ -142,7 +142,7 @@ for the project.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">compose-test.yml</span></code>: same as <code class="docutils literal notranslate"><span class="pre">compose.yml</span></code> but with run tests as root.</p></li>
 </ol>
 <section id="run-the-project-using-cli">
-<h4>Run the project using cli<a class="headerlink" href="#run-the-project-using-cli" title="Link to this heading"></a></h4>
+<h4>Run the project using cli<a class="headerlink" href="#run-the-project-using-cli" title="Permalink to this heading"></a></h4>
 <p>To run the project using cli run this command: <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span></code> in the root directory of the project.
 This command will run the dev configuration running the <code class="xref py py-mod docutils literal notranslate"><span class="pre">src.manager</span></code> module.</p>
 <p>You can specify what configuration to run by using the <code class="docutils literal notranslate"><span class="pre">-f</span></code> flag,
@@ -159,7 +159,7 @@ prepend your command with c=&lt;profile_name&gt;, for example to run the default
 debug logs.</p>
 </section>
 <section id="configure-interpreter">
-<h4>Configure interpreter<a class="headerlink" href="#configure-interpreter" title="Link to this heading"></a></h4>
+<h4>Configure interpreter<a class="headerlink" href="#configure-interpreter" title="Permalink to this heading"></a></h4>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This step explains how to configure the interpreter using PyCharm, but this is available on other IDEs.</p>
@@ -222,7 +222,7 @@ statements, juste switch to your system interpreter and re-switch to the compose
 </section>
 </section>
 <section id="document-this-project">
-<h2>Document this project<a class="headerlink" href="#document-this-project" title="Link to this heading"></a></h2>
+<h2>Document this project<a class="headerlink" href="#document-this-project" title="Permalink to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Coming Soon</p>
@@ -258,7 +258,29 @@ statements, juste switch to your system interpreter and re-switch to the compose
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(false);
       });
-  </script> 
+  </script>  
+    <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #000a45;
+    }
+
+    /* Sidebar */
+    .wy-nav-side {
+      background: #000a45;
+    }
+
+    /* Content */
+    .wy-nav-content {
+      font-family: Roboto, sans-serif;
+    }
+
+    /* All titles */
+    .wy-nav-content-wrap h1, .wy-nav-content-wrap h2, .wy-nav-content-wrap h3, .wy-nav-content-wrap h4, .wy-nav-content-wrap h5, .wy-nav-content-wrap h6 {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+  </style>
+
 
 </body>
 </html>

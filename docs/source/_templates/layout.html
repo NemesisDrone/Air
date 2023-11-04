@@ -1,4 +1,27 @@
 {% extends "!layout.html" %}
 {% block extrahead %}
-    <link href="{{ pathto("_static/custom.css", True) }}" rel="stylesheet" type="text/css">
+    <link href="{{ pathto('_static/custom.css', True) }}" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block footer %} {{ super() }}
+    <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #000a45;
+    }
+
+    /* Sidebar */
+    .wy-nav-side {
+      background: #000a45;
+    }
+
+    /* Content */
+    .wy-nav-content {
+      font-family: Roboto, sans-serif;
+    }
+
+    /* All titles */
+    .wy-nav-content-wrap h1, .wy-nav-content-wrap h2, .wy-nav-content-wrap h3, .wy-nav-content-wrap h4, .wy-nav-content-wrap h5, .wy-nav-content-wrap h6 {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+  </style>
 {% endblock %}
