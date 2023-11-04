@@ -116,8 +116,10 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
             else:
                 func(self, payload)
 
-        _regex = f"^{regex.replace('*', '.*')}$"
-        wrapper.regexes = [_regex, *args]
+        wrapper.regexes = [regex, *args]
+        for i in range(len(wrapper.regexes)):
+            wrapper.regexes[i] = f"^{wrapper.regexes[i].replace('*', '.*')}$"
+
         wrapper.thread = thread
 
         return wrapper
@@ -146,7 +148,7 @@ class IpcNode:
         you should inherit from it and implement your own routes.
     """
 
-    def __init__(self, ipc_id: str = None, host: str = 'redis-ipc',
+    def __init__(self, ipc_id: str = None, host: str = None,
                  port=6379, db=0, **kwargs):
         """
         Create a new IPC node used to communicate with other nodes.
@@ -163,7 +165,9 @@ class IpcNode:
         self.ipc_id = ipc_id if ipc_id is not None else "ipc-node-" + str(uuid.uuid4())
 
         #: :meth:`redis.StrictRedis` Redis client
-        self.r = redis.StrictRedis(host=host, port=port, db=db)
+        self.r = redis.StrictRedis(host=host if host is not None else os.environ.get("REDIS_CONTAINER_NAME"),
+                                   port=port, db=db)
+
         #: :meth:`redis.client.PubSub` Redis pubsub client
         self.pubsub = self.r.pubsub()
 
@@ -213,7 +217,7 @@ class IpcNode:
 
             if payload["route"] in self.blocking_responses:
                 self.log(f"{self.__class__.__name__}(IpcNode) received blocking request {payload['route']}:"
-                     f" {data}", level=LogLevels.DEBUG)
+                         f" {data}", level=LogLevels.DEBUG)
                 self.blocking_responses[payload["route"]][1] = data
                 self.blocking_responses[payload["route"]][0].release()
 
@@ -336,7 +340,7 @@ class _StdOverrider:
     def __init__(self, target):
         self.label = target
         self.bkp = sys.stdout if target == "stdout" else sys.stderr  # Backup
-        self.r = redis.Redis(host='redis-ipc', port=6379, db=0)
+        self.r = redis.Redis(host=os.environ.get("REDIS_CONTAINER_NAME"), port=6379, db=0)
         if target == "stdout":
             sys.stdout = self
         else:

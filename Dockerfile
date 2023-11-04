@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #                                     NEMESIS AIR EMBEDDED SYSTEMS ENVIRONMENT
 # ----------------------------------------------------------------------------------------------------------------------
-FROM python:3.11.5-slim-bookworm
+FROM python:3.11.6-bookworm
 # USER: nemesis
 RUN useradd -ms /bin/bash nemesis
 
@@ -15,6 +15,9 @@ COPY . /app
 # --- Tools ---
 RUN apt update
 RUN apt install wget build-essential nano -y
+
+# --- GST, V4L, OCV for Video Streaming ---
+RUN apt install libgstreamer1.0-0 libgstreamer-opencv1.0-0 libv4l-0 python3-gst-1.0 python3-opencv python3-websockets -y
 
 # --- RTIMULib (SenseHat & GPIO) ---
 RUN mkdir -p /tmp/nemesis
@@ -39,6 +42,6 @@ RUN python3 -m pip install -e .
 # ----------------------------------------------------------------------------------------------------------------------
 USER nemesis
 
-# CMD defined in docker-compose.yml
+# CMD defined in compose.yml
 CMD []
 ENTRYPOINT []
