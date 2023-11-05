@@ -1,8 +1,6 @@
 Component
 =========
 
-.. _docs/components/nemesis_utilities/component:
-
 .. toctree::
     :maxdepth: 1
     :hidden:

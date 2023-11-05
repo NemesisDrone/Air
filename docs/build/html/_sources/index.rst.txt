@@ -16,7 +16,7 @@ Nemesis Air Documentation
    docs/ipc_routes
 
 .. TIP::
-   Welcome to the Nemesis Air documentation, you can start by reading the :ref:`getting started <docs/getting_started>` guide.
+   Welcome to the Nemesis Air documentation, you can start by reading the :doc:`getting started <docs/getting_started>` guide.
 
 Indices and tables
 ==================

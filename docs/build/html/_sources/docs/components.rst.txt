@@ -18,8 +18,8 @@ each one with its own purpose. The following table shows the components and thei
     * - Components
       - Purposes
 
-    * - :ref:`nemesis_utilities <docs/components/nemesis_utilities>`
+    * - :doc:`nemesis_utilities <./components/nemesis_utilities>`
       - Exposes the `utilities` library for all reusable code.
 
-    * - :ref:`manager <docs/components/manager>`
+    * - :doc:`manager <./components/manager>`
       - Orchestrates the components execution.

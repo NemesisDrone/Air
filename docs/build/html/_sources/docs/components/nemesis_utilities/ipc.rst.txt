@@ -1,8 +1,6 @@
 IPC
 ===
 
-.. _docs/components/nemesis_utilities/ipc:
-
 .. toctree::
     :maxdepth: 1
     :hidden:
