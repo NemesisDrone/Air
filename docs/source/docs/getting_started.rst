@@ -1,10 +1,6 @@
 Getting Started
 ===============
 
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-
 Let's get started with Nemesis Air repository. This page will guide you through the project workflow.
 
 System Requirements

@@ -1,14 +1,6 @@
 Nemesis utilities
 =================
 
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-
-    IPC Module <nemesis_utilities/ipc>
-    Component Module <nemesis_utilities/component>
-
-
 How to use
 ----------
 

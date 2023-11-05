@@ -4,7 +4,7 @@ IPC Routes
 Redis in-memory db is used as IPC mechanism, all IpcNode subscribes to pubsub "ipc" channel, the messages routing to the
 good nodes is abstracted by the Route system.
 
-.. tip:: See :ref:`ipc <docs/components/nemesis_utilities/ipc>` for more details about the IPC system.
+.. tip:: See :doc:`ipc <./components/nemesis_utilities/ipc>` for more details about the IPC system.
 
 .. danger:: Never use other characters than letters and ':' in routes, it will break the routing system.
 

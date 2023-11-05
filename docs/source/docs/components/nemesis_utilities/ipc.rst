@@ -1,10 +1,6 @@
 IPC
 ===
 
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-
 .. automodule:: src.nemesis_utilities.utilities.ipc
     :members:
     :undoc-members:

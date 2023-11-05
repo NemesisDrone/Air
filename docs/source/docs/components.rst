@@ -1,13 +1,6 @@
 Components
 ==========
 
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-
-    components/nemesis_utilities
-    components/manager
-
 Project follows a modular approach. The project is divided in several components,
 each one with its own purpose. The following table shows the components and their purpose:
 
