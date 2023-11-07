@@ -47,6 +47,6 @@ html_theme_options = {
     "dark_logo": "dark_logo.png",
 }
 html_title = "Nemesis Air"
-html_favicon = "light_logo.png"
+html_favicon = "_static/light_logo.png"
 
 html_static_path = ['_static']
