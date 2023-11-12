@@ -2,12 +2,8 @@
 #                                     NEMESIS AIR EMBEDDED SYSTEMS ENVIRONMENT
 # ----------------------------------------------------------------------------------------------------------------------
 FROM python:3.11.6-bookworm
-# USER: nemesis
 RUN useradd -ms /bin/bash nemesis
-
 USER root
-WORKDIR /app
-COPY . /app
 
 # ----------------------------------------------------------------------------------------------------------------------
 #                                                ENVIRONMENT SETUP
@@ -27,20 +23,24 @@ RUN tar -xzf V7.2.1.tar.gz
 WORKDIR /tmp/nemesis/RTIMULib-7.2.1/Linux/python
 RUN python3 setup.py build
 RUN python3 setup.py install
-WORKDIR /app
 
-# --- Project Dependencies ---
-RUN python3 -m pip install -r requirements.txt
-RUN python3 -m pip install -r requirements-dev.txt
+# --- Project Dependencies and files ---
+COPY ./requirements-dev.txt /app/requirements-dev.txt
+COPY ./requirements.txt /app/requirements.txt
+RUN python3 -m pip install -r /app/requirements.txt
+RUN python3 -m pip install -r /app/requirements-dev.txt
 
 # --- Utilities ---
+COPY ./src/nemesis_utilities /app/src/nemesis_utilities
 WORKDIR /app/src/nemesis_utilities
 RUN python3 -m pip install -e .
 
 # ----------------------------------------------------------------------------------------------------------------------
-#                                              ENVIRONMENT EXECUTION
+#                                                EXECUTION
 # ----------------------------------------------------------------------------------------------------------------------
+WORKDIR /app
 USER nemesis
+COPY . /app
 
 # CMD defined in compose.yml
 CMD []
