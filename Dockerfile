@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 FROM python:3.11.6-bookworm
 # USER: nemesis
-RUN useradd -ms /bin/bash nemesis
+#RUN useradd -ms /bin/bash nemesis
 
 USER root
 WORKDIR /app
@@ -14,7 +14,7 @@ COPY . /app
 # ----------------------------------------------------------------------------------------------------------------------
 # --- Tools ---
 RUN apt update
-RUN apt install wget build-essential nano -y
+RUN apt install wget build-essential nano dnsutils -y
 
 # --- GST, V4L, OCV for Video Streaming ---
 RUN apt install libgstreamer1.0-0 libgstreamer-opencv1.0-0 libv4l-0 python3-gst-1.0 python3-opencv python3-websockets -y
@@ -40,7 +40,8 @@ RUN python3 -m pip install -e .
 # ----------------------------------------------------------------------------------------------------------------------
 #                                              ENVIRONMENT EXECUTION
 # ----------------------------------------------------------------------------------------------------------------------
-USER nemesis
+#USER nemesis
+WORKDIR /app/src/
 
 # CMD defined in compose.yml
 CMD []
