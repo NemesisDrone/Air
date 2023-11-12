@@ -2,7 +2,7 @@ import threading
 import time
 
 from utilities import component as component
-from sense_hat import SenseHat
+from utilities.sense_hat import SenseHat
 
 
 class SensorsComponent(component.Component):
@@ -15,15 +15,12 @@ class SensorsComponent(component.Component):
         self.alive = False
 
         self.hat = SenseHat()
-        self.hat.set_imu_config(1, 1, 1)
-        self.hat._init_humidity()
-        self.hat._init_pressure()
+        self.hat.set_imu_config(True, True, True)
 
     def main(self):
         while self.alive:
-            self.hat._imu.IMURead()
-            self.log(f"{self.hat._imu.getIMUData()}")
-            time.sleep(0.1)
+            self.log(f"{self.hat.get_orientation()}")
+            time.sleep(1)
 
     def start(self):
         self.alive = True
