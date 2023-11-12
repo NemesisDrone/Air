@@ -27,7 +27,7 @@ class TestCompo(component.Component,IpcNode):
         if random.randint(0, 1):
             self.log("TARGET NEUTRALIZED")
         else:
-            self.log("TARGET MISSED, TRYING TO REACH AGAIN", level=LogLevels.WARNING)
+            self.log("TARGET MISSED, TRYING TO REACH AGAIN !", level=LogLevels.WARNING)
 
         if random.randint(0, 1):
             self.log("Lost WING", LogLevels.CRITICAL)
