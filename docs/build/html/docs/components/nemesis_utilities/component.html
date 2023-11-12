@@ -1,123 +1,218 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="prev" title="IPC" href="ipc.html" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Component &mdash; Nemesis Air</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="shortcut icon" href="../../../_static/logo.png"/>
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+    <link rel="shortcut icon" href="../../../_static/light_logo.png"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+        <title>Component - Nemesis Air</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
   
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="The Manager" href="../manager.html" />
-    <link rel="prev" title="IPC" href="ipc.html" />
-    <link href="../../../_static/custom.css" rel="stylesheet" type="text/css">
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
 
-</head>
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
 
-          
-          
-          <a href="../../../index.html">
-            
-              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Nemesis Air Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../getting_started.html#system-requirements">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../getting_started.html#run-this-project">Run this project</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../getting_started.html#install-system-requirements">Install system requirements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../getting_started.html#docker-compose">Docker &amp; Compose</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../getting_started.html#document-this-project">Document this project</a></li>
-</ul>
-</li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../components.html">Components</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../nemesis_utilities.html">Nemesis utilities</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="ipc.html">IPC Module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Component Module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../nemesis_utilities.html#how-to-use">How to use</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../nemesis_utilities.html#modules">Modules</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../manager.html">The Manager</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../manager.html#abstract">Abstract</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../manager.html#add-new-components-and-profiles">Add new components and profiles</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../ipc_routes.html">IPC Routes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../ipc_routes.html#logs">Logs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../ipc_routes.html#state">State</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#set">Set</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#events">Events</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#current-state">Current state</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../ipc_routes.html#other">Other</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
 
-        </div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">Nemesis Air</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
       </div>
-    </nav>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../../_static/light_logo.png" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../../_static/dark_logo.png" alt="Dark Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Introduction 📖</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Nemesis 🛠️</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ipc_routes.html">Ipc Routes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../components.html">Nemesis Components</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Components 🧩</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nemesis_utilities.html">Nemesis Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manager.html">Manager</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Nemesis Utilities Modules 🧰</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ipc.html">IPC</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Component</a></li>
+</ul>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Nemesis Air</a>
-      </nav>
+</div>
+</div>
 
-      <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../components.html">Components</a></li>
-          <li class="breadcrumb-item"><a href="../nemesis_utilities.html">Nemesis utilities</a></li>
-      <li class="breadcrumb-item active">Component</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/docs/components/nemesis_utilities/component.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="component">
-<h1>Component<a class="headerlink" href="#component" title="Link to this heading"></a></h1>
-<div class="toctree-wrapper compound" id="docs-components-nemesis-utilities-component">
-</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-src.nemesis_utilities.utilities.component">
+<span id="component"></span><h1>Component<a class="headerlink" href="#module-src.nemesis_utilities.utilities.component" title="Link to this heading">#</a></h1>
 <section id="overview-usage">
-<span id="module-src.nemesis_utilities.utilities.component"></span><h2>Overview &amp; Usage<a class="headerlink" href="#overview-usage" title="Link to this heading"></a></h2>
+<h2>Overview &amp; Usage<a class="headerlink" href="#overview-usage" title="Link to this heading">#</a></h2>
 <p>This module implements a component, a component represents and handle a microservice running in its own process.
 Components are managed by the manager and are meant to be subclassed. The subclass should override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code>
 and <code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code> methods and the <code class="xref py py-attr docutils literal notranslate"><span class="pre">NAME</span></code> attribute.</p>
@@ -152,30 +247,30 @@ and <code class="xref py py-meth docutils literal notranslate"><span class="pre"
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.State">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.nemesis_utilities.utilities.component.</span></span><span class="sig-name descname"><span class="pre">State</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.nemesis_utilities.utilities.component.</span></span><span class="sig-name descname"><span class="pre">State</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Enumerations of all possible states of a component.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.State.STARTING">
-<span class="sig-name descname"><span class="pre">STARTING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'starting'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STARTING" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">STARTING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'starting'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STARTING" title="Link to this definition">#</a></dt>
 <dd><p>The component is starting up.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.State.STARTED">
-<span class="sig-name descname"><span class="pre">STARTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'started'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STARTED" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">STARTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'started'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STARTED" title="Link to this definition">#</a></dt>
 <dd><p>The component is running.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.State.STOPPING">
-<span class="sig-name descname"><span class="pre">STOPPING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'stopping'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STOPPING" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">STOPPING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'stopping'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STOPPING" title="Link to this definition">#</a></dt>
 <dd><p>The component is shutting down.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.State.STOPPED">
-<span class="sig-name descname"><span class="pre">STOPPED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'stopped'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STOPPED" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">STOPPED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'stopped'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.State.STOPPED" title="Link to this definition">#</a></dt>
 <dd><p>The component is not running.</p>
 </dd></dl>
 
@@ -183,7 +278,7 @@ and <code class="xref py py-meth docutils literal notranslate"><span class="pre"
 
 <dl class="py class">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.nemesis_utilities.utilities.component.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.nemesis_utilities.utilities.component.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IpcNode</span></code></p>
 <p>Represent a component. Components are managed by the manager and represents a single process.</p>
 <div class="admonition note">
@@ -193,18 +288,18 @@ and <code class="xref py py-meth docutils literal notranslate"><span class="pre"
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.NAME">
-<span class="sig-name descname"><span class="pre">NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'component'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.NAME" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'component'</span></em><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.NAME" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.state">
-<span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.state" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.state" title="Link to this definition">#</a></dt>
 <dd><p>The current state of the component, picked from the <a class="reference internal" href="#src.nemesis_utilities.utilities.component.State" title="src.nemesis_utilities.utilities.component.State"><code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code></a> class.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.start" title="Link to this definition">#</a></dt>
 <dd><p>Start the component. Should be overridden by the component.</p>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
@@ -215,7 +310,7 @@ deadlock.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.stop" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.stop" title="Link to this definition">#</a></dt>
 <dd><p>Stop the component. Should be overridden by the component.</p>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
@@ -226,7 +321,7 @@ deadlock.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.log">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.log" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.log" title="Link to this definition">#</a></dt>
 <dd><p>Log a message to stdout and to ipc system as “log.{level}.{component_name}” route.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -243,7 +338,7 @@ deadlock.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.send">
-<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_nolog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.send" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_nolog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.send" title="Link to this definition">#</a></dt>
 <dd><p>Send a message to a route or a blocking route without waiting for the response.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -259,7 +354,7 @@ must be pickle serializable.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.send_blocking">
-<span class="sig-name descname"><span class="pre">send_blocking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.send_blocking" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">send_blocking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.send_blocking" title="Link to this definition">#</a></dt>
 <dd><p>Send a message to a blocking route and wait for the response / raise the exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -296,44 +391,44 @@ is reached or if an error occurred in the callback return value serialization.</
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.ipc_id">
-<span class="sig-name descname"><span class="pre">ipc_id</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.ipc_id" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ipc_id</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.ipc_id" title="Link to this definition">#</a></dt>
 <dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">str()</span></code> IPC node id</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.r">
-<span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.r" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.r" title="Link to this definition">#</a></dt>
 <dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">redis.StrictRedis()</span></code> Redis client</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.pubsub">
-<span class="sig-name descname"><span class="pre">pubsub</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.pubsub" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pubsub</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.pubsub" title="Link to this definition">#</a></dt>
 <dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">redis.client.PubSub()</span></code> Redis pubsub client</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.subscribed">
-<span class="sig-name descname"><span class="pre">subscribed</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.subscribed" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">subscribed</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.subscribed" title="Link to this definition">#</a></dt>
 <dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">bool()</span></code> Flag for the listen thread, while True, the listen thread will continue
 to listen for new messages.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.listening">
-<span class="sig-name descname"><span class="pre">listening</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.listening" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">listening</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.listening" title="Link to this definition">#</a></dt>
 <dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">bool()</span></code> Listening flag, while True, the listen thread is listening for new messages.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.regexes">
-<span class="sig-name descname"><span class="pre">regexes</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.regexes" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">regexes</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.regexes" title="Link to this definition">#</a></dt>
 <dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict()</span></code> A dict mapping all regexes to their callbacks.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="src.nemesis_utilities.utilities.component.Component.blocking_responses">
-<span class="sig-name descname"><span class="pre">blocking_responses</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.blocking_responses" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">blocking_responses</span></span><a class="headerlink" href="#src.nemesis_utilities.utilities.component.Component.blocking_responses" title="Link to this definition">#</a></dt>
 <dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> A dict mapping a blocking_response_route` to a semaphore and a response field in a list.</p>
 </dd></dl>
 
@@ -341,35 +436,93 @@ to listen for new messages.</p>
 
 </section>
 
-
-           </div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="ipc.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">IPC</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Nemesis Team
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ipc.html" class="btn btn-neutral float-left" title="IPC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../manager.html" class="btn btn-neutral float-right" title="The Manager" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
     </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Component</a><ul>
+<li><a class="reference internal" href="#overview-usage">Overview &amp; Usage</a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.State"><code class="docutils literal notranslate"><span class="pre">State</span></code></a><ul>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.State.STARTING"><code class="docutils literal notranslate"><span class="pre">State.STARTING</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.State.STARTED"><code class="docutils literal notranslate"><span class="pre">State.STARTED</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.State.STOPPING"><code class="docutils literal notranslate"><span class="pre">State.STOPPING</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.State.STOPPED"><code class="docutils literal notranslate"><span class="pre">State.STOPPED</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a><ul>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.NAME"><code class="docutils literal notranslate"><span class="pre">Component.NAME</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.state"><code class="docutils literal notranslate"><span class="pre">Component.state</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.start"><code class="docutils literal notranslate"><span class="pre">Component.start()</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.stop"><code class="docutils literal notranslate"><span class="pre">Component.stop()</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.log"><code class="docutils literal notranslate"><span class="pre">Component.log()</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.send"><code class="docutils literal notranslate"><span class="pre">Component.send()</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.send_blocking"><code class="docutils literal notranslate"><span class="pre">Component.send_blocking()</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.ipc_id"><code class="docutils literal notranslate"><span class="pre">Component.ipc_id</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.r"><code class="docutils literal notranslate"><span class="pre">Component.r</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.pubsub"><code class="docutils literal notranslate"><span class="pre">Component.pubsub</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.subscribed"><code class="docutils literal notranslate"><span class="pre">Component.subscribed</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.listening"><code class="docutils literal notranslate"><span class="pre">Component.listening</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.regexes"><code class="docutils literal notranslate"><span class="pre">Component.regexes</span></code></a></li>
+<li><a class="reference internal" href="#src.nemesis_utilities.utilities.component.Component.blocking_responses"><code class="docutils literal notranslate"><span class="pre">Component.blocking_responses</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2023, Nemesis Team.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+          </div>
         </div>
       </div>
-    </section>
+      
+      
+    </aside>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(false);
-      });
-  </script> 
-
-</body>
+</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
 </html>
