@@ -1,15 +1,12 @@
 Getting Started
 ===============
-.. _docs/getting_started:
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
 
 Let's get started with Nemesis Air repository. This page will guide you through the project workflow.
 
 System Requirements
 ^^^^^^^^^^^^^^^^^^^
+.. _system_requirements:
+
 On both Windows and Linux, you will need to install the following software:
 
 #. Docker & docker-compose, both installable through `Docker Desktop <https://www.docker.com/products/docker-desktop>`_.
@@ -23,7 +20,7 @@ Run this project
 
 Install system requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Refer to the :ref:`System Requirements <docs/getting_started>` section to install the system requirements.
+Refer to the :ref:`System Requirements <system_requirements>` section to install the system requirements.
 
 Docker & Compose
 ~~~~~~~~~~~~~~~~
@@ -40,7 +37,7 @@ Run the project using cli
 -------------------------
 
 To run the project using cli run this command: ``docker compose up`` in the root directory of the project.
-This command will run the dev configuration running the :mod:`src.manager` module.
+This command will run the dev configuration running the :mod:`manager <src.manager>` module.
 
 You can specify what configuration to run by using the ``-f`` flag,
 for example to run the prod configuration run this command: ``docker compose -f compose-prod.yml up``.
@@ -137,5 +134,4 @@ as if it was executed on the raspberry pi.
 Document this project
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. note::
-    Coming Soon
+To learn how to document this project, please see the `Documentation tutorial <https://github.com/NemesisDrone/Workflow/blob/main/DocTutorial.md>`_.
