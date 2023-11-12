@@ -1,0 +1,47 @@
+name: CI/CD Test pipeline
+#
+on:
+  workflow_dispatch:
+  push:
+    branches:
+        - develop
+
+jobs:
+  test:
+    # Docker and docker-compose are required to run this workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build and run tests
+        run: |
+          docker-compose run -f compose-test.yml --rm
+
+      - name: Send Discord success notification
+        if: success()
+        env:
+          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1165676365891256350/lPY8kbfTAUjVDcsGlqk8h7ipJ-z9OQnSi61YQczs4ERzq1Ct3ggG4coQikO9Xn0bNlBm
+        uses: Ilshidur/action-discord@master
+        with:
+          args: >
+            ✅ Success test and build for 
+            **${{ github.repository }}** 
+            by **${{ github.actor }}** 
+            succeeded! Commit: 
+            **${{ github.event.head_commit.message }}**. 
+            [Build details here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+      - name: Send Discord failure notification
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1165676365891256350/lPY8kbfTAUjVDcsGlqk8h7ipJ-z9OQnSi61YQczs4ERzq1Ct3ggG4coQikO9Xn0bNlBm
+        uses: Ilshidur/action-discord@master
+        with:
+          args: >
+            ❌ Failure test and build for 
+            **${{ github.repository }}** 
+            by **${{ github.actor }}** 
+            failed! Commit: 
+            **${{ github.event.head_commit.message }}**. 
+            [Build details here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})

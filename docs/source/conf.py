@@ -40,21 +40,13 @@ source_suffix = {
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
 html_theme_options = {
-    'logo_only': True,
-    'display_version': True,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': True,
-    # Toc options
-    'collapse_navigation': False,
-    'sticky_navigation': False,
-    'navigation_depth': 3,
-    'includehidden': True,
-    'titles_only': False
+    "sidebar_hide_name": True,
+    "light_logo": "light_logo.png",
+    "dark_logo": "dark_logo.png",
 }
-html_title = "Shaft doc"
-html_logo = "logo.png"
-html_favicon = "logo.png"
+html_title = "Nemesis Air"
+html_favicon = "_static/light_logo.png"
 
 html_static_path = ['_static']
