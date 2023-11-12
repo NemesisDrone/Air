@@ -47,7 +47,10 @@ class TestCompo(component.Component,IpcNode):
             # print('Sent speed: ', rand_value)
             self.send("sensor:speed", rand_value)
             self.send("pong", {"extra_message": "Hello World!"}, loopback=True)
-            self.log("RETURN TO HOME", level=LogLevels.WARNING)
+            laser_distance = self.r.get("sensor:laser-distance")
+            laser_distance = int(laser_distance) if laser_distance is not None else 0
+
+            self.log(f"RETURN TO HOME {laser_distance}mm", level=LogLevels.WARNING)
 
             time.sleep(1)
 
