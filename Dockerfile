@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 FROM python:3.11.5-slim-bookworm
 # USER: nemesis
-RUN useradd -ms /bin/bash nemesis
+#RUN useradd -ms /bin/bash nemesis
 
 USER root
 WORKDIR /app
@@ -37,7 +37,7 @@ RUN python3 -m pip install -e .
 # ----------------------------------------------------------------------------------------------------------------------
 #                                              ENVIRONMENT EXECUTION
 # ----------------------------------------------------------------------------------------------------------------------
-USER nemesis
+#USER nemesis
 WORKDIR /app/src/
 
 # CMD defined in docker-compose.yml

@@ -13,21 +13,10 @@ services:
   # Prod: basic image with no code reloading
   # Dev: same but used code is located in a bound volume
   # ---------------------------------------------------------
-  prod:
-    build:
-      dockerfile: ./Dockerfile
-    environment:
-        - NEMESIS_CONFIG=$c
-        - DEBUG=$d
-    networks:
-      - ipc
-    depends_on:
-      - redis
-    command: [ "python3", "/app/src/manager.py" ]
-
   dev:
     build:
       dockerfile: ./Dockerfile
+      context: .
     volumes:
       - .:/app
     environment:
@@ -37,7 +26,9 @@ services:
       - redis
     command: [ "python3", "/app/src/manager.py" ]
     env_file:
-      - /src/.env
+      - ./src/.env
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"
     networks:
       - ipc
       - ground_network
@@ -46,4 +37,4 @@ networks:
   ipc:
       driver: bridge
   ground_network:
-      external: true
+#      external: true
