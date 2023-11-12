@@ -1,4 +1,4 @@
-from utilities import component as component
+from utilities import component as component, ipc
 import time
 
 from nemesis_utilities.utilities.component import State
@@ -19,7 +19,7 @@ class HelloComponent(component.Component):
     def do_work(self):
         i = 0
         while self.do_work_please:
-            print('Hello World!', i, flush=True)
+            self.log(f"Hello World {i}", ipc.LogLevels.DEBUG)
             i += 1
             time.sleep(2)
 

@@ -40,7 +40,6 @@ class LaserDistanceComponent(component.Component):
                     # Send the measurement on redis IPC and save it in redis db
                     self.send("sensor:laser-distance", laser_distance)
                     self.r.set("sensor:laser-distance", laser_distance)
-                    self.log(f"laser distance: {laser_distance}")
                     # Send the running status every 5 seconds
                     if time.time() - self.last_running_status_sent > 5:
                         self.send("state:laser-distance:running", True)

@@ -10,6 +10,10 @@ from utilities.component import State as State
 # --- Components Imports ---
 # import ...
 import hello
+from gps import gps
+from laser import laser
+from communication.messages.test import run as TestComponentRun
+
 
 # --------------------------
 
@@ -22,6 +26,9 @@ STOP_TIMOUT = 5
 components = {
     # name: function_to_call
     "hello": hello.run,
+    "gps": gps.run,
+    "TestCompo": TestComponentRun,
+    "laser-distance": laser.run
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -29,7 +36,8 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello"]
+    "default": ["hello", "TestCompo", "gps", "laser-distance"],
+    # "dev": ["test"],
 }
 
 
