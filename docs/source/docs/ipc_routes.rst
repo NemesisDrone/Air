@@ -131,3 +131,35 @@ Other
     * - state:<component>:stop
       - {"component": <component>}
       - Sent by the manager to the component to ask it to stop.
+
+Sensors
+-------
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Route
+      - Data structure
+      - Purpose
+
+    * - sensors:full
+      - {'timestamp': raw['timestamp'],
+        'roll': <-180° | +180°>,
+        'pitch': <-180° | +180°>,
+        'yaw': <-180° | +180°>,
+        'gyroRoll': <Radians/s>,
+        'gyroPitch': <Radians/s>,
+        'gyroYaw': <Radians/s>,
+        'accelX': <G>,
+        'accelY': <G>,
+        'accelZ': <G>,
+        'compassX': <uT Micro Teslas>,
+        'compassY': <uT Micro Teslas>,
+        'compassZ': <uT Micro Teslas>,
+        'pressure': <Millibars /!\ Broken>,
+        'temperature': <Celcius /!\ Broken>,
+        'humidity': <Percentage /!\ Broken>,
+        }
+      - Sensors data
+
