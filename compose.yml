@@ -12,6 +12,8 @@ services:
       context: .
     volumes:
       - .:/app
+    # Temp fix to use IMU, just bind i2c devices doesn't work, there might be other devices to bind.
+    privileged: true
     environment:
       - NEMESIS_CONFIG=$c
       - DEBUG=$d
@@ -23,3 +25,5 @@ services:
       - ./src/.env
     devices:
       - "/dev/i2c-1:/dev/i2c-1"
+    # Temp fix to use IMU, otherwise there is only 0, and laser I guess ?
+    user: root

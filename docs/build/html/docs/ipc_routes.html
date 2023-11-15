@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en" data-content_root="../">
+<html class="no-js" lang="en" data-content_root="">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Components" href="components.html" /><link rel="prev" title="Getting Started" href="getting_started.html" />
 
-    <link rel="shortcut icon" href="../_static/light_logo.png"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+    <link rel="shortcut icon" href="../_static/light_logo.png"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
         <title>IPC Routes - Nemesis Air</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
 
@@ -210,7 +210,7 @@
         </div>
         <article role="main">
           <section id="ipc-routes">
-<h1>IPC Routes<a class="headerlink" href="#ipc-routes" title="Link to this heading">#</a></h1>
+<h1>IPC Routes<a class="headerlink" href="#ipc-routes" title="Permalink to this heading">#</a></h1>
 <p>Redis in-memory db is used as IPC mechanism, all IpcNode subscribes to pubsub “ipc” channel, the messages routing to the
 good nodes is abstracted by the Route system.</p>
 <div class="admonition tip">
@@ -223,7 +223,7 @@ good nodes is abstracted by the Route system.</p>
 </div>
 <p>This page describes and references all IPC Routes used by components.</p>
 <section id="logs">
-<h2>Logs<a class="headerlink" href="#logs" title="Link to this heading">#</a></h2>
+<h2>Logs<a class="headerlink" href="#logs" title="Permalink to this heading">#</a></h2>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -234,18 +234,30 @@ good nodes is abstracted by the Route system.</p>
 </thead>
 <tbody>
 <tr class="row-even"><th class="stub"><p>log:&lt;level&gt;:&lt;label&gt;:*</p></th>
-<td><p>{“label”: &lt;label&gt;, “level”: &lt;level&gt;, “message”: &lt;message&gt;, “timestamp”: &lt;timestamp&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“label”: The log label</p></li>
+<li><p>“level”: The log level</p></li>
+<li><p>“message”: The log message</p></li>
+<li><p>“timestamp”: The log timestamp</p></li>
+</ul>
+</td>
 <td><p>Used to send a log message from &lt;label&gt; to the log system using &lt;level&gt; as log level, this route can be
 completed with any additional filter. This route is used by the
 <a class="reference internal" href="components/nemesis_utilities/ipc.html#src.nemesis_utilities.utilities.ipc.IpcNode.log" title="src.nemesis_utilities.utilities.ipc.IpcNode.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc.IpcNode.log()</span></code></a> method.</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>stdout</p></th>
-<td><p>{“message”: &lt;message&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“message”: The log message</p></li>
+</ul>
+</td>
 <td><p>Every single messages sent to the terminal (stdout) is sent to this route.
 This route is used by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc._StdOverrider()</span></code> class.</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>stderr</p></th>
-<td><p>{“message”: &lt;message&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“message”: The log message</p></li>
+</ul>
+</td>
 <td><p>Every single messages sent to the terminal (stderr) is sent to this route.
 This route is used by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">src.nemesis_utilities.utilities.ipc._StdOverrider()</span></code> class.</p></td>
 </tr>
@@ -254,9 +266,9 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </div>
 </section>
 <section id="state">
-<h2>State<a class="headerlink" href="#state" title="Link to this heading">#</a></h2>
+<h2>State<a class="headerlink" href="#state" title="Permalink to this heading">#</a></h2>
 <section id="set">
-<h3>Set<a class="headerlink" href="#set" title="Link to this heading">#</a></h3>
+<h3>Set<a class="headerlink" href="#set" title="Permalink to this heading">#</a></h3>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -267,15 +279,24 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </thead>
 <tbody>
 <tr class="row-even"><th class="stub"><p>state:start:&lt;component&gt;</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><p>Ask the manager to start the component &lt;component&gt;. If the component is already started, nothing happens.</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>state:stop:&lt;component&gt;</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><p>Ask the manager to stop the component &lt;component&gt;. If the component is already stopped, nothing happens.</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>state:restart:&lt;component&gt;</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><dl class="simple">
 <dt>Ask the manager to restart the component &lt;component&gt;. If the component is already stopped, it will be started.</dt><dd><p>If the component is already started, it will be stopped and started again.</p>
 </dd>
@@ -295,7 +316,7 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </div>
 </section>
 <section id="events">
-<h3>Events<a class="headerlink" href="#events" title="Link to this heading">#</a></h3>
+<h3>Events<a class="headerlink" href="#events" title="Permalink to this heading">#</a></h3>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -306,19 +327,31 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </thead>
 <tbody>
 <tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:starting</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><p>Sent by the component when it is starting.</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>state:&lt;component&gt;:started</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><p>Sent by the component when it is started.</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:stopping</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><p>Sent by the component when it is stopping.</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>state:&lt;component&gt;:stopped</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><p>Sent by the component when it is stopped.</p></td>
 </tr>
 </tbody>
@@ -326,7 +359,7 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </div>
 </section>
 <section id="current-state">
-<h3>Current state<a class="headerlink" href="#current-state" title="Link to this heading">#</a></h3>
+<h3>Current state<a class="headerlink" href="#current-state" title="Permalink to this heading">#</a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Current states are stored as key/value in the Redis db.</p>
@@ -341,7 +374,7 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </thead>
 <tbody>
 <tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:state</p></th>
-<td><p>“&lt;state&gt;”</p></td>
+<td><p>The state</p></td>
 <td><p>Sent by the component when it is started or stopped to update its current state.</p></td>
 </tr>
 </tbody>
@@ -349,7 +382,7 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </div>
 </section>
 <section id="other">
-<h3>Other<a class="headerlink" href="#other" title="Link to this heading">#</a></h3>
+<h3>Other<a class="headerlink" href="#other" title="Permalink to this heading">#</a></h3>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -360,13 +393,91 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </thead>
 <tbody>
 <tr class="row-even"><th class="stub"><p>state:&lt;component&gt;:stop</p></th>
-<td><p>{“component”: &lt;component&gt;}</p></td>
+<td><ul class="simple">
+<li><p>“component”: The component name</p></li>
+</ul>
+</td>
 <td><p>Sent by the manager to the component to ask it to stop.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
+</section>
+<section id="sensors">
+<h2>Sensors<a class="headerlink" href="#sensors" title="Permalink to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>sensors:full</p></th>
+<td><ul class="simple">
+<li><p>“timestamp”: The timestamp</p></li>
+<li><p>“roll”: The roll angle (-180° to +180°)</p></li>
+<li><p>“pitch”: The pitch angle (-180° to +180°)</p></li>
+<li><p>“yaw”: The yaw angle (-180° to +180°)</p></li>
+<li><p>“gyroRoll”: The roll gyroscope value (Radians/s)</p></li>
+<li><p>“gyroPitch”: The pitch gyroscope value (Radians/s)</p></li>
+<li><p>“gyroYaw”: The yaw gyroscope value (Radians/s)</p></li>
+<li><p>“accelX”: The X accelerometer value (G)</p></li>
+<li><p>“accelY”: The Y accelerometer value (G)</p></li>
+<li><p>“accelZ”: The Z accelerometer value (G)</p></li>
+<li><p>“compassX”: The X compass value (uT Micro Teslas)</p></li>
+<li><p>“compassY”: The Y compass value (uT Micro Teslas)</p></li>
+<li><p>“compassZ”: The Z compass value (uT Micro Teslas)</p></li>
+<li><p>“pressure”: The pressure value (Millibars /!Broken)</p></li>
+<li><p>“temperature”: The temperature value (Celcius /!Broken)</p></li>
+<li><p>“humidity”: The humidity value (Percentage /!Broken)</p></li>
+</ul>
+</td>
+<td><p>Sensors data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sensors data is also stored as key/value in the Redis db.</p>
+</div>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Key</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>sensors:full</p></th>
+<td><ul class="simple">
+<li><p>“timestamp”: The timestamp</p></li>
+<li><p>“roll”: The roll angle (-180° to +180°)</p></li>
+<li><p>“pitch”: The pitch angle (-180° to +180°)</p></li>
+<li><p>“yaw”: The yaw angle (-180° to +180°)</p></li>
+<li><p>“gyroRoll”: The roll gyroscope value (Radians/s)</p></li>
+<li><p>“gyroPitch”: The pitch gyroscope value (Radians/s)</p></li>
+<li><p>“gyroYaw”: The yaw gyroscope value (Radians/s)</p></li>
+<li><p>“accelX”: The X accelerometer value (G)</p></li>
+<li><p>“accelY”: The Y accelerometer value (G)</p></li>
+<li><p>“accelZ”: The Z accelerometer value (G)</p></li>
+<li><p>“compassX”: The X compass value (uT Micro Teslas)</p></li>
+<li><p>“compassY”: The Y compass value (uT Micro Teslas)</p></li>
+<li><p>“compassZ”: The Z compass value (uT Micro Teslas)</p></li>
+<li><p>“pressure”: The pressure value (Millibars /!Broken)</p></li>
+<li><p>“temperature”: The temperature value (Celcius /!Broken)</p></li>
+<li><p>“humidity”: The humidity value (Percentage /!Broken)</p></li>
+</ul>
+</td>
+<td><p>Sensors data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 </section>
 
@@ -434,6 +545,7 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 <li><a class="reference internal" href="#other">Other</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#sensors">Sensors</a></li>
 </ul>
 </li>
 </ul>
@@ -445,9 +557,9 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d45e8c67"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

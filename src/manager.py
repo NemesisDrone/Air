@@ -12,7 +12,10 @@ from utilities.component import State as State
 import hello
 from gps import gps
 from laser import laser
+import sensors.sensors as sensors
+
 from communication.messages.test import run as TestComponentRun
+
 
 
 # --------------------------
@@ -28,7 +31,8 @@ components = {
     "hello": hello.run,
     "gps": gps.run,
     "TestCompo": TestComponentRun,
-    "laser-distance": laser.run
+    "laser-distance": laser.run,
+    "sensors": sensors.run,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -36,7 +40,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello", "TestCompo", "gps", "laser-distance"],
+    "default": ["hello", "TestCompo", "gps", "laser-distance", "sensors"],
     # "dev": ["test"],
 }
 
