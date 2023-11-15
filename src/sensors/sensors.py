@@ -2,7 +2,7 @@ import threading
 import time
 
 import math
-from utilities import component as component
+from utilities import component as component, ipc as ipc
 from utilities.sense_hat import SenseHat
 
 
@@ -14,14 +14,19 @@ class SensorsComponent(component.Component):
         self.log("Sensors component initialized")
 
         self.alive = False
+        self.is_sensor = True
 
-        self.hat = SenseHat()
-        self.hat.set_imu_config(True, True, True)
-        self.hat._init_humidity()
-        self.hat._init_pressure()
+        try:
+            self.hat = SenseHat()
+            self.hat.set_imu_config(True, True, True)
+            self.hat._init_humidity()
+            self.hat._init_pressure()
+        except Exception as e:
+            self.log("Could not initialize SenseHat: " + str(e), ipc.LogLevels.WARNING)
+            self.is_sensor = False
 
     def sense_hat_listener(self):
-        while self.alive:
+        while self.alive and self.is_sensor:
             self.hat._read_imu()
             raw = self.hat._imu.getIMUData()
             data = {'timestamp': raw['timestamp'],
@@ -42,6 +47,7 @@ class SensorsComponent(component.Component):
                     'humidity': raw['humidity'],  # Percentage
                     }
             self.send("sensors:full", data)
+            self.r.set("sensors:full", data)
 
     def start(self):
         self.alive = True
