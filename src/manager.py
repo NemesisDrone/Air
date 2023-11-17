@@ -10,6 +10,7 @@ from utilities.component import State as State
 # --- Components Imports ---
 # import ...
 import hello
+import nvs
 
 # --------------------------
 
@@ -21,7 +22,9 @@ STOP_TIMOUT = 5
 # ----------------------------------------------------------------------------------------------------------------------
 components = {
     # name: function_to_call
+    # Be careful to *always* use the name that you've used in your Component-inheriting class too!
     "hello": hello.run,
+    "NVS": nvs.run
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -29,7 +32,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello"]
+    "default": ["hello", "NVS"]
 }
 
 

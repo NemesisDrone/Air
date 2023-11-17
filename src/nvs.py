@@ -5,21 +5,19 @@ from utilities.ipc import LogLevels as ll
 import dataclasses
 import gi
 import asyncio as aio
-from websockets.exceptions import exceptions as wssexcept
+from websockets import exceptions as wssexcept
 from websockets.client import connect as cn
+
+import threading
 
 gi.require_version('Gst', '1.0')
 gi.require_version("GstVideo", "1.0")
 from gi.repository import GObject, Gst, GstVideo
 
+import os
 
 
-
-COMMON_PIPELNE = "v4l2src"
-                 " ! videoconvert"
-                 " ! v4l2h264enc"
-                 " ! video/x-h264,profile=baseline,stream-format=byte-stream"
-                 " ! appsink name=sink"
+COMMON_PIPELNE = "videotestsrc ! videoconvert ! openh264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
 
 
 def functionWrap(func, object, *args):
@@ -31,15 +29,18 @@ class NVSState:
     """
     @brief Class representing the different states of NVSComponent.
     """
-    GstInitFail: 0
-    PipelineCreationFail: 1
-    SinkLookupFail: 2
-    Initialized: 3
-    WaitingConnection: 4
-    Streaming: 5
-    Cleaning: 6
-    Unknown: 7
-    PendingStop: 8
+    GstInitFail: int = 0
+    PipelineCreationFail: int = 1
+    SinkLookupFail: int = 2
+    Initialized: int = 3
+    WaitingConnection: int = 4
+    Streaming: int = 5
+    Cleaning: int = 6
+    Unknown: int = 7
+    PendingStop: int = 8
+
+async def fakee(compo):
+    await compo._start_serving()
 
 
 class NVSComponent(component.Component):
@@ -57,6 +58,8 @@ class NVSComponent(component.Component):
         super().__init__()
 
         self.nvs_state = NVSState.Unknown
+        self.thread = None
+        self.loop = None
 
         if not Gst.init_check(None): # init gstreamer
             self.log("[NVS] GST init failed!", ll.CRITICAL)
@@ -89,11 +92,32 @@ class NVSComponent(component.Component):
         self.nvs_state = NVSState.Initialized
 
     def start(self):
+        def loop_setter(loop):
+            aio.set_event_loop(loop)
+            loop.run_forever()
+
         if self.nvs_state != NVSState.Initialized:
             return
 
-        aio.run(self._start_serving(self))
+        self.loop = aio.new_event_loop()
+        aio.set_event_loop(self.loop)
+        self.thread = threading.Thread(target=loop_setter, args=(self.loop,))
+        self.thread.start()
+
+        aio.run_coroutine_threadsafe(fakee(self), self.loop)
+        #self.loop.call_soon_threadsafe(self.loop.stop)
+
+
+        """blocking_coro = aio.to_thread(self._start_serving)
+        task = aio.create_task(blocking_coro)"""
+
+        while self.nvs_state != NVSState.WaitingConnection:
+            pass
+
         self.log("[NVS] Started.", ll.INFO)
+
+        """while self.loop.is_running():
+            pass"""
 
     def stop(self):
         self.nvs_state = NVSState.Cleaning
@@ -123,17 +147,26 @@ class NVSComponent(component.Component):
         f[0].unmap(f[1])
 
     async def _start_serving(self):
-        self.pipeline.set_state(Gst.State.PLAYING)
-        self.log("[NVS] Starting WS serving.", ll.INFO)
+        print("Serving!", flush=True)
+        try:
+            self.pipeline.set_state(Gst.State.PLAYING)
+            self.log("[NVS] Starting WS serving.", ll.INFO)
 
-        while self.nvs_state != NVSState.PendingStop:
-            try:
-                self.nvs_state = NVSState.WaitingConnection
-                async with cn("ws://localhost:8000") as ws:
-                    await self._on_connection(ws)
+            while self.nvs_state != NVSState.PendingStop:
+                print("Waiting...")
+                try:
+                    self.nvs_state = NVSState.WaitingConnection
+                    async with cn("ws://127.0.0.1:7000") as ws:
+                        await self._on_connection(ws)
 
-            finally:
-                self.pipeline.set_state(Gst.State.NULL)
+                finally:
+                    self.pipeline.set_state(Gst.State.NULL)
+
+        finally:
+            pass
+
+        self.log("[NVS] WS serving stopped.", ll.INFO)
+        self.nvs_state = NVSState.Initialized
 
     async def _on_connection(self, wss):
         """
@@ -188,5 +221,7 @@ class NVSComponent(component.Component):
     def get_nvs_state(self):
         return self.nvs_state
 
+
 def run():
-    NVSComponent().start()
+    compo = NVSComponent()
+    compo.start()
