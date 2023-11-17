@@ -18,4 +18,6 @@ services:
       - REDIS_CONTAINER_NAME=redis-nemesis-dev
     depends_on:
       - redis
+    ports:
+      - "7000"
     command: [ "python3", "/app/src/manager.py"]
