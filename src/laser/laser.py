@@ -25,7 +25,7 @@ class LaserComponent(component.Component):
             self.i2c = busio.I2C(board.SCL, board.SDA)
             self.vl53 = adafruit_vl53l0x.VL53L0X(self.i2c)
         except Exception as e:
-            self.log("Laser component failed to initialize", level=ipc.LogLevels.WARNING)
+            self.log(f"Could not initialize laser: {e}", level=ipc.LogLevels.WARNING)
             self.valid = False
 
         self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
