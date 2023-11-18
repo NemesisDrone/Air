@@ -34,6 +34,8 @@ class LaserComponent(component.Component):
         if self.valid:
             self.alive = True
 
+        return self
+
     def do_work(self):
         """
         The do_work method is the main method in charge of getting the laser distance and sending it on redis IPC.
@@ -68,7 +70,6 @@ class LaserComponent(component.Component):
 
 
 def run():
-    compo = LaserComponent()
-    compo.start()
+    compo = LaserComponent().start()
     compo.do_work()
     compo.log("Laser component started")
