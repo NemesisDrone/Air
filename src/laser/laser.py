@@ -5,59 +5,66 @@ import busio
 import adafruit_vl53l0x
 
 
-class LaserDistanceComponent(component.Component):
+class LaserComponent(component.Component):
     """
     This component is responsible for reading the laser distance sensor and sending the distance on redis IPC.
     Redis key: sensor:laser-distance
     IPC route: sensor:laser-distance
     """
-    NAME = "laser-distance"
+    NAME = "laser"
 
     def __init__(self):
         super().__init__()
 
-        self.i2c = busio.I2C(board.SCL, board.SDA)
-        self.vl53 = adafruit_vl53l0x.VL53L0X(self.i2c)
+        self.valid = True
+        self.alive = False
 
-        self.send_laser_distance = False
-        self.last_running_status_sent = 0
-        self.log("Laser distance component initialized")
+        try:
+            self.i2c = busio.I2C(board.SCL, board.SDA)
+            self.vl53 = adafruit_vl53l0x.VL53L0X(self.i2c)
+        except Exception as e:
+            self.log("Laser component failed to initialize", level=ipc.LogLevels.WARNING)
+            self.valid = False
+
+        self.r.set("state:laser:custom", {"valid": self.valid, "alive": self.alive})
+        self.log("Laser component initialized")
 
     def start(self):
-        self.log("Laser component started")
-        self.send_laser_distance = True
+        if self.valid:
+            self.alive = True
 
     def do_work(self):
         """
         The do_work method is the main method in charge of getting the laser distance and sending it on redis IPC.
         """
+        self.r.set("state:laser:custom", {"valid": self.valid, "alive": self.alive})
         try:
             with self.vl53.continuous_mode():
-                while self.send_laser_distance:
+                while self.alive:
                     # Get a measurement
                     laser_distance = self.vl53.range
 
                     # Send the measurement on redis IPC and save it in redis db
-                    self.send("sensor:laser-distance", laser_distance)
-                    self.r.set("sensor:laser-distance", laser_distance)
-                    # Send the running status every 5 seconds
-                    if time.time() - self.last_running_status_sent > 5:
-                        self.send("state:laser-distance:running", True)
-                        self.last_running_status_sent = time.time()
+                    self.send("sensors:laser:distance", laser_distance)
+                    self.r.set("sensors:laser:distance", laser_distance)
 
                     # limit the frequency of the laser distance sensor
                     time.sleep(0.05)
+
         except Exception as e:
-            self.log("Laser component stopped working", level=ipc.LogLevels.ERROR)
-            self.send("state:laser-distance:running", False)
+            self.log("Laser component stopped unexpectedly: " + str(e), level=ipc.LogLevels.ERROR)
+            self.alive = False
+            self.valid = False
+
+        self.r.set("state:laser:custom", {"valid": self.valid, "alive": self.alive})
 
     def stop(self):
-        self.send_laser_distance = False
+        self.alive = False
         self.log("Laser component stopped")
 
 
 def run():
-    compo = LaserDistanceComponent()
+    compo = LaserComponent()
     compo.start()
     compo.do_work()
-
+    compo.log("Laser component started")

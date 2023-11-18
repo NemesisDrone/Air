@@ -135,6 +135,39 @@ Other
       - - "component": The component name
       - Sent by the manager to the component to ask it to stop.
 
+Custom States
+~~~~~~~~~~~~~
+
+.. note::
+    Custom states depends on the component and are used to give more accurate information about the component state.
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Route
+      - Data structure
+      - Purpose
+
+    * - state:laser:custom
+      - - "alive": True/False (If the component is reading data)
+        - "valid": True/False (If the component is working/detected)
+      - Sent by the laser component when its custom state is updated.
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Key
+      - Data structure
+      - Purpose
+
+    * - state:laser:custom
+      - - "alive": True/False (If the component is reading data)
+        - "valid": True/False (If the component is working/detected)
+      - Set by the laser component when its custom state is updated.
+
+
 Sensors
 -------
 
@@ -165,6 +198,10 @@ Sensors
         - "humidity": The humidity value (Percentage /!\ Broken)
       - Sensors data
 
+    * - sensors:laser:distance
+      - The distance (in ??)
+      - Used by the laser sensor to send the distance measured.
+
 .. note::
     Sensors data is also stored as key/value in the Redis db.
 
@@ -194,4 +231,8 @@ Sensors
         - "temperature": The temperature value (Celcius /!\ Broken)
         - "humidity": The humidity value (Percentage /!\ Broken)
       - Sensors data
+
+    * - sensors:laser:distance
+      - The distance (in ??)
+      - Used by the laser sensor to send the distance measured.
 
