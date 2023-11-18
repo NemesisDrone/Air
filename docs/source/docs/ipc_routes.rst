@@ -154,6 +154,11 @@ Custom States
         - "valid": True/False (If the component is working/detected)
       - Sent by the laser component when its custom state is updated.
 
+    * - state:sensors:custom
+      - - "alive": True/False (If the component is reading data)
+        - "valid": True/False (If the component is working/detected)
+      - Sent by the sensors component when its custom state is updated.
+
 .. list-table::
     :header-rows: 1
     :stub-columns: 1
@@ -167,6 +172,10 @@ Custom States
         - "valid": True/False (If the component is working/detected)
       - Set by the laser component when its custom state is updated.
 
+    * - state:sensors:custom
+      - - "alive": True/False (If the component is reading data)
+        - "valid": True/False (If the component is working/detected)
+      - Set by the sensors component when its custom state is updated.
 
 Sensors
 -------
