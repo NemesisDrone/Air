@@ -31,7 +31,7 @@ components = {
     "hello": hello.run,
     "gps": gps.run,
     "TestCompo": TestComponentRun,
-    "laser-distance": laser.run,
+    "laser": laser.run,
     "sensors": sensors.run,
 }
 
@@ -40,7 +40,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello", "TestCompo", "gps", "laser-distance", "sensors"],
+    "default": ["hello", "TestCompo", "gps", "laser", "sensors"],
     # "dev": ["test"],
 }
 
