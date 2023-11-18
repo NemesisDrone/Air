@@ -403,6 +403,53 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </table>
 </div>
 </section>
+<section id="custom-states">
+<h3>Custom States<a class="headerlink" href="#custom-states" title="Permalink to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Custom states depends on the component and are used to give more accurate information about the component state.</p>
+</div>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Route</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>state:laser:custom</p></th>
+<td><ul class="simple">
+<li><p>“alive”: True/False (If the component is reading data)</p></li>
+<li><p>“valid”: True/False (If the component is working/detected)</p></li>
+</ul>
+</td>
+<td><p>Sent by the laser component when its custom state is updated.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Key</p></th>
+<th class="head"><p>Data structure</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>state:laser:custom</p></th>
+<td><ul class="simple">
+<li><p>“alive”: True/False (If the component is reading data)</p></li>
+<li><p>“valid”: True/False (If the component is working/detected)</p></li>
+</ul>
+</td>
+<td><p>Set by the laser component when its custom state is updated.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 </section>
 <section id="sensors">
 <h2>Sensors<a class="headerlink" href="#sensors" title="Permalink to this heading">#</a></h2>
@@ -436,6 +483,10 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </ul>
 </td>
 <td><p>Sensors data</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>sensors:laser:distance</p></th>
+<td><p>The distance (in ??)</p></td>
+<td><p>Used by the laser sensor to send the distance measured.</p></td>
 </tr>
 </tbody>
 </table>
@@ -474,6 +525,10 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </ul>
 </td>
 <td><p>Sensors data</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>sensors:laser:distance</p></th>
+<td><p>The distance (in ??)</p></td>
+<td><p>Used by the laser sensor to send the distance measured.</p></td>
 </tr>
 </tbody>
 </table>
@@ -543,6 +598,7 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 <li><a class="reference internal" href="#events">Events</a></li>
 <li><a class="reference internal" href="#current-state">Current state</a></li>
 <li><a class="reference internal" href="#other">Other</a></li>
+<li><a class="reference internal" href="#custom-states">Custom States</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#sensors">Sensors</a></li>
