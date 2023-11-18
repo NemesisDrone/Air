@@ -1,3 +1,4 @@
+import json
 import threading
 import time
 
@@ -24,13 +25,14 @@ class SensorsComponent(component.Component):
             self.log("Could not initialize SenseHat: " + str(e), ipc.LogLevels.WARNING)
             self.valid = False
 
-        self.r.set("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
+        self.r.set("state:sensors:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
         self.log("Sensors component initialized")
 
     def sense_hat_listener(self):
-        self.r.set("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
+        self.r.set("state:sensors:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
+        self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
         try:
             while self.alive:
@@ -54,14 +56,14 @@ class SensorsComponent(component.Component):
                         'humidity': raw['humidity'],  # Percentage
                         }
                 self.send("sensors:full", data)
-                self.r.set("sensors:full", data)
+                self.r.set("sensors:full", json.dumps(data))
 
         except Exception as e:
             self.log("SenseHat stopped unexpectedly: " + str(e), level=ipc.LogLevels.ERROR)
             self.valid = False
             self.alive = False
 
-        self.r.set("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
+        self.r.set("state:sensors:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
     def start(self):

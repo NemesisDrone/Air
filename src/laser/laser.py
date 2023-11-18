@@ -1,3 +1,5 @@
+import json
+
 from utilities import component as component, ipc
 import time
 import board
@@ -26,7 +28,7 @@ class LaserComponent(component.Component):
             self.log("Laser component failed to initialize", level=ipc.LogLevels.WARNING)
             self.valid = False
 
-        self.r.set("state:laser:custom", {"valid": self.valid, "alive": self.alive})
+        self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
         self.send("state:laser:custom", {"valid": self.valid, "alive": self.alive})
         self.log("Laser component initialized")
 
@@ -40,7 +42,7 @@ class LaserComponent(component.Component):
         """
         The do_work method is the main method in charge of getting the laser distance and sending it on redis IPC.
         """
-        self.r.set("state:laser:custom", {"valid": self.valid, "alive": self.alive})
+        self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
         self.send("state:laser:custom", {"valid": self.valid, "alive": self.alive})
 
         try:
@@ -61,7 +63,7 @@ class LaserComponent(component.Component):
             self.alive = False
             self.valid = False
 
-        self.r.set("state:laser:custom", {"valid": self.valid, "alive": self.alive})
+        self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
         self.send("state:laser:custom", {"valid": self.valid, "alive": self.alive})
 
     def stop(self):
