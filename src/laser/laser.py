@@ -45,6 +45,9 @@ class LaserComponent(component.Component):
         self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
         self.send("state:laser:custom", {"valid": self.valid, "alive": self.alive})
 
+        if not self.alive:
+            return
+
         try:
             with self.vl53.continuous_mode():
                 while self.alive:
