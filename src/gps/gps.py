@@ -20,7 +20,7 @@ class GPSComponent(component.Component):
         while self.send_gps_position:
             lat = -0.7563779 + random.uniform(-0.001, 0.001)
             lng = 48.0879123 + random.uniform(-0.001, 0.001)
-            self.send("sensor:gps", {"lat": lat, "lng": lng})
+            self.send("sensors:gps", {"lat": lat, "lng": lng})
             time.sleep(1)
 
             if time.time() - self.last_running_status_sent > 5:

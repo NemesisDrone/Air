@@ -10,8 +10,8 @@ import adafruit_vl53l0x
 class LaserComponent(component.Component):
     """
     This component is responsible for reading the laser distance sensor and sending the distance on redis IPC.
-    Redis key: sensor:laser-distance
-    IPC route: sensor:laser-distance
+    Redis key: sensors:laser-distance
+    IPC route: sensors:laser-distance
     """
     NAME = "laser"
 

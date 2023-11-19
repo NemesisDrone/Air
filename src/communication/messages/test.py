@@ -39,15 +39,15 @@ class TestCompo(component.Component,IpcNode):
             # I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.
             rand_value = random.randint(97, 110)
             # print('Sent altitude: ', rand_value)
-            self.send("sensor:altitude", rand_value)
+            self.send("sensors:altitude", rand_value)
             rand_value = random.randint(0, 100)
             # print('Sent battery: ', rand_value)
-            self.send("sensor:battery", rand_value)
+            self.send("sensors:battery", rand_value)
             rand_value = random.randint(30, 40)
             # print('Sent speed: ', rand_value)
-            self.send("sensor:speed", rand_value)
+            self.send("sensors:speed", rand_value)
             self.send("pong", {"extra_message": "Hello World!"}, loopback=True)
-            laser_distance = self.r.get("sensor:laser-distance")
+            laser_distance = self.r.get("sensors:laser-distance")
             laser_distance = int(laser_distance) if laser_distance is not None else 0
 
             self.log(f"RETURN TO HOME {laser_distance}mm", level=LogLevels.WARNING)
