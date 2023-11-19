@@ -40,7 +40,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello", "TestCompo", "gps", "laser", "sensors"],
+    "default": ["TestCompo", "gps", "laser", "sensors"],
     # "dev": ["test"],
 }
 
