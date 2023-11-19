@@ -13,6 +13,7 @@ import hello
 from sim7600 import sim7600
 from laser import laser
 import sensors.sensors as sensors
+import communication.messages.CommunicationComponent as CommunicationComponent
 
 from communication.messages.test import run as TestComponentRun
 
@@ -33,6 +34,7 @@ components = {
     "TestCompo": TestComponentRun,
     "laser": laser.run,
     "sensors": sensors.run,
+    "communication": CommunicationComponent.run,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -40,7 +42,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["sim7600", "laser", "sensors", "TestCompo"],
+    "default": ["communication", "sim7600", "laser", "sensors", "TestCompo"],
     # "dev": ["test"],
 }
 

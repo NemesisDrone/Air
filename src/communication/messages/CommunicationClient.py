@@ -1,4 +1,8 @@
 """
+KEEP IT HERE FOR HERITAGE FOR THE MOMENT
+"""
+
+"""
 The communication client is used to connect to the base station and send/receive messages.
 """
 import socket
