@@ -25,13 +25,19 @@ class SensorsComponent(component.Component):
             self.log("Could not initialize SenseHat: " + str(e), ipc.LogLevels.WARNING)
             self.valid = False
 
-        self.r.set("state:sensors:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
+        self.r.set(
+            "state:sensors:custom",
+            json.dumps({"valid": self.valid, "alive": self.alive}),
+        )
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
         self.log("Sensors component initialized")
 
     def sense_hat_listener(self):
-        self.r.set("state:sensors:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
+        self.r.set(
+            "state:sensors:custom",
+            json.dumps({"valid": self.valid, "alive": self.alive}),
+        )
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
         # Emulator datas
@@ -68,42 +74,42 @@ class SensorsComponent(component.Component):
                     self.hat._read_imu()
                     raw = self.hat._imu.getIMUData()
                     data = {
-                        'timestamp': raw['timestamp'],
-                        'roll': math.degrees(raw['fusionPose'][0]),  # -180 | +180
-                        'pitch': math.degrees(raw['fusionPose'][1]),  # -180 | +180
-                        'yaw': math.degrees(raw['fusionPose'][2]),  # -180 | +180
-                        'gyroRoll': math.degrees(raw['gyro'][0]),  # Radians/s
-                        'gyroPitch': math.degrees(raw['gyro'][1]),  # Radians/s
-                        'gyroYaw': math.degrees(raw['gyro'][2]),  # Radians/s
-                        'accelX': raw['accel'][0],  # G
-                        'accelY': raw['accel'][1],  # G
-                        'accelZ': raw['accel'][2],  # G
-                        'compassX': raw['compass'][0],  # uT Micro Teslas
-                        'compassY': raw['compass'][1],  # uT Micro Teslas
-                        'compassZ': raw['compass'][2],  # uT Micro Teslas
-                        'pressure': raw['pressure'],  # Millibars
-                        'temperature': raw['temperature'],  # Celcius
-                        'humidity': raw['humidity'],  # Percentage
-                        }
+                        "timestamp": raw["timestamp"],
+                        "roll": math.degrees(raw["fusionPose"][0]),  # -180 | +180
+                        "pitch": math.degrees(raw["fusionPose"][1]),  # -180 | +180
+                        "yaw": math.degrees(raw["fusionPose"][2]),  # -180 | +180
+                        "gyroRoll": math.degrees(raw["gyro"][0]),  # Radians/s
+                        "gyroPitch": math.degrees(raw["gyro"][1]),  # Radians/s
+                        "gyroYaw": math.degrees(raw["gyro"][2]),  # Radians/s
+                        "accelX": raw["accel"][0],  # G
+                        "accelY": raw["accel"][1],  # G
+                        "accelZ": raw["accel"][2],  # G
+                        "compassX": raw["compass"][0],  # uT Micro Teslas
+                        "compassY": raw["compass"][1],  # uT Micro Teslas
+                        "compassZ": raw["compass"][2],  # uT Micro Teslas
+                        "pressure": raw["pressure"],  # Millibars
+                        "temperature": raw["temperature"],  # Celcius
+                        "humidity": raw["humidity"],  # Percentage
+                    }
                 else:
                     var()
                     data = {
-                        'timestamp': time.time(),
-                        'roll': roll,  # -180 | +180
-                        'pitch': pitch,  # -180 | +180
-                        'yaw': yaw,  # -180 | +180
-                        'gyroRoll': gyrX,  # Radians/s
-                        'gyroPitch': gyrY,  # Radians/s
-                        'gyroYaw': gyrZ,  # Radians/s
-                        'accelX': accX,  # G
-                        'accelY': accY,  # G
-                        'accelZ': accZ,  # G
-                        'compassX': compX,  # uT Micro Teslas
-                        'compassY': compY,  # uT Micro Teslas
-                        'compassZ': compZ,  # uT Micro Teslas
-                        'pressure': pressure,  # Millibars
-                        'temperature': temperature,  # Celcius
-                        'humidity': humidity,  # Percentage
+                        "timestamp": time.time(),
+                        "roll": roll,  # -180 | +180
+                        "pitch": pitch,  # -180 | +180
+                        "yaw": yaw,  # -180 | +180
+                        "gyroRoll": gyrX,  # Radians/s
+                        "gyroPitch": gyrY,  # Radians/s
+                        "gyroYaw": gyrZ,  # Radians/s
+                        "accelX": accX,  # G
+                        "accelY": accY,  # G
+                        "accelZ": accZ,  # G
+                        "compassX": compX,  # uT Micro Teslas
+                        "compassY": compY,  # uT Micro Teslas
+                        "compassZ": compZ,  # uT Micro Teslas
+                        "pressure": pressure,  # Millibars
+                        "temperature": temperature,  # Celcius
+                        "humidity": humidity,  # Percentage
                     }
                     # TODO: change later
                     time.sleep(0.05)
@@ -112,11 +118,16 @@ class SensorsComponent(component.Component):
                 self.r.set("sensors:full", json.dumps(data))
 
         except Exception as e:
-            self.log("SenseHat stopped unexpectedly: " + str(e), level=ipc.LogLevels.ERROR)
+            self.log(
+                "SenseHat stopped unexpectedly: " + str(e), level=ipc.LogLevels.ERROR
+            )
             self.valid = False
             self.alive = False
 
-        self.r.set("state:sensors:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
+        self.r.set(
+            "state:sensors:custom",
+            json.dumps({"valid": self.valid, "alive": self.alive}),
+        )
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
     def start(self):

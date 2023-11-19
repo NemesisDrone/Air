@@ -4,7 +4,7 @@ from utilities import component as component
 from utilities.ipc import IpcNode, route, LogLevels
 
 
-class TestCompo(component.Component,IpcNode):
+class TestCompo(component.Component, IpcNode):
     NAME = "TestCompo"
     # I register a ping route, all messages sent to `ping` route will be received by this function
 
@@ -59,5 +59,3 @@ def run():
     n = TestCompo()
     n.start()
     n.work()
-
-

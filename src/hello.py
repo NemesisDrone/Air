@@ -32,4 +32,3 @@ def run():
     compo = HelloComponent()
     compo.start()
     compo.do_work()
-

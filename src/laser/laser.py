@@ -13,6 +13,7 @@ class LaserComponent(component.Component):
     Redis key: sensors:laser-distance
     IPC route: sensors:laser-distance
     """
+
     NAME = "laser"
 
     def __init__(self):
@@ -28,7 +29,9 @@ class LaserComponent(component.Component):
             self.log(f"Could not initialize laser: {e}", level=ipc.LogLevels.WARNING)
             self.valid = False
 
-        self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
+        self.r.set(
+            "state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive})
+        )
         self.send("state:laser:custom", {"valid": self.valid, "alive": self.alive})
         self.log("Laser component initialized")
 
@@ -42,7 +45,9 @@ class LaserComponent(component.Component):
         """
         The do_work method is the main method in charge of getting the laser distance and sending it on redis IPC.
         """
-        self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
+        self.r.set(
+            "state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive})
+        )
         self.send("state:laser:custom", {"valid": self.valid, "alive": self.alive})
 
         if not self.alive:
@@ -62,11 +67,16 @@ class LaserComponent(component.Component):
                     time.sleep(0.05)
 
         except Exception as e:
-            self.log("Laser component stopped unexpectedly: " + str(e), level=ipc.LogLevels.ERROR)
+            self.log(
+                "Laser component stopped unexpectedly: " + str(e),
+                level=ipc.LogLevels.ERROR,
+            )
             self.alive = False
             self.valid = False
 
-        self.r.set("state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive}))
+        self.r.set(
+            "state:laser:custom", json.dumps({"valid": self.valid, "alive": self.alive})
+        )
         self.send("state:laser:custom", {"valid": self.valid, "alive": self.alive})
 
     def stop(self):

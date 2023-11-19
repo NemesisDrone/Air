@@ -14,7 +14,7 @@ def clear_route(_route: str) -> str:
     This method is used to clear route of IPC message for base station
     For instance : log:* -> log
     """
-    splitted_route = _route.split(':')
+    splitted_route = _route.split(":")
     if len(splitted_route) > 1:
         if splitted_route[0] == "log":
             return splitted_route[0]
@@ -26,6 +26,7 @@ class SensorEvent:
     """
     This class is used to measure the time between two sensor same events to avoid spamming the base station
     """
+
     name: str
     time_between_events: float
     last_time: float
@@ -44,6 +45,7 @@ class CommunicationComponent(component.Component):
     """
     This component is responsible for forwarding messages from redis IPC to the base station and vice-versa.
     """
+
     NAME = "communication"
 
     def __init__(self, host: str, port: int):
@@ -104,7 +106,9 @@ class CommunicationComponent(component.Component):
 
             except Exception as e:
                 self.log(f"Connection error: {e}")
-                self.log(f"Retrying in {self.waiting_time_before_reconnection} seconds (retry {retry})")
+                self.log(
+                    f"Retrying in {self.waiting_time_before_reconnection} seconds (retry {retry})"
+                )
                 retry += 1
 
                 time.sleep(self.waiting_time_before_reconnection)
@@ -136,7 +140,7 @@ class CommunicationComponent(component.Component):
         while not self.stop_threads:
             try:
                 message_length_bytes = self.client_socket.recv(4)
-                message_length = int.from_bytes(message_length_bytes, byteorder='big')
+                message_length = int.from_bytes(message_length_bytes, byteorder="big")
                 message = self.client_socket.recv(message_length).decode()
 
                 if message:
@@ -146,7 +150,7 @@ class CommunicationComponent(component.Component):
                 self.log(f"Reception error: {e}")
                 self.stop_threads = True
                 break
-                
+
     def handle_heartbeat_emission(self):
         """
         Method used to handle the emission of heartbeat messages to the server.
@@ -155,7 +159,7 @@ class CommunicationComponent(component.Component):
         while not self.stop_threads:
             print("heartbeat sent")
             try:
-                self.client_socket.send(len("heartbeat").to_bytes(4, byteorder='big'))
+                self.client_socket.send(len("heartbeat").to_bytes(4, byteorder="big"))
                 self.client_socket.send("heartbeat".encode())
 
                 time.sleep(self.time_between_heartbeats)
@@ -174,7 +178,7 @@ class CommunicationComponent(component.Component):
         "log:ERROR:*",
         "log:CRITICAL:*",
         "state:*",
-        get_route=True
+        get_route=True,
     )
     def handle_emission(self, payload, _route):
         """
@@ -184,16 +188,13 @@ class CommunicationComponent(component.Component):
             return
 
         try:
-            message = {
-                "type": clear_route(_route),
-                "data": payload
-            }
+            message = {"type": clear_route(_route), "data": payload}
             if _route in self.sensors:
                 if not self.sensors[_route].can_send():
                     return
 
             data = str(json.dumps(message))
-            self.client_socket.send(len(data).to_bytes(4, byteorder='big'))
+            self.client_socket.send(len(data).to_bytes(4, byteorder="big"))
             self.client_socket.send(data.encode())
 
         except Exception as e:
@@ -209,11 +210,11 @@ class CommunicationComponent(component.Component):
 def run():
     compo = CommunicationComponent(
         host=os.environ.get("COMMUNICATION_BASE_HOST"),
-        port=int(os.environ.get("COMMUNICATION_BASE_PORT"))
+        port=int(os.environ.get("COMMUNICATION_BASE_PORT")),
     ).start()
     compo.connection_jobs()
 
 
 # Only for testing purposes
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

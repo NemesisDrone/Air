@@ -16,9 +16,11 @@ import re
 import json
 import logging
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
 
-r = redis.Redis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
+r = redis.Redis(
+    host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0
+)
 r.set("CONNECTED_TO_SERVER", 0)
 r.set("LAST_HEARTBEAT_RECEIVED", 0)
 r.set("LAST_HEARTBEAT_SENT", 0)
@@ -85,7 +87,6 @@ class CommunicationClient:
                 retry += 1
                 time.sleep(1)
 
-
     def create_threads(self):
         """
         Method used to create the threads for the reception and emission of messages.
@@ -108,13 +109,16 @@ class CommunicationClient:
         Method used to handle the reception of messages from the server.
         """
         while not self.stop_threads:
-            if time.time() - float(r.get("LAST_HEARTBEAT_RECEIVED")) > 6 and r.get("CONNECTED_TO_SERVER") == 1:
+            if (
+                time.time() - float(r.get("LAST_HEARTBEAT_RECEIVED")) > 6
+                and r.get("CONNECTED_TO_SERVER") == 1
+            ):
                 r.set("CONNECTED_TO_SERVER", 0)
                 logging.debug("Drone disconnected from server")
 
             try:
                 message_length_bytes = self.client_socket.recv(4)
-                message_length = int.from_bytes(message_length_bytes, byteorder='big')
+                message_length = int.from_bytes(message_length_bytes, byteorder="big")
                 if message_length == 0:
                     continue
 
@@ -136,14 +140,17 @@ class CommunicationClient:
                     continue
 
                 logging.info(f"from socket: {message}")
-                r.publish("ipc", pickle.dumps(
-                    {
-                        "route": message["route"],
-                        "sender": "communication-forwarder",
-                        "loopback": False,
-                        "data": pickle.dumps(message["data"])
-                    }
-                ))
+                r.publish(
+                    "ipc",
+                    pickle.dumps(
+                        {
+                            "route": message["route"],
+                            "sender": "communication-forwarder",
+                            "loopback": False,
+                            "data": pickle.dumps(message["data"]),
+                        }
+                    ),
+                )
 
             except Exception as e:
                 logging.error(f"Reception error: {e}")
@@ -176,7 +183,7 @@ class CommunicationClient:
 
                             payload = {
                                 "type": message_route,
-                                "data": pickle.loads(message["data"])
+                                "data": pickle.loads(message["data"]),
                             }
 
                             """
@@ -184,7 +191,9 @@ class CommunicationClient:
                             """
                             data = str(json.dumps(payload))
                             logging.debug(f"Payload sent {data}")
-                            self.client_socket.send(len(data).to_bytes(4, byteorder='big'))
+                            self.client_socket.send(
+                                len(data).to_bytes(4, byteorder="big")
+                            )
                             self.client_socket.send(data.encode())
                             break
 
@@ -192,7 +201,9 @@ class CommunicationClient:
                 If the last heartbeat sent is older than 3 seconds, send a new heartbeat.
                 """
                 if time.time() - float(r.get("LAST_HEARTBEAT_SENT")) > 1.5:
-                    self.client_socket.send(len("heartbeat").to_bytes(4, byteorder='big'))
+                    self.client_socket.send(
+                        len("heartbeat").to_bytes(4, byteorder="big")
+                    )
                     self.client_socket.send("heartbeat".encode())
                     r.set("LAST_HEARTBEAT_SENT", time.time())
                     logging.debug("Heartbeat sent")
@@ -204,4 +215,7 @@ class CommunicationClient:
 
 
 if __name__ == "__main__":
-    client = CommunicationClient(os.environ.get("COMMUNICATION_BASE_HOST"), int(os.environ.get("COMMUNICATION_BASE_PORT")))
+    client = CommunicationClient(
+        os.environ.get("COMMUNICATION_BASE_HOST"),
+        int(os.environ.get("COMMUNICATION_BASE_PORT")),
+    )
