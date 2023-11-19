@@ -434,6 +434,14 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </td>
 <td><p>Sent by the sensors component when its custom state is updated.</p></td>
 </tr>
+<tr class="row-even"><th class="stub"><p>state:sim7600:custom</p></th>
+<td><ul class="simple">
+<li><p>“alive”: True/False (If the component is reading data)</p></li>
+<li><p>“valid”: True/False (If the component is working/detected)</p></li>
+</ul>
+</td>
+<td><p>Sent by the sim7600 component when its custom state is updated.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -461,6 +469,14 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 </ul>
 </td>
 <td><p>Set by the sensors component when its custom state is updated.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>state:sim7600:custom</p></th>
+<td><ul class="simple">
+<li><p>“alive”: True/False (If the component is reading data)</p></li>
+<li><p>“valid”: True/False (If the component is working/detected)</p></li>
+</ul>
+</td>
+<td><p>Set by the sim7600 component when its custom state is updated.</p></td>
 </tr>
 </tbody>
 </table>
@@ -504,6 +520,28 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 <td><p>The distance (in ??)</p></td>
 <td><p>Used by the laser sensor to send the distance measured.</p></td>
 </tr>
+<tr class="row-even"><th class="stub"><p>sensors:sim7600:gnss</p></th>
+<td><ul class="simple">
+<li><p>“fixMode”: the fix mode (useless)</p></li>
+<li><p>“gpsSat”: the number of GPS satellites</p></li>
+<li><p>“gloSat”: the number of GLONASS satellites</p></li>
+<li><p>“beiSat”: the number of BEIDOU satellites</p></li>
+<li><p>“lat”: the latitude of format (degrees, minutes)</p></li>
+<li><p>“latInd”: the latitude indicator (N or S) WARNING, multiply lat degrees by -1 if latInd is S</p></li>
+<li><p>“lon”: the longitude of format (degrees, minutes)</p></li>
+<li><p>“lonInd”: the longitude indicator (E or W) WARNING, multiply lon degrees by -1 if lonInd is W</p></li>
+<li><p>“date”: the date of format DDMMYY</p></li>
+<li><p>“time”: the time of format HHMMSS</p></li>
+<li><p>“alt”: the altitude in meters</p></li>
+<li><p>“speed”: the speed in km/h (not tested)</p></li>
+<li><p>“course”: the course in degrees (not tested)</p></li>
+<li><p>“pdop”: the pdop</p></li>
+<li><p>“hdop”: the hdop</p></li>
+<li><p>“vdop”: the vdop</p></li>
+</ul>
+</td>
+<td><p>Used by the sim7600 sensor to send the GNSS data.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -545,6 +583,28 @@ This route is used by the <code class="xref py py-meth docutils literal notransl
 <tr class="row-odd"><th class="stub"><p>sensors:laser:distance</p></th>
 <td><p>The distance (in ??)</p></td>
 <td><p>Used by the laser sensor to send the distance measured.</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>sensors:sim7600:gnss</p></th>
+<td><ul class="simple">
+<li><p>“fixMode”: the fix mode (useless)</p></li>
+<li><p>“gpsSat”: the number of GPS satellites</p></li>
+<li><p>“gloSat”: the number of GLONASS satellites</p></li>
+<li><p>“beiSat”: the number of BEIDOU satellites</p></li>
+<li><p>“lat”: the latitude of format (degrees, minutes)</p></li>
+<li><p>“latInd”: the latitude indicator (N or S) WARNING, multiply lat degrees by -1 if latInd is S</p></li>
+<li><p>“lon”: the longitude of format (degrees, minutes)</p></li>
+<li><p>“lonInd”: the longitude indicator (E or W) WARNING, multiply lon degrees by -1 if lonInd is W</p></li>
+<li><p>“date”: the date of format DDMMYY</p></li>
+<li><p>“time”: the time of format HHMMSS</p></li>
+<li><p>“alt”: the altitude in meters</p></li>
+<li><p>“speed”: the speed in km/h (not tested)</p></li>
+<li><p>“course”: the course in degrees (not tested)</p></li>
+<li><p>“pdop”: the pdop</p></li>
+<li><p>“hdop”: the hdop</p></li>
+<li><p>“vdop”: the vdop</p></li>
+</ul>
+</td>
+<td><p>Used by the sim7600 sensor to send the GNSS data.</p></td>
 </tr>
 </tbody>
 </table>

@@ -159,6 +159,11 @@ Custom States
         - "valid": True/False (If the component is working/detected)
       - Sent by the sensors component when its custom state is updated.
 
+    * - state:sim7600:custom
+      - - "alive": True/False (If the component is reading data)
+        - "valid": True/False (If the component is working/detected)
+      - Sent by the sim7600 component when its custom state is updated.
+
 .. list-table::
     :header-rows: 1
     :stub-columns: 1
@@ -176,6 +181,11 @@ Custom States
       - - "alive": True/False (If the component is reading data)
         - "valid": True/False (If the component is working/detected)
       - Set by the sensors component when its custom state is updated.
+
+    * - state:sim7600:custom
+      - - "alive": True/False (If the component is reading data)
+        - "valid": True/False (If the component is working/detected)
+      - Set by the sim7600 component when its custom state is updated.
 
 Sensors
 -------
@@ -211,6 +221,26 @@ Sensors
       - The distance (in ??)
       - Used by the laser sensor to send the distance measured.
 
+    * - sensors:sim7600:gnss
+      - - "fixMode": the fix mode (useless)
+        - "gpsSat": the number of GPS satellites
+        - "gloSat": the number of GLONASS satellites
+        - "beiSat": the number of BEIDOU satellites
+        - "lat": the latitude of format (degrees, minutes)
+        - "latInd": the latitude indicator (N or S) WARNING, multiply lat degrees by -1 if latInd is S
+        - "lon": the longitude of format (degrees, minutes)
+        - "lonInd": the longitude indicator (E or W) WARNING, multiply lon degrees by -1 if lonInd is W
+        - "date": the date of format DDMMYY
+        - "time": the time of format HHMMSS
+        - "alt": the altitude in meters
+        - "speed": the speed in km/h (not tested)
+        - "course": the course in degrees (not tested)
+        - "pdop": the pdop
+        - "hdop": the hdop
+        - "vdop": the vdop
+
+      - Used by the sim7600 sensor to send the GNSS data.
+
 .. note::
     Sensors data is also stored as key/value in the Redis db.
 
@@ -244,4 +274,24 @@ Sensors
     * - sensors:laser:distance
       - The distance (in ??)
       - Used by the laser sensor to send the distance measured.
+
+    * - sensors:sim7600:gnss
+      - - "fixMode": the fix mode (useless)
+        - "gpsSat": the number of GPS satellites
+        - "gloSat": the number of GLONASS satellites
+        - "beiSat": the number of BEIDOU satellites
+        - "lat": the latitude of format (degrees, minutes)
+        - "latInd": the latitude indicator (N or S) WARNING, multiply lat degrees by -1 if latInd is S
+        - "lon": the longitude of format (degrees, minutes)
+        - "lonInd": the longitude indicator (E or W) WARNING, multiply lon degrees by -1 if lonInd is W
+        - "date": the date of format DDMMYY
+        - "time": the time of format HHMMSS
+        - "alt": the altitude in meters
+        - "speed": the speed in km/h (not tested)
+        - "course": the course in degrees (not tested)
+        - "pdop": the pdop
+        - "hdop": the hdop
+        - "vdop": the vdop
+
+      - Used by the sim7600 sensor to send the GNSS data.
 
