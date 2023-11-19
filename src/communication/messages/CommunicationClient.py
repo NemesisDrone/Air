@@ -29,7 +29,7 @@ LISTENING_ROUTES = [
     "log:WARNING:.*",
     "log:ERROR:.*",
     "log:CRITICAL:.*",
-    "sensor:.*",
+    "sensors:.*",
     "state:*:*",
 ]
 
