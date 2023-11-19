@@ -35,7 +35,8 @@ class SensorsComponent(component.Component):
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
         # Emulator datas
-        inc = True
+        inc_pitch = True
+        inc_roll = True
         roll, pitch, yaw = 0, 0, 0
         gyrX, gyrY, gyrZ = 0, 0, 0
         accX, accY, accZ = 0, 0, 0
@@ -43,15 +44,23 @@ class SensorsComponent(component.Component):
         pressure, temperature, humidity = 1013, 20, 50
 
         def var():
-            nonlocal inc, roll, pitch, yaw, gyrX, gyrY, gyrZ, accX, accY, accZ, compX, compY, compZ, pressure, temperature, humidity
+            nonlocal inc_pitch, inc_roll, roll, pitch, yaw, gyrX, gyrY, gyrZ, accX, accY, accZ, compX, compY, compZ, pressure, temperature, humidity
 
-            roll += 1 if inc else -1
-            if roll >= 180:
-                inc = False
-                roll = 180
-            elif roll <= -180:
-                inc = True
-                roll = -180
+            roll += 1 if inc_roll else -1
+            if roll >= 40:
+                inc_roll = False
+                roll = 40
+            elif roll <= -40:
+                inc_roll = True
+                roll = -40
+
+            pitch += 1 if inc_pitch else -1
+            if pitch >= 40:
+                inc_pitch = False
+                pitch = 40
+            elif pitch <= 0:
+                inc_pitch = True
+                pitch = 0
 
         try:
             while self.alive:
@@ -94,7 +103,8 @@ class SensorsComponent(component.Component):
                             'temperature': temperature,  # Celcius
                             'humidity': humidity,  # Percentage
                             }
-                    time.sleep(0.01)
+                    # TODO: change later
+                    time.sleep(0.05)
 
                 self.send("sensors:full", data)
                 self.r.set("sensors:full", json.dumps(data))
