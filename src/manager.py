@@ -10,7 +10,7 @@ from utilities.component import State as State
 # --- Components Imports ---
 # import ...
 import hello
-from gps import gps
+from sim7600 import sim7600
 from laser import laser
 import sensors.sensors as sensors
 
@@ -29,7 +29,7 @@ STOP_TIMOUT = 5
 components = {
     # name: function_to_call
     "hello": hello.run,
-    "gps": gps.run,
+    "sim7600": sim7600.run,
     "TestCompo": TestComponentRun,
     "laser": laser.run,
     "sensors": sensors.run,
@@ -40,7 +40,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["TestCompo", "gps", "laser", "sensors"],
+    "default": ["sim7600"],
     # "dev": ["test"],
 }
 

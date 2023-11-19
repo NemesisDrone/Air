@@ -76,5 +76,5 @@ class LaserComponent(component.Component):
 
 def run():
     compo = LaserComponent().start()
-    compo.do_work()
     compo.log("Laser component started")
+    compo.do_work()

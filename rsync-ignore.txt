@@ -1,4 +1,6 @@
-.*
-__pycache__
-docs
-src/nemesis_utilities/.*
+.git
+.github
+.gitignore
+.idea
+.pytest_cache
+src/__pycache__
