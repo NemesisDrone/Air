@@ -40,7 +40,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["sim7600"],
+    "default": ["sim7600", "laser", "sensors", "TestCompo"],
     # "dev": ["test"],
 }
 

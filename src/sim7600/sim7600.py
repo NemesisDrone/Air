@@ -88,8 +88,8 @@ class Sim7600Component(component.Component):
                 if self.valid:
                     data = self.sim.get_gnss_info()
                     if type(data) == dict:
-                        self.send("sensor:sim7600:gnss", data)
-                        self.r.set("sensor:sim7600:gnss", json.dumps(data))
+                        self.send("sensors:sim7600:gnss", data)
+                        self.r.set("sensors:sim7600:gnss", json.dumps(data))
                     time.sleep(0.05)
 
                 else:
@@ -107,8 +107,8 @@ class Sim7600Component(component.Component):
                                                         "hdop": '0.7',
                                                         "vdop": '0.7'}
 
-                    self.send("sensor:sim7600:gnss", data)
-                    self.r.set("sensor:sim7600:gnss", json.dumps(data))
+                    self.send("sensors:sim7600:gnss", data)
+                    self.r.set("sensors:sim7600:gnss", json.dumps(data))
                     time.sleep(0.1)
 
         except Exception as e:
