@@ -10,7 +10,7 @@ USER root
 # ----------------------------------------------------------------------------------------------------------------------
 # --- Tools ---
 RUN apt update
-RUN apt install wget build-essential nano dnsutils -y
+RUN apt install wget build-essential nano dnsutils python3-serial -y
 
 # --- GST, V4L, OCV for Video Streaming ---
 RUN apt install libgstreamer1.0-0 libgstreamer-opencv1.0-0 libv4l-0 python3-gst-1.0 python3-opencv python3-websockets -y
@@ -24,6 +24,10 @@ WORKDIR /tmp/nemesis/RTIMULib-7.2.1/Linux/python
 RUN python3 setup.py build
 RUN python3 setup.py install
 
+RUN apt install  -y
+
+# --- ADD ADDITIONAL DEPENDENCIES HERE TO AVOID INVALIDATING CACHE ---
+
 # --- Project Dependencies and files ---
 COPY ./requirements-dev.txt /app/requirements-dev.txt
 COPY ./requirements.txt /app/requirements.txt
@@ -34,6 +38,8 @@ RUN python3 -m pip install -r /app/requirements-dev.txt
 COPY ./src/nemesis_utilities /app/src/nemesis_utilities
 WORKDIR /app/src/nemesis_utilities
 RUN python3 -m pip install -e .
+
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #                                                EXECUTION
