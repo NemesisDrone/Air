@@ -4,24 +4,21 @@ from utilities.ipc import LogLevels as ll
 
 import dataclasses
 import gi
+import threading
 import asyncio as aio
 from websockets import exceptions as wssexcept
 from websockets.client import connect as cn
-
-import threading
 
 gi.require_version('Gst', '1.0')
 gi.require_version("GstVideo", "1.0")
 from gi.repository import GObject, Gst, GstVideo
 
-import os
+
+COMMON_PIPELINE = "v4l2src ! videoconvert ! v4l2h264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
 
 
-COMMON_PIPELNE = "videotestsrc ! videoconvert ! openh264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
-
-
-def functionWrap(func, object, *args):
-    func(tuple(object) + args)
+async def functionWrap(func):
+    await func()
 
 
 @dataclasses.dataclass
@@ -39,9 +36,6 @@ class NVSState:
     Unknown: int = 7
     PendingStop: int = 8
 
-async def fakee(compo):
-    await compo._start_serving()
-
 
 class NVSComponent(component.Component):
     """
@@ -49,20 +43,19 @@ class NVSComponent(component.Component):
     """
     NAME = "NVS"
 
-    pipeline = None
-    sink = None
-    wss = None
-    waiting = None
-
     def __init__(self):
         super().__init__()
 
         self.nvs_state = NVSState.Unknown
         self.thread = None
         self.loop = None
+        self.waiting = None
+        self.pipeline = None
+        self.sink = None
+        self.wss = None
 
         if not Gst.init_check(None): # init gstreamer
-            self.log("[NVS] GST init failed!", ll.CRITICAL)
+            self.log("GST init failed!", ll.CRITICAL)
             self.nvs_state = NVSState.GstInitFail
             return
 
@@ -70,16 +63,16 @@ class NVSComponent(component.Component):
         # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
         # Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
 
-        global COMMON_PIPELNE
-        self.pipeline = Gst.parse_launch(COMMON_PIPELNE)
+        global COMMON_PIPELINE
+        self.pipeline = Gst.parse_launch(COMMON_PIPELINE)
         if not self.pipeline:
-            self.log("[NVS] Could not create pipeline.", ll.CRITICAL)
+            self.log("Could not create pipeline.", ll.CRITICAL)
             self.nvs_state = NVSState.PipelineCreationFail
             return
 
         self.sink = self.pipeline.get_by_name("sink")
         if not self.sink:
-            self.log("[NVS] Failed to get pipeline's sink.", ll.CRITICAL)
+            self.log("Failed to get pipeline's sink.", ll.CRITICAL)
             self.nvs_state = NVSState.SinkLookupFail
             return
 
@@ -88,8 +81,9 @@ class NVSComponent(component.Component):
         # Set CB for new data
         self.sink.connect("new-sample", self._on_data_available)
 
-        self.log("[NVS] Initialized.", ll.INFO)
+        self.log("Initialized.", ll.INFO)
         self.nvs_state = NVSState.Initialized
+
 
     def start(self):
         def loop_setter(loop):
@@ -104,20 +98,10 @@ class NVSComponent(component.Component):
         self.thread = threading.Thread(target=loop_setter, args=(self.loop,))
         self.thread.start()
 
-        aio.run_coroutine_threadsafe(fakee(self), self.loop)
-        #self.loop.call_soon_threadsafe(self.loop.stop)
+        aio.run_coroutine_threadsafe(functionWrap(self._start_serving), self.loop)
 
+        self.log("Started.", ll.INFO)
 
-        """blocking_coro = aio.to_thread(self._start_serving)
-        task = aio.create_task(blocking_coro)"""
-
-        while self.nvs_state != NVSState.WaitingConnection:
-            pass
-
-        self.log("[NVS] Started.", ll.INFO)
-
-        """while self.loop.is_running():
-            pass"""
 
     def stop(self):
         self.nvs_state = NVSState.Cleaning
@@ -136,8 +120,9 @@ class NVSComponent(component.Component):
         if self.pipeline:
             self.pipeline.set_state(Gst.State.NULL)
 
-        self.log("[NVS] Stopped.", ll.INFO)
+        self.log("Stopped.", ll.INFO)
         self.nvs_state = NVSState.Initialized
+
 
     def clear_waiting_data(self):
         """
@@ -146,48 +131,49 @@ class NVSComponent(component.Component):
         f, self.waiting = self.waiting, None
         f[0].unmap(f[1])
 
-    async def _start_serving(self):
-        print("Serving!", flush=True)
-        try:
-            self.pipeline.set_state(Gst.State.PLAYING)
-            self.log("[NVS] Starting WS serving.", ll.INFO)
 
+    async def _start_serving(self):
+        try:
             while self.nvs_state != NVSState.PendingStop:
-                print("Waiting...")
                 try:
                     self.nvs_state = NVSState.WaitingConnection
-                    async with cn("ws://127.0.0.1:7000") as ws:
-                        await self._on_connection(ws)
-
+                    try:
+                        async with cn("ws://172.20.10.2:7000/") as ws:  # [TODO] See what address to use.
+                            await self._on_connection(ws)
+                    except Exception:
+                        pass
                 finally:
-                    self.pipeline.set_state(Gst.State.NULL)
-
+                    pass
         finally:
             pass
 
-        self.log("[NVS] WS serving stopped.", ll.INFO)
         self.nvs_state = NVSState.Initialized
+
 
     async def _on_connection(self, wss):
         """
         Handles connection to a WS.
         """
+        self.pipeline.set_state(Gst.State.PLAYING)
         self.nvs_state = NVSState.Streaming
-        self.log("[NVS] WS Connection opened.", ll.INFO)
+        self.log("Established.", ll.INFO)
         self.wss = wss
         try:
             while True:
                 # Push all the frames.
-                while self.waiting:
-                    await self.send_data(wss, self.waiting)
+                if self.waiting:
+                    await self.send_data(self.wss, self.waiting)
                     self.waiting = None
         except wssexcept.ConnectionClosed:
             # Remove con
             self.wss = None
             self.clear_waiting_data()
-            self.log("[NVS] WS Connection closed.", ll.INFO)
+            self.log("Lost.", ll.INFO)
             if self.nvs_state != NVSState.PendingStop:
                 self.nvs_state = NVSState.WaitingConnection
+
+        self.pipeline.set_state(Gst.State.NULL)
+
 
     def _on_data_available(self, appsink):
         """
@@ -202,12 +188,13 @@ class NVSComponent(component.Component):
                 if self.wss:  # Would be useless to store frames while there is no conn.
                     if self.waiting:
                         self.waiting[0].unmap(self.waiting[1])
-                    self.waiting = tuple(gst_buffer, buffer_map)
+                    self.waiting = (gst_buffer, buffer_map)
 
             finally:
                 pass
 
         return Gst.FlowReturn.OK
+
 
     @staticmethod
     async def send_data(wss, stuff):
@@ -216,6 +203,7 @@ class NVSComponent(component.Component):
         """
         await wss.send(stuff[1].data)
         stuff[0].unmap(stuff[1])
+
 
     @route("nvs:state", thread=True)
     def get_nvs_state(self):
