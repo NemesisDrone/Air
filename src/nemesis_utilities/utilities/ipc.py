@@ -72,7 +72,7 @@ import redis
 IPC_BLOCKING_RESPONSE_ROUTE = "IPC_BLOCKING_RESPONSE_ROUTE_IGNORE_IT"
 
 
-def route(regex: str, *args, thread: bool = False, blocking: bool = False):
+def route(regex: str, *args, thread: bool = False, blocking: bool = False, get_route: bool = False):
     """
     Decorate a method with this decorator to register it as a route.
 
@@ -87,6 +87,7 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
         returns.
     :param blocking: If true, the decorated function return value will be sent back to the sender, the sender will
         wait for the response before continuing.
+    :param get_route: If true, the decorated function will receive the route as a second parameter.
 
     .. warning::
         With blocking mode, your function has to return None or a json serializable object only, otherwise a
@@ -100,12 +101,15 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
 
     def decorator(func):
 
-        def wrapper(self, payload):
+        def wrapper(self, payload, _route=None):
             if blocking and IPC_BLOCKING_RESPONSE_ROUTE in payload:
                 blocking_route = payload.pop(IPC_BLOCKING_RESPONSE_ROUTE)
 
                 try:
-                    r = func(self, payload)
+                    if _route:
+                        r = func(self, payload, _route)
+                    else:
+                        r = func(self, payload)
                 except Exception as e:
                     r = e
                 try:
@@ -114,13 +118,17 @@ def route(regex: str, *args, thread: bool = False, blocking: bool = False):
                     print(f"IpcNode[{self.ipc_id}][{self.__class__.__name__}] ERROR, blocking route {regex} "
                           f"failed to send response: {e}", flush=True)
             else:
-                func(self, payload)
+                if _route:
+                    func(self, payload, _route)
+                else:
+                    func(self, payload)
 
         wrapper.regexes = [regex, *args]
         for i in range(len(wrapper.regexes)):
             wrapper.regexes[i] = f"^{wrapper.regexes[i].replace('*', '.*')}$"
 
         wrapper.thread = thread
+        wrapper.get_route = get_route
 
         return wrapper
 
@@ -182,7 +190,11 @@ class IpcNode:
         for func in dir(self):
             if hasattr(getattr(self, func), "regexes"):
                 for regex in getattr(getattr(self, func), "regexes"):
-                    self.regexes[regex] = (getattr(self, func), getattr(getattr(self, func), "thread"))
+                    self.regexes[regex] = (
+                        getattr(self, func),
+                        getattr(getattr(self, func), "thread"),
+                        getattr(getattr(self, func), "get_route")
+                    )
 
         #: :class:`dict` A dict mapping a blocking_response_route` to a semaphore and a response field in a list.
         self.blocking_responses = {}
@@ -226,13 +238,25 @@ class IpcNode:
                     try:
                         self.log(f"{self.__class__.__name__}(IpcNode) received request {payload['route']}:"
                                  f" {data}", level=LogLevels.DEBUG)
-                        self.regexes[regex][0](data) if not self.regexes[regex][1] else threading.Thread(
-                            target=self.regexes[regex][0], args=(data,)).start()
+
+                        # If get_route is True, call the callback with the route as a second parameter
+                        callback_args = (
+                            data, payload["route"]
+                        ) if self.regexes[regex][2] else (data,)
+
+                        # If thread is True, call the callback in a new thread, else call it directly
+                        if self.regexes[regex][1]:
+                            threading.Thread(target=self.regexes[regex][0], args=callback_args).start()
+                        else:
+                            self.regexes[regex][0](*callback_args)
+
                     except Exception as e:
-                        self.log(f"{self.__class__.__name__}(IpcNode) failed to process request {regex} "
-                                 f"{payload['route']}:  {data}, "
-                                 f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
-                                 level=LogLevels.ERROR)
+                        self.log(
+                        f"{self.__class__.__name__}(IpcNode) failed to process request {regex} "
+                             f"{payload['route']}:  {data}, "
+                             f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
+                             level=LogLevels.ERROR
+                        )
 
         self.listening = False
 
