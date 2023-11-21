@@ -2,11 +2,12 @@ from utilities import component
 from utilities.ipc import route
 from utilities.ipc import LogLevels as ll
 
+import os
 import gi
 import threading
-from enum import Enum
 import asyncio as aio
 from websockets import exceptions as wssexcept
+from websockets.server import WebSocketServerProtocol as wssp
 from websockets.client import connect as cn
 
 gi.require_version('Gst', '1.0')
@@ -14,8 +15,10 @@ gi.require_version("GstVideo", "1.0")
 from gi.repository import GObject, Gst, GstVideo
 
 
+# [TODO] See if it's worth switching back to H264
 #COMMON_PIPELINE = "v4l2src ! videoconvert ! v4l2h264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
-COMMON_PIPELINE = "videotestsrc ! videoconvert ! openh264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
+#COMMON_PIPELINE = "videotestsrc ! videoconvert ! videorate drop-only=true ! video/x-raw,width=160,height=120,framerate=10/1 ! openh264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
+COMMON_PIPELINE = "videotestsrcsrc ! video/x-raw,format=YUY2,width=160,height=120,framerate=10/1 ! jpegenc ! appsink name=sink"
 
 
 async def functionWrap(func):
@@ -47,15 +50,16 @@ class NVSComponent(component.Component):
     def __init__(self):
         super().__init__()
 
+        output_stream = os.popen("v4l2-ctl --info")
+        print("------------\n", output_stream.read(), "\n------------")
+
         self.nvs_state = NVSState.Unknown
-        self.thread = None
-        self.sthread = None
-        self.loop = None
-        self.sloop = None
-        self.waiting = None
+        self.thread: threading.Thread = None
+        self.loop: aio.AbstractEventLoop = None
+        self.waiting: tuple = None
         self.pipeline = None
         self.sink = None
-        self.wss = None
+        self.wss: wssp = None
 
         if not Gst.init_check(None): # init gstreamer
             self.log("GST init failed!", ll.CRITICAL)
@@ -92,7 +96,7 @@ class NVSComponent(component.Component):
         self.stop()
 
 
-    def set_nvs_state(self, val):
+    def set_nvs_state(self, val: int):
         if int(val) < int(NVSState.Initialized):
             self.log("Warning, state:" + str(val), ll.CRITICAL)
         self.nvs_state = val
@@ -159,11 +163,10 @@ class NVSComponent(component.Component):
         finally:
             pass
 
-        print("Stopped serving.")
         self.set_nvs_state(NVSState.Initialized)
 
 
-    async def _on_connection(self, wss):
+    async def _on_connection(self, wss: wssp):
         """
         Handles connection to a WS.
         """
@@ -178,7 +181,10 @@ class NVSComponent(component.Component):
                 if self.waiting:
                     await self.send_data(self.wss, self.waiting)
                     self.waiting = None
+                    #self.clear_waiting_data()
         except wssexcept.ConnectionClosed:
+            #pass
+
             # Remove con
             self.wss = None
             self.clear_waiting_data()
@@ -214,7 +220,7 @@ class NVSComponent(component.Component):
 
 
     @staticmethod
-    async def send_data(wss, stuff):
+    async def send_data(wss: wssp, stuff: tuple):
         """
         Sends video data to a WS.
         """
