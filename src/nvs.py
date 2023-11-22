@@ -16,7 +16,6 @@ from gi.repository import GObject, Gst, GstVideo
 
 # [TODO] See if it's worth switching back to H264
 #COMMON_PIPELINE = "v4l2src ! videoconvert ! v4l2h264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
-#COMMON_PIPELINE = "videotestsrc ! videoconvert ! videorate drop-only=true ! video/x-raw,width=160,height=120,framerate=10/1 ! openh264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
 COMMON_PIPELINE = "v4l2src ! video/x-raw,format=YUY2,width=1280,height=720,framerate=10/1 ! videoscale ! video/x-raw,format=YUY2,width=320,height=180,framerate=10/1 ! jpegenc quality=30 ! appsink name=sink"
 
 
@@ -26,7 +25,7 @@ async def functionWrap(func):
 
 class NVSState(int):
     """
-    @brief Class representing the different states of NVSComponent.
+    Class representing the different states of NVSComponent.
     """
     GstInitFail: int = 0
     PipelineCreationFail: int = 1
@@ -93,6 +92,9 @@ class NVSComponent(component.Component):
 
 
     def set_nvs_state(self, val: int):
+        """
+        Used as guard to watch unproper behaviours.
+        """
         if int(val) < int(NVSState.Initialized):
             self.log("Warning, state:" + str(val), ll.CRITICAL)
         self.nvs_state = val
@@ -100,6 +102,9 @@ class NVSComponent(component.Component):
 
     def start(self):
         def loop_setter(loop):
+            """
+            Used to start a thread with an Asyncio event loop running within.
+            """
             aio.set_event_loop(loop)
             loop.run_forever()
 
@@ -172,11 +177,10 @@ class NVSComponent(component.Component):
 
         try:
             while True:
-                # Push all the frames.
+                # Push the current frame.
                 if self.waiting:
                     await self.send_data(self.wss, self.waiting)
                     self.waiting = None
-                    #self.clear_waiting_data()
         except wssexcept.ConnectionClosed:
             #pass
 
@@ -225,6 +229,9 @@ class NVSComponent(component.Component):
 
     @route("nvs:state", thread=True)
     def get_nvs_state(self):
+        """
+        Gives you the current internal state of NVS.
+        """
         return self.nvs_state
 
 
