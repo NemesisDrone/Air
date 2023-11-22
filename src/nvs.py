@@ -2,7 +2,6 @@ from utilities import component
 from utilities.ipc import route
 from utilities.ipc import LogLevels as ll
 
-import os
 import gi
 import threading
 import asyncio as aio
@@ -18,7 +17,7 @@ from gi.repository import GObject, Gst, GstVideo
 # [TODO] See if it's worth switching back to H264
 #COMMON_PIPELINE = "v4l2src ! videoconvert ! v4l2h264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
 #COMMON_PIPELINE = "videotestsrc ! videoconvert ! videorate drop-only=true ! video/x-raw,width=160,height=120,framerate=10/1 ! openh264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
-COMMON_PIPELINE = "videotestsrcsrc ! video/x-raw,format=YUY2,width=160,height=120,framerate=10/1 ! jpegenc ! appsink name=sink"
+COMMON_PIPELINE = "v4l2src ! video/x-raw,format=YUY2,width=1280,height=720,framerate=10/1 ! videoscale ! video/x-raw,format=YUY2,width=320,height=180,framerate=10/1 ! jpegenc quality=30 ! appsink name=sink"
 
 
 async def functionWrap(func):
@@ -49,9 +48,6 @@ class NVSComponent(component.Component):
 
     def __init__(self):
         super().__init__()
-
-        output_stream = os.popen("v4l2-ctl --info")
-        print("------------\n", output_stream.read(), "\n------------")
 
         self.nvs_state = NVSState.Unknown
         self.thread: threading.Thread = None
@@ -125,8 +121,6 @@ class NVSComponent(component.Component):
         # Close connection if there is one.
         if self.wss:
             self.set_nvs_state(NVSState.PendingStop)
-            self.wss.close()
-            self.wss = None
             while self.nvs_state != NVSState.Initialized:
                 pass
 
@@ -144,8 +138,9 @@ class NVSComponent(component.Component):
         """
         Clears all the data put in the pending list for sending.
         """
-        f, self.waiting = self.waiting, None
-        f[0].unmap(f[1])
+        if self.waiting:
+            f, self.waiting = self.waiting, None
+            f[0].unmap(f[1])
 
 
     async def _start_serving(self):
