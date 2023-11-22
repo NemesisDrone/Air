@@ -10,13 +10,13 @@ from utilities.component import State as State
 # --- Components Imports ---
 # import ...
 import hello
+import nvs
 from sim7600 import sim7600
 from laser import laser
 import sensors.sensors as sensors
 import communication.messages.CommunicationComponent as CommunicationComponent
 
 from communication.messages.test import run as TestComponentRun
-
 
 # --------------------------
 
@@ -28,7 +28,9 @@ STOP_TIMOUT = 5
 # ----------------------------------------------------------------------------------------------------------------------
 components = {
     # name: function_to_call
+    # Be careful to *always* use the name that you've used in your Component-inheriting class too!
     "hello": hello.run,
+    "NVS": nvs.run
     "sim7600": sim7600.run,
     "TestCompo": TestComponentRun,
     "laser": laser.run,
@@ -41,7 +43,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["communication", "sim7600", "laser", "sensors", "TestCompo"],
+    "default": ["communication", "sim7600", "laser", "sensors", "TestCompo", "NVS],
     # "dev": ["test"],
 }
 

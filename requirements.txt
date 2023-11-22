@@ -1,4 +1,6 @@
 redis
+PyGObject
+websockets
 adafruit-circuitpython-vl53l0x
 RPi.GPIO
 sense-hat
