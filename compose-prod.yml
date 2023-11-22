@@ -17,3 +17,5 @@ services:
     depends_on:
       - redis
     command: [ "python3", "/app/src/manager.py" ]
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"

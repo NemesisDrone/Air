@@ -45,6 +45,7 @@ class State:
     """
     Enumerations of all possible states of a component.
     """
+
     #: The component is starting up.
     STARTING = "starting"
     #: The component is running.
@@ -63,6 +64,7 @@ class Component(ipc.IpcNode):
         Components are not meant to be used directly, but rather to be subclassed. The subclass should override the
         :meth:`start` and :meth:`stop` methods and the :attr:`NAME` attribute.
     """
+
     NAME = "component"
 
     def __init__(self):
@@ -78,7 +80,9 @@ class Component(ipc.IpcNode):
         self.stop = self._stop_method(self.stop)
 
         # Override stop regex
-        self.regexes[f"^state:{self.NAME}:stop$"] = self.regexes.pop("^state:{NAME}:stop$")
+        self.regexes[f"^state:{self.NAME}:stop$"] = self.regexes.pop(
+            "^state:{NAME}:stop$"
+        )
 
     @ipc.route("state:{NAME}:stop")
     def _call_stop(self, payload: dict):
@@ -88,7 +92,6 @@ class Component(ipc.IpcNode):
         self.stop()
 
     def _start_method(self, func):
-
         def wrapper():
             if self._set_starting():
                 r = func()
@@ -101,7 +104,6 @@ class Component(ipc.IpcNode):
         return wrapper
 
     def _stop_method(self, func):
-
         def wrapper():
             if self._set_stopping():
                 r = func()
@@ -123,7 +125,9 @@ class Component(ipc.IpcNode):
             return False
         super().start()
         self.state = State.STARTING
-        self.send(f"state:{self.__class__.NAME}:starting", {"component": self.__class__.NAME})
+        self.send(
+            f"state:{self.__class__.NAME}:starting", {"component": self.__class__.NAME}
+        )
         self.log(f"component starting", ipc.LogLevels.DEBUG, "state")
         return True
 
@@ -134,7 +138,9 @@ class Component(ipc.IpcNode):
         if self.state != State.STARTING:
             return False
         self.state = State.STARTED
-        self.send(f"state:{self.__class__.NAME}:started", {"component": self.__class__.NAME})
+        self.send(
+            f"state:{self.__class__.NAME}:started", {"component": self.__class__.NAME}
+        )
         self.log(f"component started", ipc.LogLevels.DEBUG, "state")
         return True
 
@@ -145,7 +151,9 @@ class Component(ipc.IpcNode):
         if self.state != State.STARTED:
             return False
         self.state = State.STOPPING
-        self.send(f"state:{self.__class__.NAME}:stopping", {"component": self.__class__.NAME})
+        self.send(
+            f"state:{self.__class__.NAME}:stopping", {"component": self.__class__.NAME}
+        )
         self.log(f"component stopping", ipc.LogLevels.DEBUG, "state")
         return True
 
@@ -156,7 +164,9 @@ class Component(ipc.IpcNode):
         if self.state != State.STOPPING:
             return False
         self.state = State.STOPPED
-        self.send(f"state:{self.__class__.NAME}:stopped", {"component": self.__class__.NAME})
+        self.send(
+            f"state:{self.__class__.NAME}:stopped", {"component": self.__class__.NAME}
+        )
         self.log(f"component stopped", ipc.LogLevels.DEBUG, "state")
         super().stop()
         return True
@@ -183,7 +193,9 @@ class Component(ipc.IpcNode):
 
     # We reimplement this method, ignore the signature warning
     # noinspection PyMethodOverriding
-    def log(self, message: str, level: str = ipc.LogLevels.INFO, extra_route: str = None):
+    def log(
+        self, message: str, level: str = ipc.LogLevels.INFO, extra_route: str = None
+    ):
         """
         Log a message to stdout and to ipc system as "log.{level}.{component_name}" route.
 
@@ -197,6 +209,7 @@ class Component(ipc.IpcNode):
 
 
 if __name__ == "__main__":
+
     class TestComponent(Component):
         NAME = "test"
 
@@ -214,7 +227,6 @@ if __name__ == "__main__":
             self.log("test stop")
             time.sleep(1)
 
-
     test = TestComponent()
     test.start()
     time.sleep(2)
@@ -223,4 +235,3 @@ if __name__ == "__main__":
     # Output without debug:
     # [15-10-2023 12:35:56] INFO@test: test start
     # [15-10-2023 12:35:59] INFO@test: test stop
-

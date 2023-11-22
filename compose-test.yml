@@ -21,3 +21,5 @@ services:
       - redis
     user: root
     command: [ "pytest", "/app/tests" ]
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"

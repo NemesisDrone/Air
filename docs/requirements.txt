@@ -1,0 +1,5 @@
+sphinx
+myst_parser
+sphinx_markdown_tables
+furo
+redis

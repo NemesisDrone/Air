@@ -11,6 +11,12 @@ from utilities.component import State as State
 # import ...
 import hello
 import nvs
+from sim7600 import sim7600
+from laser import laser
+import sensors.sensors as sensors
+import communication.messages.CommunicationComponent as CommunicationComponent
+
+from communication.messages.test import run as TestComponentRun
 
 # --------------------------
 
@@ -25,6 +31,11 @@ components = {
     # Be careful to *always* use the name that you've used in your Component-inheriting class too!
     "hello": hello.run,
     "NVS": nvs.run
+    "sim7600": sim7600.run,
+    "TestCompo": TestComponentRun,
+    "laser": laser.run,
+    "sensors": sensors.run,
+    "communication": CommunicationComponent.run,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -32,19 +43,24 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello", "NVS"]
+    "default": ["communication", "sim7600", "laser", "sensors", "TestCompo", "NVS],
+    # "dev": ["test"],
 }
 
 
 class Manager(ipc.IpcNode):
-
     def __init__(self):
         super().__init__(ipc_id="manager")
 
         # First profile to load, caught from the "NEMESIS_PROFILE" environment variable, defaults to "default"
-        self.init_profile = "default" if (os.environ.get("NEMESIS_PROFILE") == "" or
-                                          os.environ.get("NEMESIS_PROFILE") is None) \
+        self.init_profile = (
+            "default"
+            if (
+                os.environ.get("NEMESIS_PROFILE") == ""
+                or os.environ.get("NEMESIS_PROFILE") is None
+            )
             else os.environ.get("NEMESIS_PROFILE")
+        )
 
         #: A :class:`dict` mapping a component name to a list of :class:`multiprocessing.Process` instance, a lock and
         # a restart flag
@@ -58,7 +74,9 @@ class Manager(ipc.IpcNode):
         self.log(f"Starting profile {self.init_profile}", ipc.LogLevels.INFO)
 
         for component in profiles[self.init_profile]:
-            self.send(f"state:start:{component}", {"component": component}, loopback=True)
+            self.send(
+                f"state:start:{component}", {"component": component}, loopback=True
+            )
 
         self.log("profile started", ipc.LogLevels.DEBUG)
 
@@ -78,16 +96,28 @@ class Manager(ipc.IpcNode):
         Called to timeout when a component does not stop in time
         """
         now = time.time()
-        while self.r.get(f"state:{component}:state").decode() != State.STOPPED and time.time() - now < STOP_TIMOUT:
+        while (
+            self.r.get(f"state:{component}:state").decode() != State.STOPPED
+            and time.time() - now < STOP_TIMOUT
+        ):
             time.sleep(0.1)
 
         if self.r.get(f"state:{component}:state").decode() != State.STOPPED:
-            self.log(f"component {component} did not stop in time, killing it", ipc.LogLevels.WARNING)
+            self.log(
+                f"component {component} did not stop in time, killing it",
+                ipc.LogLevels.WARNING,
+            )
             if self.r.get(f"state:{component}:state").decode() == State.STARTED:
-                self.send(f"state:{component}:stopping", {"component": component}, loopback=True)
+                self.send(
+                    f"state:{component}:stopping",
+                    {"component": component},
+                    loopback=True,
+                )
             self.components[component][0].terminate()
             self.components[component][0].join()
-            self.send(f"state:{component}:stopped", {"component": component}, loopback=True)
+            self.send(
+                f"state:{component}:stopped", {"component": component}, loopback=True
+            )
 
     # ------------------------------------------------------------------------------------------------------------------
     #                                                 Set state
@@ -96,7 +126,9 @@ class Manager(ipc.IpcNode):
     def _start(self, data):
         self.components[data["component"]][1].acquire()
         if self.r.get(f"state:{data['component']}:state").decode() == State.STOPPED:
-            self.components[data["component"]][0] = multiprocessing.Process(target=components[data["component"]])
+            self.components[data["component"]][0] = multiprocessing.Process(
+                target=components[data["component"]]
+            )
             self.components[data["component"]][0].start()
 
         self.components[data["component"]][1].release()
@@ -106,7 +138,9 @@ class Manager(ipc.IpcNode):
         self.components[data["component"]][1].acquire()
 
         if self.r.get(f"state:{data['component']}:state").decode() == State.STARTED:
-            self.send(f"state:{data['component']}:stop", {"component": data["component"]})
+            self.send(
+                f"state:{data['component']}:stop", {"component": data["component"]}
+            )
             threading.Thread(target=self._timeout, args=(data["component"],)).start()
 
         self.components[data["component"]][1].release()
@@ -116,7 +150,9 @@ class Manager(ipc.IpcNode):
         self.components[data["component"]][1].acquire()
 
         if self.r.get(f"state:{data['component']}:state").decode() == State.STARTED:
-            self.send(f"state:{data['component']}:stop", {"component": data["component"]})
+            self.send(
+                f"state:{data['component']}:stop", {"component": data["component"]}
+            )
             threading.Thread(target=self._timeout, args=(data["component"],)).start()
 
             self.components[data["component"]][1].release()
@@ -126,7 +162,11 @@ class Manager(ipc.IpcNode):
 
         self.components[data["component"]][1].acquire()
 
-        self.send(f"state:start:{data['component']}", {"component": data["component"]}, loopback=True)
+        self.send(
+            f"state:start:{data['component']}",
+            {"component": data["component"]},
+            loopback=True,
+        )
 
         self.components[data["component"]][1].release()
 
@@ -135,7 +175,9 @@ class Manager(ipc.IpcNode):
         for component in self.components:
             self.components[component][1].acquire()
             if self.r.get(f"state:{component}:state").decode() == State.STARTED:
-                self.send(f"state:stop:{component}", {"component": component}, loopback=True)
+                self.send(
+                    f"state:stop:{component}", {"component": component}, loopback=True
+                )
                 threading.Thread(target=self._timeout, args=(component,)).start()
             self.components[component][1].release()
 
@@ -144,9 +186,12 @@ class Manager(ipc.IpcNode):
         for component in self.components:
             self.components[component][1].acquire()
             if self.r.get(f"state:{component}:state").decode() == State.STARTED:
-                self.send(f"state:restart:{component}", {"component": component}, loopback=True)
+                self.send(
+                    f"state:restart:{component}",
+                    {"component": component},
+                    loopback=True,
+                )
             self.components[component][1].release()
-
 
     # ------------------------------------------------------------------------------------------------------------------
     #                                                Update State
@@ -156,8 +201,11 @@ class Manager(ipc.IpcNode):
         self.components[data["component"]][1].acquire()
 
         if self.r.get(f"state:{data['component']}:state").decode() != State.STOPPED:
-            self.log(f"inconsistency detected, this should never happen, component {data['component']} "
-                     f"is starting but it is not stopped", ipc.LogLevels.CRITICAL)
+            self.log(
+                f"inconsistency detected, this should never happen, component {data['component']} "
+                f"is starting but it is not stopped",
+                ipc.LogLevels.CRITICAL,
+            )
         self.r.set(f"state:{data['component']}:state", State.STARTING)
         self.log(f"component {data['component']} set to starting", ipc.LogLevels.DEBUG)
 
@@ -168,8 +216,11 @@ class Manager(ipc.IpcNode):
         self.components[data["component"]][1].acquire()
 
         if self.r.get(f"state:{data['component']}:state").decode() != State.STARTING:
-            self.log(f"inconsistency detected, this should never happen, component {data['component']} "
-                     f"is started but it is not starting", ipc.LogLevels.CRITICAL)
+            self.log(
+                f"inconsistency detected, this should never happen, component {data['component']} "
+                f"is started but it is not starting",
+                ipc.LogLevels.CRITICAL,
+            )
         self.r.set(f"state:{data['component']}:state", State.STARTED)
         self.log(f"component {data['component']} set to started", ipc.LogLevels.DEBUG)
 
@@ -180,8 +231,11 @@ class Manager(ipc.IpcNode):
         self.components[data["component"]][1].acquire()
 
         if self.r.get(f"state:{data['component']}:state").decode() != State.STARTED:
-            self.log(f"inconsistency detected, this should never happen, component {data['component']} "
-                     f"is stopping but it is not started", ipc.LogLevels.CRITICAL)
+            self.log(
+                f"inconsistency detected, this should never happen, component {data['component']} "
+                f"is stopping but it is not started",
+                ipc.LogLevels.CRITICAL,
+            )
         self.r.set(f"state:{data['component']}:state", State.STOPPING)
         self.log(f"component {data['component']} set to stopping", ipc.LogLevels.DEBUG)
 
@@ -192,8 +246,11 @@ class Manager(ipc.IpcNode):
         self.components[data["component"]][1].acquire()
 
         if self.r.get(f"state:{data['component']}:state").decode() != State.STOPPING:
-            self.log(f"inconsistency detected, this should never happen, component {data['component']} "
-                     f"is stopped but it is not stopping", ipc.LogLevels.CRITICAL)
+            self.log(
+                f"inconsistency detected, this should never happen, component {data['component']} "
+                f"is stopped but it is not stopping",
+                ipc.LogLevels.CRITICAL,
+            )
         self.r.set(f"state:{data['component']}:state", State.STOPPED)
         self.log(f"component {data['component']} set to stopped", ipc.LogLevels.DEBUG)
 
@@ -201,6 +258,7 @@ class Manager(ipc.IpcNode):
 
 
 if __name__ == "__main__":
+
     class ManagerKiller:
         def __init__(self, manager):
             self.manager = manager
