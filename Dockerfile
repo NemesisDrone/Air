@@ -17,7 +17,7 @@ RUN apt update
 RUN apt install wget build-essential nano -y
 
 # --- GST, V4L, OCV for Video Streaming ---
-RUN apt install v4l-utils gir1.2-gst-plugins-bad-1.0 libopenh264-7 gstreamer1.0-plugins-base-apps libv4l-0 libgstreamer1.0-0 libgirepository-1.0-1 libgirepository1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad gobject-introspection python3-gst-1.0 python3-gi -y
+RUN apt install gir1.2-gst-plugins-bad-1.0 libopenh264-7 gstreamer1.0-plugins-base-apps libv4l-0 libgstreamer1.0-0 libgirepository-1.0-1 libgirepository1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad gobject-introspection python3-gst-1.0 python3-gi -y
 
 # --- RTIMULib (SenseHat & GPIO) ---
 RUN mkdir -p /tmp/nemesis
@@ -36,6 +36,9 @@ RUN python3 -m pip install -r requirements-dev.txt
 # --- Utilities ---
 WORKDIR /app/src/nemesis_utilities
 RUN python3 -m pip install -e .
+
+# --- Camera access ---
+RUN usermod -aG video nemesis
 
 # ----------------------------------------------------------------------------------------------------------------------
 #                                              ENVIRONMENT EXECUTION
