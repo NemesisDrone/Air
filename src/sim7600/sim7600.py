@@ -22,6 +22,7 @@ class Sim7600:
     def toggle_gps(self, enable: bool = True):
         self._send_at("AT+CGPS=0")
         self._send_at("AT+CGPSHOR=1")
+        self._send_at("AT+CGPSNMEA=1")
         if enable:
             r = self._send_at("AT+CGPS=1,2")
             while "OK" not in r:

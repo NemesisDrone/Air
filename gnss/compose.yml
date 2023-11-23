@@ -1,0 +1,51 @@
+version: '3.7'
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    container_name: redis-nemesis-dev
+
+  dev:
+    build:
+      dockerfile: ./Dockerfile
+      context: ../
+    volumes:
+      - ../:/app
+    # Temp fix to use IMU, just bind i2c devices doesn't work, there might be other devices to bind.
+    privileged: true
+    environment:
+      - NEMESIS_CONFIG=$c
+      - DEBUG=$d
+      - REDIS_CONTAINER_NAME=redis-nemesis-dev
+    depends_on:
+      - redis
+    command: [ "python3", "/app/src/manager.py"]
+    env_file:
+      - ../src/.env
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"
+    # Temp fix to use IMU, otherwise there is only 0, and laser I guess ?
+    user: root
+
+  gnss:
+    build:
+      dockerfile: ./Dockerfile
+      context: ../
+    volumes:
+      - ../:/app
+    # Temp fix to use IMU, just bind i2c devices doesn't work, there might be other devices to bind.
+    privileged: true
+    environment:
+      - NEMESIS_CONFIG=$c
+      - DEBUG=$d
+      - REDIS_CONTAINER_NAME=redis-nemesis-dev
+    depends_on:
+      - redis
+    command: [ "python3", "/app/gnss/main.py"]
+    env_file:
+      - ../src/.env
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"
+    # Temp fix to use IMU, otherwise there is only 0, and laser I guess ?
+    user: root
