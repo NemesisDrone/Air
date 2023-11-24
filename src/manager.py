@@ -30,7 +30,7 @@ components = {
     # name: function_to_call
     # Be careful to *always* use the name that you've used in your Component-inheriting class too!
     "hello": hello.run,
-    "NVS": nvs.run
+    "NVS": nvs.run,
     "sim7600": sim7600.run,
     "TestCompo": TestComponentRun,
     "laser": laser.run,
