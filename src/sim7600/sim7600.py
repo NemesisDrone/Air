@@ -8,7 +8,12 @@ import time
 
 class Sim7600:
     def __init__(self):
-        self.ser = serial.Serial("/dev/ttyS0", 115200)
+        try:
+            self.ser = serial.Serial("/dev/ttyS0", 115200)
+        except Exception as e:
+            # For RPI 2
+            self.ser = serial.Serial("/dev/ttyAMA0", 115200)
+
         self.ser.flushInput()
         self.ser.flushOutput()
 
