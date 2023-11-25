@@ -8,7 +8,6 @@ class GnssClient(ipc.IpcNode):
 
     def __init__(self):
         super().__init__()
-
         self.file = open("/app/gnss.txt", "w")
 
     @ipc.route("sensors:sim7600:gnss")
