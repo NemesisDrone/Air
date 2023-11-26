@@ -39,6 +39,7 @@ RUN make install
 # --- Project Dependencies and files ---
 COPY ./requirements-dev.txt /app/requirements-dev.txt
 COPY ./requirements.txt /app/requirements.txt
+RUN apt install cmake -y
 RUN python3 -m pip install -r /app/requirements.txt
 RUN python3 -m pip install -r /app/requirements-dev.txt
 
