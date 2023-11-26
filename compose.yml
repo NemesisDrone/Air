@@ -12,6 +12,8 @@ services:
       context: .
     volumes:
       - .:/app
+      - /dev:/dev
+      - /run/udev:/run/udev
     # Temp fix to use IMU, just bind i2c devices doesn't work, there might be other devices to bind.
     privileged: true
     environment:

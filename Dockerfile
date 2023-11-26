@@ -12,8 +12,8 @@ USER root
 RUN apt update
 RUN apt install wget build-essential nano dnsutils python3-serial -y
 
-# --- GST, V4L, OCV for Video Streaming ---
-RUN apt install gir1.2-gst-plugins-bad-1.0 libopenh264-7 gstreamer1.0-plugins-base-apps libv4l-0 libgstreamer1.0-0 libgirepository-1.0-1 libgirepository1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad gobject-introspection python3-gst-1.0 python3-gi -y
+# --- GST, V4L & LIBCAM for Video Streaming ---
+RUN apt install gstreamer1.0-plugins-base-apps libv4l-0 libgstreamer1.0-0 libgirepository-1.0-1 libgirepository1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad gobject-introspection python3-gst-1.0 python3-gi libcamera-v4l2 gstreamer1.0-libcamera libcamera-ipa -y
 
 # --- RTIMULib (SenseHat & GPIO) ---
 RUN mkdir -p /tmp/nemesis
