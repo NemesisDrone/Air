@@ -146,7 +146,8 @@ class NVSComponent(component.Component):
 
     def set_nvs_state(self, val: int):
         """
-        Used as guard to watch unproper behaviours.
+        Sets value of the nvs_state. Used as guard to watch unproper behaviours on value updates.
+        :param int val: Value of an NVSState.
         """
         if int(val) < int(NVSState.Initialized):
             self.log("Warning, state:" + str(val), ll.CRITICAL)
@@ -174,6 +175,10 @@ class NVSComponent(component.Component):
 
 
     def stop(self):
+        """
+        Stops the streaming. It will wait until all the threads are able to stop and do so to ensure proper releases.
+        This means that the function might be blocking for an undetermined amount of time.
+        """
         self.set_nvs_state(NVSState.Cleaning)
 
         # Close connection if there is one.
@@ -194,7 +199,7 @@ class NVSComponent(component.Component):
 
     def clear_waiting_data(self):
         """
-        Clears all the data put in the pending list for sending.
+        Clears all the data put in the pending for sending.
         """
         if self.waiting:
             f, self.waiting = self.waiting, None
@@ -202,6 +207,10 @@ class NVSComponent(component.Component):
 
 
     async def _start_serving(self):
+        """
+        Starts serving camera stream to the server. It will try to (re)connect to the server until the component is
+        stopped.
+        """
         try:
             while self.nvs_state != NVSState.PendingStop:
                 try:
@@ -221,7 +230,7 @@ class NVSComponent(component.Component):
 
     async def _on_connection(self, wss: wssp):
         """
-        Handles connection to a WS.
+        Handles a connection to the server.
         """
         self.pipeline.set_state(Gst.State.PLAYING)
         self.set_nvs_state(NVSState.Streaming)
@@ -247,7 +256,8 @@ class NVSComponent(component.Component):
 
     def _on_data_available(self, appsink):
         """
-        Handles incoming data from a GST pipeline.
+        Handles incoming data from a GST pipeline and buffers it. If new data is available but the previous has not
+        been sent, the previous is dropped and the new one will be scheduled for sending.
         """
         sample = appsink.emit("pull-sample")
 
@@ -272,7 +282,7 @@ class NVSComponent(component.Component):
     @staticmethod
     async def send_data(wss: wssp, stuff: tuple):
         """
-        Sends video data to a WS.
+        Sends video data over a WS.
         """
         await wss.send(stuff[1].data)
         stuff[0].unmap(stuff[1])
@@ -287,15 +297,24 @@ class NVSComponent(component.Component):
 
 
     def _waiting_lock(self):
+        """
+        Returns when no more functions are changing the pipeline data.
+        """
         while self.suspension_count != 0:
             pass
 
 
     def _reconstruct_local_gst_pipeline(self):
+        """
+        Reconstructs the whole pipeline string used for GST.
+        """
         self.gst_pipeline_str = build_pipeline(self._resolution, self._quality, self._framerate)
 
 
     def _update_pipeline_elements(self):
+        """
+        Updates the pipeline's elements' data. Meant to be used when the pipeline is already setup.
+        """
         global RESOLUTIONS
 
         caps: str = build_caps(RESOLUTIONS[self._resolution][0], RESOLUTIONS[self._resolution][1], self._framerate)
@@ -305,7 +324,9 @@ class NVSComponent(component.Component):
 
     def _pipeline_locking_set(self, name: str, val: int):
         """
-        Change the resolution of the camera stream.
+        Change the value of an attribute that must block the pipeline.
+        :param str name: The attribute's name
+        :param int val: Value to assign to the attribute.
         """
 
         # 0: not responsible & no pipeline running, 1: responsible, no pipeline running, 2: pipeline might be
@@ -333,6 +354,7 @@ class NVSComponent(component.Component):
     def set_resolution(self, pl: int):
         """
         Change the resolution of the camera stream.
+        :param int pl: The index of the new resolution to use. Must be within [0; 16].
         """
         if pl < 0 or pl > 16:
             return False
@@ -344,7 +366,8 @@ class NVSComponent(component.Component):
     @route("nvs:ctl:framerate", thread=False, blocking=True)
     def set_framerate(self, pl: int):
         """
-        Change the resolution of the camera stream.
+        Change the frame rate of the camera stream.
+        :param int pl: The new frame rate to use. Must be within [0; 30].
         """
         # From 1 to 30 max.
         if pl < 0 or pl > 30:
@@ -358,6 +381,7 @@ class NVSComponent(component.Component):
     def set_quality(self, pl: int):
         """
         Change the JPEG quality level.
+        :param int pl: The new quality of encoding to use. Must be within [0; 60].
         """
         # From 1 to 60 max.
         if pl < 0 or pl > 60:
