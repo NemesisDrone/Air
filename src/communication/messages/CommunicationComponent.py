@@ -2,7 +2,7 @@ import json
 import socket
 import threading
 import os
-from typing import Union
+from typing import Union, Generic, TypeVar, List
 from utilities import component as component, ipc
 from utilities.ipc import route
 import time
@@ -21,6 +21,9 @@ def clear_route(_route: str) -> str:
     return _route
 
 
+T = TypeVar('T')
+
+
 @dataclass
 class SensorEvent:
     """
@@ -30,6 +33,7 @@ class SensorEvent:
     name: str
     time_between_events: float
     last_time: float
+    necessary_data: Union[None, List[str]] = None
 
     def can_send(self) -> bool:
         """
@@ -39,6 +43,14 @@ class SensorEvent:
             self.last_time = time.time()
             return True
         return False
+
+    def sanitize_data(self, payload: Generic[T]) -> Generic[T]:
+        """
+        This method is used to sanitize data of IPC message for base station. To send only the necessary data
+        """
+        if self.necessary_data is not None and type(payload) == dict:
+            return {key: payload[key] for key in self.necessary_data}
+        return payload
 
 
 class CommunicationComponent(component.Component):
@@ -68,7 +80,7 @@ class CommunicationComponent(component.Component):
             "sensors:speed": SensorEvent("speed", 1, 0),
             "sensors:altitude": SensorEvent("altitude", 1, 0),
             "sensors:battery": SensorEvent("battery", 1, 0),
-            "sensors:full": SensorEvent("full", 0.2, 0),
+            "sensors:full": SensorEvent("full", 0.2, 0, ["roll", "pitch"]),
         }
 
         self.log("Communication component initialized")
@@ -196,10 +208,19 @@ class CommunicationComponent(component.Component):
             return
 
         try:
-            message = {"type": clear_route(_route), "data": payload}
+            _route = clear_route(_route)
+
+            data = payload
             if _route in self.sensors:
                 if not self.sensors[_route].can_send():
                     return
+
+                data = self.sensors[_route].sanitize_data(payload)
+
+            message = {
+                "type": _route,
+                "data": data
+            }
 
             data = str(json.dumps(message))
             self.client_socket.send(len(data).to_bytes(4, byteorder="big"))
