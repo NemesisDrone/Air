@@ -105,8 +105,7 @@ class NVSComponent(component.Component):
         # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
         # Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
 
-        global COMMON_PIPELINE
-        self.pipeline = Gst.parse_launch(COMMON_PIPELINE)
+        self.pipeline = Gst.parse_launch(self.gst_pipeline_str)
         if not self.pipeline:
             self.log("Could not create pipeline.", ll.CRITICAL)
             self.set_nvs_state(NVSState.PipelineCreationFail)
