@@ -24,15 +24,16 @@ class TestCompo(component.Component, IpcNode):
 
     @route("pong")
     def pong(self, payload: dict):
-        if random.randint(0, 1):
-            self.log("TARGET NEUTRALIZED")
-        else:
-            self.log("TARGET MISSED, TRYING TO REACH AGAIN !", level=LogLevels.WARNING)
-
-        if random.randint(0, 1):
-            self.log("Lost WING", LogLevels.CRITICAL)
-        else:
-            self.log("Lost MOTOR", LogLevels.CRITICAL)
+        # if random.randint(0, 1):
+        #     self.log("TARGET NEUTRALIZED")
+        # else:
+        #     self.log("TARGET MISSED, TRYING TO REACH AGAIN !", level=LogLevels.WARNING)
+        #
+        # if random.randint(0, 1):
+        #     self.log("Lost WING", LogLevels.CRITICAL)
+        # else:
+        #     self.log("Lost MOTOR", LogLevels.CRITICAL)
+        pass
 
     def work(self):
         while self.work_please:
@@ -50,7 +51,7 @@ class TestCompo(component.Component, IpcNode):
             laser_distance = self.r.get("sensors:laser-distance")
             laser_distance = int(laser_distance) if laser_distance is not None else 0
 
-            self.log(f"RETURN TO HOME {laser_distance}mm", level=LogLevels.WARNING)
+            # self.log(f"RETURN TO HOME {laser_distance}mm", level=LogLevels.WARNING)
 
             time.sleep(1)
 
