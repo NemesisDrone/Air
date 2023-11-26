@@ -144,7 +144,16 @@ class CommunicationComponent(component.Component):
                 message = self.client_socket.recv(message_length).decode()
 
                 if message:
-                    print(message)
+                    if message == "heartbeat":
+                        # TODO: handle heartbeat
+                        continue
+
+                    # TODO: refacto this piece of shit
+                    data = json.loads(json.loads(message))
+                    # print(data, type(data), flush=True)
+                    if "route" in data and "data" in data:
+                        self.send(data["route"], data["data"])
+
 
             except Exception as e:
                 self.log(f"Reception error: {e}")
@@ -157,7 +166,6 @@ class CommunicationComponent(component.Component):
         Every {time_between_heartbeats} seconds, a heartbeat message is sent to the server.
         """
         while not self.stop_threads:
-            print("heartbeat sent")
             try:
                 self.client_socket.send(len("heartbeat").to_bytes(4, byteorder="big"))
                 self.client_socket.send("heartbeat".encode())

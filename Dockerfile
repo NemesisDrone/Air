@@ -26,6 +26,14 @@ RUN python3 setup.py install
 
 RUN apt install  -y
 
+# --- Propulsion Brushless ESC ---
+WORKDIR /tmp/nemesis
+RUN wget https://github.com/joan2937/pigpio/archive/master.zip
+RUN unzip master.zip
+WORKDIR /tmp/nemesis/pigpio-master
+RUN make
+RUN make install
+
 # --- ADD ADDITIONAL DEPENDENCIES HERE TO AVOID INVALIDATING CACHE ---
 
 # --- Project Dependencies and files ---
