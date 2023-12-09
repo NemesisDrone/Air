@@ -45,7 +45,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["communication", "sim7600", "laser", "sensors", "TestCompo", "NVS", "propulsion"],
+    "default": ["hello"],
     # "dev": ["test"],
 }
 
@@ -120,6 +120,35 @@ class Manager(ipc.IpcNode):
             self.send(
                 f"state:{component}:stopped", {"component": component}, loopback=True
             )
+
+    def _process_crash_listener(self):
+        """
+        Listens for any process crash and restarts it
+        """
+        while self.subscribed:  # Flag of ipc.IpcNode
+            for component in self.components:
+                if (
+                    self.components[component][0] is not None
+                    and not self.components[component][0].is_alive()
+                    and self.r.get(f"state:{component}:state").decode() == State.STARTED
+                ):
+                    self.log(
+                        f"component {component} crashed, restarting it",
+                        ipc.LogLevels.WARNING,
+                    )
+
+                    self.components[component][1].acquire()
+
+                    self.send(
+                        f"state:{component}:stopped",
+                        {"component": component},
+                        loopback=True,
+                    )
+                    self.r.set(f"state:{component}:state", State.STOPPED)
+
+                    self.send(f"state:start:{component}", {"component": component})
+
+            time.sleep(0.1)
 
     # ------------------------------------------------------------------------------------------------------------------
     #                                                 Set state
