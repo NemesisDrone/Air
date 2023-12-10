@@ -16,6 +16,7 @@ from laser import laser
 import sensors.sensors as sensors
 import communication.messages.CommunicationComponent as CommunicationComponent
 from propulsion import Propulsion
+from config import config
 
 from communication.messages.test import run as TestComponentRun
 
@@ -38,6 +39,7 @@ components = {
     "sensors": sensors.run,
     "communication": CommunicationComponent.run,
     "propulsion": Propulsion.run,
+    "config": config.run,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -45,7 +47,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["hello"],
+    "default": ["communication, config"],
     # "dev": ["test"],
 }
 
