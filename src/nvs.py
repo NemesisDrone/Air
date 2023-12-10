@@ -14,9 +14,6 @@ gi.require_version("GstVideo", "1.0")
 from gi.repository import GObject, Gst, GstVideo
 
 
-# [TODO] See if it's worth switching back to H264
-#COMMON_PIPELINE = "v4l2src ! videoconvert ! v4l2h264enc ! video/x-h264,profile=baseline,stream-format=byte-stream ! appsink name=sink"
-
 RESOLUTIONS = [
     (160,160),
     (320,320),
@@ -42,14 +39,15 @@ async def functionWrap(func):
 
 
 def build_caps(w, h, fr):
-    return "video/x-raw,width=" + str(w) + ",height=" + str(h) + ",framerate=" + str(int(fr)) + "/1"
+    return "video/x-raw,width=" + str(w) + ",height=" + str(h) + ",framerate=" + str(int(fr)) + "/1,fromat=YUY2"
 
 
 def build_pipeline(sset, framerate, quality):
     global RESOLUTIONS
-    pipeline = "libcamerasrc name=src camera-name=\"" + r"/base/soc/i2c0mux/i2c\@1/ov5647\@36" + "\" ! "
+    pipeline = "libcamerasrc camera-name=\"" + r"/base/soc/i2c0mux/i2c\@1/ov5647\@36" + "\""
+    pipeline += " ! capsfilter name=capper caps="
     pipeline += build_caps(RESOLUTIONS[sset][0], RESOLUTIONS[sset][1], framerate)
-    pipeline += " ! jpegenc name=enc quality=" + str(quality) + " ! appsink name=sink"
+    pipeline += " ! jpegenc name=enc idct-method=1 quality=" + str(quality) + " ! appsink name=sink"
 
     return pipeline
 
@@ -61,11 +59,9 @@ class NVSState(int):
     GstInitFail: int = 0
     PipelineCreationFail: int = 1
     SinkLookupFail: int = 2
-    EncLookupFail: int = 3
-    SrcLookupFail: int = 4
-    GstBufferFail: int = 5
-    Initialized: int = 6
-    WaitingConnection: int = 7
+    GstBufferFail: int = 6
+    Initialized: int = 7
+    WaitingConnection: int = 8
     Streaming: int = 9
     Cleaning: int = 10
     Unknown: int = 11
@@ -84,17 +80,12 @@ class NVSComponent(component.Component):
         self.nvs_state = NVSState.Unknown
         self.thread: threading.Thread = None
         self.loop: aio.AbstractEventLoop = None
-        self.waiting: tuple = None
+        self.waiting: list = []
         self.pipeline = None
         self.sink = None
-        self.encoder = None
-        self.src = None
         self.wss: wssp = None
         self.suspension_count: int = 0
-        self._framerate: int = 10
-        self._quality: int = 30
-        self._resolution: int = 2
-        self.gst_pipeline_str: str = build_pipeline(2, 10, 30)
+        self.gst_pipeline_str: str = build_pipeline(0, 10, 30)
 
         if not Gst.init_check(None): # init gstreamer
             self.log("GST init failed!", ll.CRITICAL)
@@ -115,18 +106,6 @@ class NVSComponent(component.Component):
         if not self.sink:
             self.log("Failed to get pipeline's sink.", ll.CRITICAL)
             self.set_nvs_state(NVSState.SinkLookupFail)
-            return
-
-        self.encoder = self.pipeline.get_by_name("enc")
-        if not self.encoder:
-            self.log("Failed to get pipeline's encoder.", ll.CRITICAL)
-            self.set_nvs_state(NVSState.EncLookupFail)
-            return
-
-        self.src = self.pipeline.get_by_name("src")
-        if not self.src:
-            self.log("Failed to get pipeline's source.", ll.CRITICAL)
-            self.set_nvs_state(NVSState.SrcLookupFail)
             return
 
         # Notify us when it receives a frame
@@ -200,8 +179,9 @@ class NVSComponent(component.Component):
         """
         Clears all the data put in the pending for sending.
         """
-        if self.waiting:
-            f, self.waiting = self.waiting, None
+        tmp, self.waiting = self.waiting, []
+        while tmp:
+            f = tmp.pop(0)
             f[0].unmap(f[1])
 
 
@@ -215,9 +195,9 @@ class NVSComponent(component.Component):
                 try:
                     self.set_nvs_state(NVSState.WaitingConnection)
                     try:
-                        async with cn("ws://100.87.214.117:7000") as ws:  # [TODO] See what address to use
+                        async with cn("ws://100.87.214.117:7000") as ws:
                             await self._on_connection(ws)
-                    except Exception:
+                    except BaseException:
                         pass
                 finally:
                     pass
@@ -238,10 +218,12 @@ class NVSComponent(component.Component):
 
         try:
             while True:
-                # Push the current frame.
-                if self.waiting:
-                    await self.send_data(self.wss, self.waiting)
-                    self.waiting = None
+                # Push the current frames.
+                while self.waiting:
+                    current: tuple = self.waiting.pop(0)
+                    pending: tuple = (aio.create_task(self.send_data(self.wss, current)),)
+                    while pending:
+                       done, pending = await aio.wait(pending, return_when=aio.FIRST_COMPLETED)
         except wssexcept.ConnectionClosed:
             # Remove con
             self.wss = None
@@ -266,9 +248,11 @@ class NVSComponent(component.Component):
                 (ret, buffer_map) = gst_buffer.map(Gst.MapFlags.READ)
                 if ret:
                     if self.wss:  # Would be useless to store frames while there is no conn.
-                        if self.waiting:
-                            self.waiting[0].unmap(self.waiting[1])
-                        self.waiting = (gst_buffer, buffer_map)
+                        if len(self.waiting) < 5:
+                            self.waiting.append((gst_buffer, buffer_map,))
+                        else:
+                            # Just release this frame.
+                            gst_buffer.unmap(buffer_map)
                 else:
                     self.set_nvs_state(NVSState.GstBufferFail)
 
@@ -293,100 +277,6 @@ class NVSComponent(component.Component):
         Gives you the current internal state of NVS.
         """
         return self.nvs_state
-
-
-    def _waiting_lock(self):
-        """
-        Returns when no more functions are changing the pipeline data.
-        """
-        while self.suspension_count != 0:
-            pass
-
-
-    def _reconstruct_local_gst_pipeline(self):
-        """
-        Reconstructs the whole pipeline string used for GST.
-        """
-        self.gst_pipeline_str = build_pipeline(self._resolution, self._quality, self._framerate)
-
-
-    def _update_pipeline_elements(self):
-        """
-        Updates the pipeline's elements' data. Meant to be used when the pipeline is already setup.
-        """
-        global RESOLUTIONS
-
-        caps: str = build_caps(RESOLUTIONS[self._resolution][0], RESOLUTIONS[self._resolution][1], self._framerate)
-        self.encoder.set_property("quality", self._quality)
-        self.src.set_property("caps", Gst.Caps.from_string(caps))
-
-
-    def _pipeline_locking_set(self, name: str, val: int):
-        """
-        Change the value of an attribute that must block the pipeline.
-        :param str name: The attribute's name
-        :param int val: Value to assign to the attribute.
-        """
-
-        # 0: not responsible & no pipeline running, 1: responsible, no pipeline running, 2: pipeline might be
-        # running, not responsible, 3: responsible and pipeline running.
-        responsible: int = int(self.suspension_count == 0) + int(self.nvs_state == NVSState.Streaming)*2
-
-        if responsible == 3:
-            self.pipeline.set_state(Gst.State.PAUSED)
-
-        self.suspension_count += 1
-        # Assign the corresponding value.
-        setattr(self, name, val)
-        self.suspension_count -= 1
-
-        if responsible%2 == 1:
-            self._waiting_lock()
-            self._reconstruct_local_gst_pipeline()
-            self._update_pipeline_elements()
-
-        if responsible == 3:
-            self.pipeline.set_state(Gst.State.PLAYING)
-
-
-    @route("nvs:ctl:resolution", thread=False, blocking=True)
-    def set_resolution(self, pl: int):
-        """
-        Change the resolution of the camera stream.
-        :param int pl: The index of the new resolution to use. Must be within [0; 16].
-        """
-        if pl < 0 or pl > 16:
-            return False
-
-        self._pipeline_locking_set("_resolution", pl)
-        return True
-
-
-    @route("nvs:ctl:framerate", thread=False, blocking=True)
-    def set_framerate(self, pl: int):
-        """
-        Change the frame rate of the camera stream.
-        :param int pl: The new frame rate to use. Must be within [0; 30].
-        """
-        # From 1 to 30 max.
-        if pl < 0 or pl > 30:
-            return False
-
-        self._pipeline_locking_set("_framerate", pl)
-        return True
-
-
-    @route("nvs:ctl:quality", thread=False, blocking=True)
-    def set_quality(self, pl: int):
-        """
-        Change the JPEG quality level.
-        :param int pl: The new quality of encoding to use. Must be within [0; 60].
-        """
-        # From 1 to 60 max.
-        if pl < 0 or pl > 60:
-            return False
-
-        self._pipeline_locking_set("_quality", pl)
 
 
 def run():
