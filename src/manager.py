@@ -17,6 +17,7 @@ import sensors.sensors as sensors
 import communication.messages.CommunicationComponent as CommunicationComponent
 from propulsion import Propulsion
 from config import config
+from servos import Servos
 
 from communication.messages.test import run as TestComponentRun
 
@@ -40,6 +41,7 @@ components = {
     "communication": CommunicationComponent.run,
     "propulsion": Propulsion.run,
     "config": config.run,
+    "servos": Servos.run,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -47,7 +49,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["communication, config"],
+    "default": ["communication", "config", "sensors", "servos"],
     # "dev": ["test"],
 }
 

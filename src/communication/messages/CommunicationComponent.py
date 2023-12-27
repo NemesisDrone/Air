@@ -162,10 +162,8 @@ class CommunicationComponent(component.Component):
 
                     # TODO: refacto this piece of shit
                     data = json.loads(json.loads(message))
-                    # print(data, type(data), flush=True)
                     if "route" in data and "data" in data:
                         self.send(data["route"], data["data"])
-
 
             except Exception as e:
                 self.log(f"Reception error: {e}")

@@ -24,7 +24,7 @@ class ConfigComponent(component.Component):
         """
         if "canals" in payload:
             for canal in payload["canals"]:
-                self.r.set(f"config:canal:{canal['canal']}", json.dumps(canal["gpios"]))
+                self.r.set(f"config:canal:{canal['canal']}", json.dumps(canal))
 
         self.log("Config updated")
 
