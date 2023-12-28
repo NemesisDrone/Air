@@ -1,6 +1,5 @@
 from utilities import component
-from utilities.ipc import route
-from utilities.ipc import LogLevels as ll
+from utilities.ipc import route, LogLevels as ll
 
 import gi
 import threading
@@ -38,14 +37,13 @@ async def functionWrap(func):
     await func()
 
 
-def build_caps(w, h, fr) -> str:
-    return "video/x-raw,width=" + str(w) + ",height=" + str(h) + ",framerate=" + str(int(fr)) + "/1,fromat=YUY2"
+def build_pipeline(sset: int, framerate: int, quality: int) -> str:
+    def build_caps(w: int, h: int, fr: int) -> str:
+        return "video/x-raw,width=" + str(w) + ",height=" + str(h) + ",framerate=" + str(int(fr)) + "/1,format=YUY2"
 
-
-def build_pipeline(sset, framerate, quality) -> str:
     global RESOLUTIONS
     pipeline = "libcamerasrc camera-name=\"" + r"/base/soc/i2c0mux/i2c\@1/ov5647\@36" + "\""
-    pipeline += " ! capsfilter name=capper caps="
+    pipeline += " ! capsfilter caps="
     pipeline += build_caps(RESOLUTIONS[sset][0], RESOLUTIONS[sset][1], framerate)
     pipeline += " ! jpegenc name=enc idct-method=1 quality=" + str(quality) + " ! appsink name=sink"
 
@@ -60,12 +58,12 @@ class NVSState(int):
     PipelineCreationFail: int = 1
     SinkLookupFail: int = 2
     GstBufferFail: int = 3
-    Initialized: int = 4
-    WaitingConnection: int = 5
-    Streaming: int = 6
-    Cleaning: int = 7
-    Unknown: int = 8
-    PendingStop: int = 9
+    Unknown: int = 4
+    Initialized: int = 5
+    PendingStop: int = 6
+    WaitingConnection: int = 7
+    Streaming: int = 8
+    Cleaning: int = 9
 
 
 class NVSComponent(component.Component):
@@ -81,8 +79,8 @@ class NVSComponent(component.Component):
         self.thread: threading.Thread = None
         self.loop: aio.AbstractEventLoop = None
         self.waiting: list = []
-        self.pipeline = None
-        self.sink = None
+        self.pipeline: Gst.Element = None
+        self.sink: Gst.Element = None
         self.wss: wssp = None
         self.suspension_count: int = 0
         self.gst_pipeline_str: str = build_pipeline(0, 10, 30)
@@ -117,24 +115,25 @@ class NVSComponent(component.Component):
         self.set_nvs_state(NVSState.Initialized)
 
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.stop()
         Gst.deinit()  # Do not forget to release GST's non-pipeline resources ;)
 
 
-    def set_nvs_state(self, val: int):
+    def set_nvs_state(self, val: int) -> None:
         """
         Sets value of the nvs_state. Used as guard to watch unproper behaviours on value updates.
         :param int val: Value of an NVSState.
         """
-        if int(val) < int(NVSState.Initialized):
+        if val < NVSState.Initialized:
             self.log("Warning, state:" + str(val), ll.CRITICAL)
         self.nvs_state = val
 
 
     def start(self) -> bool:
         """
-        Function used to start the module. It will set up different threads and schedule tasks, as well as running the GST pipeline.
+        Function used to start the component. It will set up different threads and schedule tasks,
+        as well as running the GST pipeline.
         """
 
         def loop_setter(loop):
@@ -145,6 +144,7 @@ class NVSComponent(component.Component):
             loop.run_forever()
 
         if self.nvs_state != NVSState.Initialized:
+            self.log("Impossible to start, wrongly initialized.", ll.INFO)
             return False
 
         self.loop = aio.new_event_loop()
@@ -157,17 +157,18 @@ class NVSComponent(component.Component):
         return True
 
 
-    def stop(self):
+    def stop(self) -> None:
         """
         Stops the streaming. It will wait until all the threads are able to stop and do so to ensure proper releases.
         This means that the function might be blocking for an undetermined amount of time.
         """
-        self.set_nvs_state(NVSState.Cleaning)
+        if self.nvs_state <= NVSState.PendingStop:
+            return
 
         # Close connection if there is one.
         if self.wss:
             self.set_nvs_state(NVSState.PendingStop)
-            while self.nvs_state != NVSState.Initialized:
+            while self.nvs_state >= NVSState.PendingStop:
                 pass
 
         # Make the thread join.
@@ -181,20 +182,24 @@ class NVSComponent(component.Component):
             self.pipeline.set_state(Gst.State.NULL)
 
         self.log("Stopped.", ll.INFO)
-        self.set_nvs_state(NVSState.Initialized)
 
 
     def clear_waiting_data(self):
         """
         Clears all the data put in the pending for sending.
         """
+        prev = self.nvs_state
+        self.set_nvs_state(NVSState.Cleaning)
+
         tmp, self.waiting = self.waiting, []
         while tmp:
             f = tmp.pop(0)
             f[0].unmap(f[1])
 
+        self.set_nvs_state(prev)
 
-    async def _start_serving(self):
+
+    async def _start_serving(self) -> None:
         """
         Starts serving camera stream to the server. It will try to (re)connect to the server until the component is
         stopped.
@@ -206,17 +211,19 @@ class NVSComponent(component.Component):
                     try:
                         async with cn("ws://100.87.214.117:7000") as ws:  # [TODO] Change to the right address.
                             await self._on_connection(ws)
-                    except BaseException:
+                    except Exception:
                         pass
                 finally:
                     pass
-        finally:
-            pass
 
-        self.set_nvs_state(NVSState.Initialized)
+            self.set_nvs_state(NVSState.Initialized)
+
+        except Exception as e:
+            self.log("Stopped unexpectedly: " + str(e), ll.ERROR)
+            self.set_nvs_state(NVSState.Unknown)
 
 
-    async def _on_connection(self, wss: wssp):
+    async def _on_connection(self, wss: wssp) -> None:
         """
         Handles a connection to the server.
         """
@@ -235,6 +242,7 @@ class NVSComponent(component.Component):
                     pending: tuple = (aio.create_task(self.send_data(self.wss, current)),)
                     while pending:
                         _, pending = await aio.wait(pending, return_when=aio.FIRST_COMPLETED)
+
         except wssexcept.ConnectionClosed:
             # Remove con
             self.wss = None
@@ -243,10 +251,11 @@ class NVSComponent(component.Component):
             if self.nvs_state != NVSState.PendingStop:
                 self.nvs_state = NVSState.WaitingConnection
 
-        self.pipeline.set_state(Gst.State.NULL)
+        finally:
+            self.pipeline.set_state(Gst.State.NULL)
 
 
-    def _on_data_available(self, appsink):
+    def _on_data_available(self, appsink) -> Gst.FlowReturn:
         """
         Handles incoming data from a GST pipeline and buffers it. If new data is available but the previous has not
         been sent, the previous is dropped and the new one will be scheduled for sending.
@@ -259,7 +268,7 @@ class NVSComponent(component.Component):
                 (ret, buffer_map) = gst_buffer.map(Gst.MapFlags.READ)
                 if ret:
                     if self.wss:  # Would be useless to store frames while there is no conn.
-                        if len(self.waiting) < 5:  # Frame not scheduled as there's no more space.
+                        if len(self.waiting) < 2:  # Frame not scheduled as there's no more space.
                             self.waiting.append((gst_buffer, buffer_map,))
                         else:
                             # Just release this frame.
@@ -274,7 +283,7 @@ class NVSComponent(component.Component):
 
 
     @staticmethod
-    async def send_data(wss: wssp, stuff: tuple):
+    async def send_data(wss: wssp, stuff: tuple) -> None:
         """
         Sends video data over a WS.
         """
@@ -282,7 +291,7 @@ class NVSComponent(component.Component):
         stuff[0].unmap(stuff[1])
 
 
-    @route("nvs:state", thread=False, blocking=True)
+    @route("state:nvs:custom", thread=False, blocking=True)
     def get_nvs_state(self) -> int:
         """
         Gives you the current internal state of NVS.
