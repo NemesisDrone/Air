@@ -6,4 +6,3 @@ RPi.GPIO
 sense-hat
 smbus2
 pigpio
-serial
