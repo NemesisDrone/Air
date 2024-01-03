@@ -25,6 +25,9 @@
 
    Nemesis Utilities <docs/components/nemesis_utilities.rst>
    Manager <docs/components/manager.rst>
+   Sim7600 <docs/components/sim7600.rst>
+   SenseHat <docs/components/sense_hat.rst>
+   Vl53 <docs/components/vl53.rst>
 
 .. toctree::
    :hidden:
