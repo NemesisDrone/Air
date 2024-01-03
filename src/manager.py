@@ -21,7 +21,6 @@ STOP_TIMOUT = 15
 components = {
     # name: class
     # Be careful to *always* use the name that you've used in your Component-inheriting class too!
-    #"test": testcomp.TestComponent,
     "hello": hello.HelloComponent,
     "sim7600": sim7600.Sim7600Component,
     "sense_hat": pi_sense_hat.SenseHatComponent,
@@ -33,7 +32,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["vl53"],
+    "default": ["sim7600", "sense_hat", "vl53"]
     # "dev": ["test"],
 }
 
