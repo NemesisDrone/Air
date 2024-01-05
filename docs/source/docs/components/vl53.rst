@@ -1,0 +1,72 @@
+The Vl53 component
+==================
+
+Integration of multiple Vl53 sensors for measuring distances.
+Component name: `vl53`.
+
+Configuration
+-------------
+
+This component is designed to handle multiple Vl53 sensors.
+If you want to handle multiple sensors, you **will** need to bind both `XSHUTS` pins to 2 different GPIOs.
+
+You need to indicate the GPIOs used for the `XSHUTS` pins in the fields at the beginning of the
+`src.vl53.vl53.Vl53Component` class.
+
+.. code-block:: python
+
+    class Vl53Component(component.Component):
+
+        ...
+
+        # For using multiple sensors, XSHUTS pins must be used.
+        # First sensor XSHUTS pin
+        FIRST_SENSOR_XSHUTS_PIN_NUMBER = 20
+        # Second sensor XSHUTS pin
+        SECOND_SENSOR_XSHUTS_PIN_NUMBER = None
+
+        ...
+
+.. warning::
+    There might be a chance that even a single sensor will not work if the `XSHUTS` pin is not connected to a GPIO.
+    If you see that the sensor is not working, try to connect the `XSHUTS` pin to a GPIO and set the `XSHUTS` pin number
+
+Custom Status
+-------------
+
+The component publishes and set a custom status message to `sensors:vl53:status`.
+
+.. code-block::
+
+    {
+    "sensing_worker_alive": boolean,
+    "first_sensor_emulation": boolean,
+    "second_sensor_emulation": boolean,
+    }
+
+The `sensing_worker_alive` field indicates if the sensing worker is alive or not.
+
+The `first_sensor_emulation` and `second_sensor_emulation` fields indicate if the first and second sensors are emulated or not.
+
+.. note::
+    If both sensors are emulated, distances will be different and generated in the range [100, 600] mm.
+    If only one sensor is emulated, the emulated sensor will copy the other sensor's distance.
+
+Data
+----
+
+The component publishes and set the data to `sensors:vl53:ranges`.
+
+.. code-block::
+
+    {
+    "first_range": int,
+    "second_range": int,
+    }
+
+
+The `first_range` and `second_range` fields indicate the distance measured by the first and second sensors in mm.
+
+.. note::
+    If the distance measured is above 1100 mm, the value will be set to 0.
+    Even with the limitation above, the distances is uploaded as is without parsing so it can be sometimes a bit noisy.

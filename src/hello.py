@@ -1,34 +1,34 @@
-from utilities import component as component, ipc
-import time
+import threading
 
-from nemesis_utilities.utilities.component import State
+from utilities import component, ipc
+import time
 
 
 class HelloComponent(component.Component):
     NAME = "hello"
 
-    def __init__(self):
-        super().__init__()
-        self.do_work_please = False
-        self.log("Hello component initialized")
+    def __init__(self, ipc_node: ipc.IpcNode):
+        """
+        :param ipc_node: The IPCNode.
+        """
+        super().__init__(ipc_node)
 
-    def start(self):
-        self.log("Hello component started")
-        self.do_work_please = True
+        self._alive = False
+        self._thread = None
+        self.logger.info("Hello component initialized", self.NAME)
 
-    def do_work(self):
+    def _job(self):
         i = 0
-        while self.do_work_please:
-            self.log(f"Hello World {i}", ipc.LogLevels.DEBUG)
+        while self._alive:
+            self.logger.info(f"Hello component saying hello for the {i}th time", self.NAME)
             i += 1
             time.sleep(2)
 
+    def start(self):
+        self._alive = True
+        self._thread = threading.Thread(target=self._job)
+        self._thread.start()
+
     def stop(self):
-        self.do_work_please = False
-        self.log("Hello component stopped")
-
-
-def run():
-    compo = HelloComponent()
-    compo.start()
-    compo.do_work()
+        self._alive = False
+        self._thread.join()

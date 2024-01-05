@@ -1,47 +1,30 @@
-import os
 import multiprocessing
-import threading
-import time
+import os
 import signal
+import threading
+import typing
 
-from utilities import ipc
-from utilities.component import State as State
+import redis
+from utilities import ipc, component as component_module, logger
 
-# --- Components Imports ---
-# import ...
-import hello
-import nvs
-from sim7600 import sim7600
-from laser import laser
-import sensors.sensors as sensors
-import communication.messages.CommunicationComponent as CommunicationComponent
-from propulsion import Propulsion
-from config import config
-from servos import Servos
-
-from communication.messages.test import run as TestComponentRun
-
-# --------------------------
+import hello as hello
+import sim7600.sim7600 as sim7600
+import vl53.vl53 as vl53
+import pi_sense_hat.pi_sense_hat as pi_sense_hat
 
 #: The time in seconds to wait for the components to stop before killing them
-STOP_TIMOUT = 5
+STOP_TIMOUT = 15
 
 # ----------------------------------------------------------------------------------------------------------------------
 #                                             Components Configuration
 # ----------------------------------------------------------------------------------------------------------------------
 components = {
-    # name: function_to_call
+    # name: class
     # Be careful to *always* use the name that you've used in your Component-inheriting class too!
-    "hello": hello.run,
-    "NVS": nvs.run,
-    "sim7600": sim7600.run,
-    "TestCompo": TestComponentRun,
-    "laser": laser.run,
-    "sensors": sensors.run,
-    "communication": CommunicationComponent.run,
-    "propulsion": Propulsion.run,
-    "config": config.run,
-    "servos": Servos.run,
+    "hello": hello.HelloComponent,
+    "sim7600": sim7600.Sim7600Component,
+    "sense_hat": pi_sense_hat.SenseHatComponent,
+    "vl53": vl53.Vl53Component,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -49,250 +32,220 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["communication", "config", "sensors", "servos"],
+    "default": ["sim7600", "sense_hat", "vl53"]
     # "dev": ["test"],
 }
 
 
-class Manager(ipc.IpcNode):
-    def __init__(self):
-        super().__init__(ipc_id="manager")
+class Manager:
 
-        # First profile to load, caught from the "NEMESIS_PROFILE" environment variable, defaults to "default"
-        self.init_profile = (
-            "default"
-            if (
-                os.environ.get("NEMESIS_PROFILE") == ""
-                or os.environ.get("NEMESIS_PROFILE") is None
-            )
-            else os.environ.get("NEMESIS_PROFILE")
-        )
+    def __init__(self, ipc_node: ipc.IpcNode):
+        """d
+        :param ipc_node: The IPC node to use
+        """
+        self._ipc_node = ipc_node
+        self._ipc_node.bind_routes(self)
+        for c in components:
+            component_module.Component.init_state(self._ipc_node.redis, c)
 
-        #: A :class:`dict` mapping a component name to a list of :class:`multiprocessing.Process` instance, a lock and
-        # a restart flag
-        self.components = {}
-        for k in components:
-            self.components[k] = [None, threading.Lock(), False]
-            self.r.set(f"state:{k}:state", State.STOPPED)
+        self._ipc_node.start()
 
-    def start(self):
-        super().start()
-        self.log(f"Starting profile {self.init_profile}", ipc.LogLevels.INFO)
-
-        for component in profiles[self.init_profile]:
-            self.send(
-                f"state:start:{component}", {"component": component}, loopback=True
-            )
-
-        self.log("profile started", ipc.LogLevels.DEBUG)
+        self._components: (
+            typing.Dict)[str, typing.Dict[str, typing.Union[multiprocessing.Process, None, threading.Lock]]] = \
+            {c: {"process": None, "lock": threading.Lock(), "timeout_lock": threading.Lock()} for c in components}
 
     def stop(self):
-        self.log("Stopping manager and all components", ipc.LogLevels.INFO)
-
-        self.send_blocking("state:stop_all", {}, loopback=True)
-        for component in self.components:
-            while self.r.get(f"state:{component}:state").decode() != State.STOPPED:
-                time.sleep(0.1)
-
-        self.log("manager stopped", ipc.LogLevels.DEBUG)
-        super().stop()
-
-    def _timeout(self, component: str):
         """
-        Called to timeout when a component does not stop in time
+        Stop the manager
         """
-        now = time.time()
-        while (
-            self.r.get(f"state:{component}:state").decode() != State.STOPPED
-            and time.time() - now < STOP_TIMOUT
-        ):
-            time.sleep(0.1)
+        self._stop_all_components()
+        self._ipc_node.stop()
 
-        if self.r.get(f"state:{component}:state").decode() != State.STOPPED:
-            self.log(
-                f"component {component} did not stop in time, killing it",
-                ipc.LogLevels.WARNING,
-            )
-            if self.r.get(f"state:{component}:state").decode() == State.STARTED:
-                self.send(
-                    f"state:{component}:stopping",
-                    {"component": component},
-                    loopback=True,
-                )
-            self.components[component][0].terminate()
-            self.components[component][0].join()
-            self.send(
-                f"state:{component}:stopped", {"component": component}, loopback=True
-            )
-
-    def _process_crash_listener(self):
+    def _check_state(self, component: str, state: str) -> bool:
         """
-        Listens for any process crash and restarts it
+        Check the state of a component
+        :param component: The component to check
+        :param state: The state to check
+        :return: True if the component is in the given state, False otherwise
         """
-        while self.subscribed:  # Flag of ipc.IpcNode
-            for component in self.components:
-                if (
-                    self.components[component][0] is not None
-                    and not self.components[component][0].is_alive()
-                    and self.r.get(f"state:{component}:state").decode() == State.STARTED
-                ):
-                    self.log(
-                        f"component {component} crashed, restarting it",
-                        ipc.LogLevels.WARNING,
-                    )
+        return component_module.Component.get_state(self._ipc_node.redis, component) == state
 
-                    self.components[component][1].acquire()
+    def _timout_state_update(self, component: str):
+        """
+        Timeout the state update of a component
+        """
+        r = self._components[component]["timeout_lock"].acquire(timeout=STOP_TIMOUT)
+        if r:
+            self._components[component]["timeout_lock"].release()
+        else:
+            state = component_module.Component.get_state(self._ipc_node.redis, component)
+            self._ipc_node.logger.error(f"Timout reached for {component} component witch is still {state}, "
+                                        f"killing process.", "manager")
 
-                    self.send(
-                        f"state:{component}:stopped",
-                        {"component": component},
-                        loopback=True,
-                    )
-                    self.r.set(f"state:{component}:state", State.STOPPED)
+            # Timeout reached, kill the process
+            self._components[component]["process"].kill()
 
-                    self.send(f"state:start:{component}", {"component": component})
+            # Force his state
+            self._ipc_node.redis.set(f"state:{component}", component_module.ComponentState.STOPPED)
+            self._ipc_node.send(f"state:{component}:{component_module.ComponentState.STOPPED}",
+                                {"component": component}, loopback=True)
+            self._ipc_node.logger.info(f"component is {component_module.ComponentState.STOPPED}", component,
+                                       "state")
 
-            time.sleep(0.1)
+    def _start_component(self, component: str):
+        """
+        Start a component
+        :param component: The component to start
+        """
+        self._components[component]["lock"].acquire()
+        if not self._check_state(component, component_module.ComponentState.STOPPED):
+            self._components[component]["lock"].release()
+            return
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #                                                 Set state
-    # ------------------------------------------------------------------------------------------------------------------
-    @ipc.route("state:start:*", thread=True, blocking=True)
-    def _start(self, data):
-        self.components[data["component"]][1].acquire()
-        if self.r.get(f"state:{data['component']}:state").decode() == State.STOPPED:
-            self.components[data["component"]][0] = multiprocessing.Process(
-                target=components[data["component"]]
-            )
-            self.components[data["component"]][0].start()
+        assert self._components[component]["timeout_lock"].acquire(timeout=1)
 
-        self.components[data["component"]][1].release()
+        self._components[component]["process"] = multiprocessing.Process(target=component_module.run_component,
+                                                                         args=(components[component],))
+        self._components[component]["process"].start()
 
-    @ipc.route("state:stop:*", thread=False, blocking=True)
-    def _stop(self, data):
-        self.components[data["component"]][1].acquire()
+        self._timout_state_update(component)
 
-        if self.r.get(f"state:{data['component']}:state").decode() == State.STARTED:
-            self.send(
-                f"state:{data['component']}:stop", {"component": data["component"]}
-            )
-            threading.Thread(target=self._timeout, args=(data["component"],)).start()
+    def _stop_component(self, component: str):
+        """
+        Stop a component
+        :param component: The component to stop
+        """
+        self._components[component]["lock"].acquire()
+        if not self._check_state(component, component_module.ComponentState.STARTED):
+            self._components[component]["lock"].release()
+            return
 
-        self.components[data["component"]][1].release()
+        assert self._components[component]["timeout_lock"].acquire(timeout=1)
 
-    @ipc.route("state:restart:*", thread=True, blocking=True)
-    def _restart(self, data):
-        self.components[data["component"]][1].acquire()
+        self._ipc_node.send(f"state:{component}:stop", {"component": component})
 
-        if self.r.get(f"state:{data['component']}:state").decode() == State.STARTED:
-            self.send(
-                f"state:{data['component']}:stop", {"component": data["component"]}
-            )
-            threading.Thread(target=self._timeout, args=(data["component"],)).start()
+        self._timout_state_update(component)
 
-            self.components[data["component"]][1].release()
+    def _restart_component(self, component: str):
+        """
+        Restart a component
+        :param component: The component to restart
+        """
+        self._stop_component(component)
+        self._start_component(component)
 
-        while self.r.get(f"state:{data['component']}:state").decode() != State.STOPPED:
-            time.sleep(0.001)
+    def _stop_all_components(self):
+        """
+        Stop all components
+        """
+        threads = []
+        for c in self._components:
+            t = threading.Thread(target=self._stop_component, args=(c,))
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
 
-        self.components[data["component"]][1].acquire()
+    def _start_all_components(self):
+        """
+        Start all components
+        """
+        threads = []
+        for c in self._components:
+            t = threading.Thread(target=self._start_component, args=(c,))
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
 
-        self.send(
-            f"state:start:{data['component']}",
-            {"component": data["component"]},
-            loopback=True,
-        )
+    def _restart_all_components(self):
+        """
+        Restart all components
+        """
+        threads = []
+        for c in self._components:
+            t = threading.Thread(target=self._restart_component, args=(c,))
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
 
-        self.components[data["component"]][1].release()
+    # --- Callback ---
+    @ipc.Route(["state:*:started", "state:*:stopped"], False).decorator
+    def _state_update(self, call_data: ipc.CallData, payload: dict):
+        """
+        Callback for state updates
+        """
+        self._components[payload["component"]]["lock"].release()
+        self._components[payload["component"]]["timeout_lock"].release()
 
-    @ipc.route("state:stop_all", thread=True, blocking=True)
-    def _stop_all(self, data):
-        for component in self.components:
-            self.components[component][1].acquire()
-            if self.r.get(f"state:{component}:state").decode() == State.STARTED:
-                self.send(
-                    f"state:stop:{component}", {"component": component}, loopback=True
-                )
-                threading.Thread(target=self._timeout, args=(component,)).start()
-            self.components[component][1].release()
+    # --- IPC Bindings ---
+    @ipc.Route(["state:start:*"], True).decorator
+    def _start_component_route(self, call_data: ipc.CallData, payload: dict):
+        """
+        Start a component
+        """
+        component = payload["component"]
+        self._start_component(component)
 
-    @ipc.route("state:restart_all", thread=True, blocking=True)
-    def _restart_all(self, data):
-        for component in self.components:
-            self.components[component][1].acquire()
-            if self.r.get(f"state:{component}:state").decode() == State.STARTED:
-                self.send(
-                    f"state:restart:{component}",
-                    {"component": component},
-                    loopback=True,
-                )
-            self.components[component][1].release()
+    @ipc.Route(["state:stop:*"], True).decorator
+    def _stop_component_route(self, call_data: ipc.CallData, payload: dict):
+        """
+        Stop a component
+        """
+        component = payload["component"]
+        self._stop_component(component)
 
-    # ------------------------------------------------------------------------------------------------------------------
-    #                                                Update State
-    # ------------------------------------------------------------------------------------------------------------------
-    @ipc.route("state:*:starting", thread=True, blocking=True)
-    def _on_starting(self, data):
-        self.components[data["component"]][1].acquire()
+    @ipc.Route(["state:restart:*"], True).decorator
+    def _restart_component_route(self, call_data: ipc.CallData, payload: dict):
+        """
+        Restart a component
+        """
+        component = payload["component"]
+        self._restart_component(component)
 
-        if self.r.get(f"state:{data['component']}:state").decode() != State.STOPPED:
-            self.log(
-                f"inconsistency detected, this should never happen, component {data['component']} "
-                f"is starting but it is not stopped",
-                ipc.LogLevels.CRITICAL,
-            )
-        self.r.set(f"state:{data['component']}:state", State.STARTING)
-        self.log(f"component {data['component']} set to starting", ipc.LogLevels.DEBUG)
+    @ipc.Route(["state:start_all"], True).decorator
+    def _start_all_components_route(self, call_data: ipc.CallData, payload: dict):
+        """
+        Start all components
+        """
+        self._start_all_components()
 
-        self.components[data["component"]][1].release()
+    @ipc.Route(["state:stop_all"], True).decorator
+    def _stop_all_components_route(self, call_data: ipc.CallData, payload: dict):
+        """
+        Stop all components
+        """
+        self._stop_all_components()
 
-    @ipc.route("state:*:started", thread=True, blocking=True)
-    def _on_started(self, data):
-        self.components[data["component"]][1].acquire()
-
-        if self.r.get(f"state:{data['component']}:state").decode() != State.STARTING:
-            self.log(
-                f"inconsistency detected, this should never happen, component {data['component']} "
-                f"is started but it is not starting",
-                ipc.LogLevels.CRITICAL,
-            )
-        self.r.set(f"state:{data['component']}:state", State.STARTED)
-        self.log(f"component {data['component']} set to started", ipc.LogLevels.DEBUG)
-
-        self.components[data["component"]][1].release()
-
-    @ipc.route("state:*:stopping", thread=True, blocking=True)
-    def _on_stopping(self, data):
-        self.components[data["component"]][1].acquire()
-
-        if self.r.get(f"state:{data['component']}:state").decode() != State.STARTED:
-            self.log(
-                f"inconsistency detected, this should never happen, component {data['component']} "
-                f"is stopping but it is not started",
-                ipc.LogLevels.CRITICAL,
-            )
-        self.r.set(f"state:{data['component']}:state", State.STOPPING)
-        self.log(f"component {data['component']} set to stopping", ipc.LogLevels.DEBUG)
-
-        self.components[data["component"]][1].release()
-
-    @ipc.route("state:*:stopped", thread=True, blocking=True)
-    def _on_stopped(self, data):
-        self.components[data["component"]][1].acquire()
-
-        if self.r.get(f"state:{data['component']}:state").decode() != State.STOPPING:
-            self.log(
-                f"inconsistency detected, this should never happen, component {data['component']} "
-                f"is stopped but it is not stopping",
-                ipc.LogLevels.CRITICAL,
-            )
-        self.r.set(f"state:{data['component']}:state", State.STOPPED)
-        self.log(f"component {data['component']} set to stopped", ipc.LogLevels.DEBUG)
-
-        self.components[data["component"]][1].release()
+    @ipc.Route(["state:restart_all"], True).decorator
+    def _restart_all_components_route(self, call_data: ipc.CallData, payload: dict):
+        """
+        Restart all components
+        """
+        self._restart_all_components()
 
 
 if __name__ == "__main__":
+    r = redis.StrictRedis(host="redis", port=6379, db=0)
+    _ipc_node = ipc.IpcNode(
+        "manager",
+        r,
+        r.pubsub()
+    )
+    _ipc_node.set_logger(logger.Logger(_ipc_node))
+    manager = Manager(_ipc_node)
+
+    init_profile = (
+        "default"
+        if (
+                os.environ.get("NEMESIS_PROFILE") == ""
+                or os.environ.get("NEMESIS_PROFILE") is None
+        )
+        else os.environ.get("NEMESIS_PROFILE")
+    )
+    for c in profiles[init_profile]:
+        manager._start_component(c)
 
     class ManagerKiller:
         def __init__(self, manager):
@@ -303,6 +256,4 @@ if __name__ == "__main__":
         def stop(self, sig, frame):
             self.manager.stop()
 
-    _manager = Manager()
-    _manager.start()
-    ManagerKiller(_manager)
+    ManagerKiller(manager)

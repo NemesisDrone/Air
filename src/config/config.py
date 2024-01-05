@@ -1,7 +1,6 @@
 import json
 
-from utilities import component as component, ipc
-from utilities.ipc import route
+from utilities import component, ipc
 
 
 class ConfigComponent(component.Component):
@@ -10,27 +9,22 @@ class ConfigComponent(component.Component):
     """
     NAME = "config"
 
-    def __init__(self):
-        super().__init__()
-        self.log("Config component initialized")
+    def __init__(self, ipc_node: ipc.IpcNode):
+        super().__init__(ipc_node)
 
-    def start(self):
-        return self
-
-    @route("config")
-    def update_config(self, payload: dict):
+    @ipc.Route(["config:*"], False).decorator
+    def update_config(self, call_data: ipc.CallData, payload: dict):
         """
         This method is used to update the config of the drone.
         """
         if "canals" in payload:
             for canal in payload["canals"]:
-                self.r.set(f"config:canal:{canal['canal']}", json.dumps(canal))
+                self.redis.set(f"config:canal:{canal['canal']}", json.dumps(canal))
 
-        self.log("Config updated")
+        self.logger.info("Config was updated", self.NAME)
+
+    def start(self):
+        pass
 
     def stop(self):
-        self.log("Config component stopped")
-
-
-def run():
-    compo = ConfigComponent().start()
+        pass
