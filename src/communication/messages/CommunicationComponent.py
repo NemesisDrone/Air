@@ -3,8 +3,7 @@ import socket
 import threading
 import os
 from typing import Union, Generic, TypeVar, List
-from utilities import component as component, ipc
-from utilities.ipc import route
+from utilities import component, ipc
 import time
 from dataclasses import dataclass
 
@@ -60,11 +59,11 @@ class CommunicationComponent(component.Component):
 
     NAME = "communication"
 
-    def __init__(self, host: str, port: int):
-        super().__init__()
+    def __init__(self, ipc_node: ipc.IpcNode):
+        super().__init__(ipc_node)
 
-        self.host = host
-        self.port = port
+        self.host = os.environ.get("COMMUNICATION_BASE_HOST")
+        self.port = int(os.environ.get("COMMUNICATION_BASE_PORT"))
         self.alive = False
         self.stop_threads = False
 
@@ -83,24 +82,21 @@ class CommunicationComponent(component.Component):
             "sensors:full": SensorEvent("full", 0.2, 0, ["roll", "pitch", "yaw"]),
         }
 
-        self.log("Communication component initialized")
-
     def start(self):
         self.alive = True
-
-        return self
+        threading.Thread(target=self.connection_jobs, daemon=True).start()
 
     def connection_jobs(self):
         """
         Method used to manage the connection to the server.
         """
-        self.log("Communication component started")
         if not self.alive:
             return
 
         retry = 1
         while self.alive:
-            self.log(f"Trying to connect to {self.host}:{self.port} (attempt {retry})")
+            self.logger.info(f"Trying to connect to {self.host}:{self.port} (attempt {retry})",
+                             self.NAME)
 
             # Close the socket if it is already open
             if self.client_socket:
@@ -111,15 +107,17 @@ class CommunicationComponent(component.Component):
 
             try:
                 self.client_socket.connect((self.host, self.port))
-                self.log("Drone connected to server")
+                self.logger.info("Drone connected to server",
+                                 self.NAME)
                 self.stop_threads = False
 
                 self.create_threads()
 
             except Exception as e:
-                self.log(f"Connection error: {e}")
-                self.log(
-                    f"Retrying in {self.waiting_time_before_reconnection} seconds (retry {retry})"
+                self.logger.info(f"Connection error: {e}", self.NAME)
+                self.logger.info(
+                    f"Retrying in {self.waiting_time_before_reconnection} seconds (retry {retry})",
+                    self.NAME,
                 )
                 retry += 1
 
@@ -163,10 +161,10 @@ class CommunicationComponent(component.Component):
                     # TODO: refacto this piece of shit
                     data = json.loads(json.loads(message))
                     if "route" in data and "data" in data:
-                        self.send(data["route"], data["data"])
+                        self.ipc_node.send(data["route"], data["data"])
 
             except Exception as e:
-                self.log(f"Reception error: {e}")
+                self.logger.error(f"Reception error: {e}", self.NAME)
                 self.stop_threads = True
                 break
 
@@ -182,23 +180,11 @@ class CommunicationComponent(component.Component):
 
                 time.sleep(self.time_between_heartbeats)
             except Exception as e:
-                self.log(f"Heartbeat emission error: {e}")
+                self.logger.error(f"Heartbeat emission error: {e}", self.NAME)
                 self.stop_threads = True
 
-    @route(
-        "sensors:full",
-        "sensors:speed",
-        "sensors:altitude",
-        "sensors:battery",
-        "sensors:gps",
-        "log:INFO:*",
-        "log:WARNING:*",
-        "log:ERROR:*",
-        "log:CRITICAL:*",
-        "state:*",
-        get_route=True,
-    )
-    def handle_emission(self, payload, _route):
+    @ipc.Route(["sensors:*", "log:*", "state:*"], True).decorator
+    def handle_emission(self, call_data: ipc.CallData, payload: dict):
         """
         Method used to handle the emission of messages to the server.
         """
@@ -206,16 +192,16 @@ class CommunicationComponent(component.Component):
             return
 
         try:
-            _route = clear_route(_route)
+            _channel = call_data.channel
             data = payload
-            if _route in self.sensors:
-                if not self.sensors[_route].can_send():
+            if _channel in self.sensors:
+                if not self.sensors[_channel].can_send():
                     return
 
-                data = self.sensors[_route].sanitize_data(payload)
+                data = self.sensors[_channel].sanitize_data(payload)
 
             message = {
-                "type": _route,
+                "type": _channel,
                 "data": data
             }
 
@@ -224,23 +210,9 @@ class CommunicationComponent(component.Component):
             self.client_socket.send(data.encode())
 
         except Exception as e:
-            self.log(f"Emission error: {e}")
+            self.logger.error(f"Emission error: {e}", self.NAME)
             self.stop_threads = True
 
     def stop(self):
         self.alive = False
         self.stop_threads = True
-        self.log("Communication component stopped")
-
-
-def run():
-    compo = CommunicationComponent(
-        host=os.environ.get("COMMUNICATION_BASE_HOST"),
-        port=int(os.environ.get("COMMUNICATION_BASE_PORT")),
-    ).start()
-    compo.connection_jobs()
-
-
-# Only for testing purposes
-if __name__ == "__main__":
-    run()
