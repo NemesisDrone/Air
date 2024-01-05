@@ -43,7 +43,7 @@ class SensorsComponent(component.Component):
         # Emulator datas
         inc_pitch = True
         inc_roll = True
-        roll, pitch, yaw = 0, 0, 0
+        roll, pitch, yaw = 0, 0, 90
         gyrX, gyrY, gyrZ = 0, 0, 0
         accX, accY, accZ = 0, 0, 0
         compX, compY, compZ = 0, 0, 0
@@ -68,6 +68,15 @@ class SensorsComponent(component.Component):
                 inc_pitch = True
                 pitch = 0
 
+            yaw += 0.5
+            if yaw >= 360:
+                yaw = 0
+
+
+        gps_pos = {
+          "lat": -0.7563779,
+          "lng": 48.0879123
+        }
         try:
             while self.alive:
                 if self.valid:
@@ -115,6 +124,8 @@ class SensorsComponent(component.Component):
                     time.sleep(0.05)
 
                 self.send("sensors:full", data)
+                self.send("sensors:gps", gps_pos)
+                gps_pos["lat"] += 0.00001
                 self.r.set("sensors:full", json.dumps(data))
 
         except Exception as e:
