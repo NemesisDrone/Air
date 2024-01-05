@@ -80,7 +80,7 @@ class CommunicationComponent(component.Component):
             "sensors:speed": SensorEvent("speed", 1, 0),
             "sensors:altitude": SensorEvent("altitude", 1, 0),
             "sensors:battery": SensorEvent("battery", 1, 0),
-            "sensors:full": SensorEvent("full", 0.2, 0, ["roll", "pitch"]),
+            "sensors:full": SensorEvent("full", 0.2, 0, ["roll", "pitch", "yaw"]),
         }
 
         self.log("Communication component initialized")
@@ -207,7 +207,6 @@ class CommunicationComponent(component.Component):
 
         try:
             _route = clear_route(_route)
-
             data = payload
             if _route in self.sensors:
                 if not self.sensors[_route].can_send():
