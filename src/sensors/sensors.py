@@ -13,8 +13,9 @@ class SensorsComponent(component.Component):
     def __init__(self):
         super().__init__()
 
-        self.valid = True
-        self.alive = False
+        self.valid: bool = True
+        self.alive: bool = False
+        self.hat: SenseHat = None
 
         try:
             self.hat = SenseHat()
@@ -33,7 +34,7 @@ class SensorsComponent(component.Component):
 
         self.log("Sensors component initialized")
 
-    def sense_hat_listener(self):
+    def sense_hat_listener(self) -> None:
         self.r.set(
             "state:sensors:custom",
             json.dumps({"valid": self.valid, "alive": self.alive}),
@@ -135,12 +136,12 @@ class SensorsComponent(component.Component):
 
         return self
 
-    def stop(self):
+    def stop(self) -> None:
         self.alive = False
         self.log("Sensors component stopped")
 
 
-def run():
+def run() -> None:
     comp = SensorsComponent().start()
     comp.sense_hat_listener()
     comp.log("Sensors component started")
