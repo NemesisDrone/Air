@@ -16,6 +16,7 @@ class SensorsComponent(component.Component):
         self.valid: bool = True
         self.alive: bool = False
         self.hat: SenseHat = None
+        self.thread: threading.Thread = None
 
         try:
             self.hat = SenseHat()
@@ -33,6 +34,9 @@ class SensorsComponent(component.Component):
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
         self.log("Sensors component initialized")
+
+    def __del__(self):
+        self.stop()
 
     def sense_hat_listener(self) -> None:
         self.r.set(
@@ -131,17 +135,32 @@ class SensorsComponent(component.Component):
         )
         self.send("state:sensors:custom", {"valid": self.valid, "alive": self.alive})
 
-    def start(self):
-        self.alive = True
+    def start(self) -> bool:
+        """
+        Function used to start the component. It will set up a thread and schedule tasks to make the measurements.
+        """
+        if self.alive:
+            return False
 
-        return self
+        self.alive = True
+        self.thread = threading.Thread(target=self._sense_hat_listener)
+        self.thread.start()
+
+        self.log("Sensors component started")
+        return True
 
     def stop(self) -> None:
+        """
+        Stops the measurements. It will wait until all the measurement thread is able to stop.
+        This means that the function might be blocking for an undetermined amount of time.
+        """
         self.alive = False
+        if self.thread:
+            self.thread.join()
+
         self.log("Sensors component stopped")
 
 
-def run() -> None:
-    comp = SensorsComponent().start()
-    comp.sense_hat_listener()
-    comp.log("Sensors component started")
+def run() -> bool:
+    comp = SensorsComponent()
+    return comp.start()
