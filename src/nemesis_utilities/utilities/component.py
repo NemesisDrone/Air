@@ -36,6 +36,7 @@ and :meth:`stop` methods and the :attr:`NAME` attribute.
 """
 import dataclasses
 import time
+import os
 
 import utilities.ipc as ipc
 
@@ -83,6 +84,10 @@ class Component(ipc.IpcNode):
         self.regexes[f"^state:{self.NAME}:stop$"] = self.regexes.pop(
             "^state:{NAME}:stop$"
         )
+
+        self.simulate = os.environ.get("SIMULATE_" + self.NAME, "0") != "0"
+        if self.simulate:
+            self.log("Simulation enabled.")
 
     @ipc.route("state:{NAME}:stop")
     def _call_stop(self, payload: dict):
