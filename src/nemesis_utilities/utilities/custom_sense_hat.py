@@ -1,20 +1,19 @@
-#!/usr/bin/python
-import logging
-import struct
-import os
-import sys
-import math
-import time
-import numpy as np
-import shutil
-import glob
-import RTIMU  # custom version
-import pwd
 import array
 import fcntl
-from PIL import Image  # pillow
+import glob
+import logging
+import math
+import os
+import pwd
+import shutil
+import struct
+import sys
+import time
 from copy import deepcopy
 
+import numpy as np
+import RTIMU  # custom version
+from PIL import Image  # pillow
 from sense_hat.colour import ColourSensor
 from sense_hat.exceptions import ColourSensorInitialisationError
 
@@ -35,9 +34,7 @@ class SenseHat(object):
             raise OSError("Cannot detect %s device" % self.SENSE_HAT_FB_NAME)
 
         if not glob.glob("/dev/i2c*"):
-            raise OSError(
-                "Cannot access I2C. Please ensure I2C is enabled in raspi-config"
-            )
+            raise OSError("Cannot access I2C. Please ensure I2C is enabled in raspi-config")
 
         # 0 is With B+ HDMI port facing downwards
         pix_map0 = np.array(
@@ -162,9 +159,7 @@ class SenseHat(object):
         if system_exists and not home_exists:
             shutil.copyfile(system_file, home_file)
 
-        return RTIMU.Settings(
-            os.path.join(home_path, imu_settings_file)
-        )  # RTIMU will add .ini internally
+        return RTIMU.Settings(os.path.join(home_path, imu_settings_file))  # RTIMU will add .ini internally
 
     def _get_fb_device(self):
         """
@@ -299,16 +294,12 @@ class SenseHat(object):
         for index, pix in enumerate(pixel_list):
             if len(pix) != 3:
                 raise ValueError(
-                    "Pixel at index %d is invalid. Pixels must contain 3 elements: Red, Green and Blue"
-                    % index
+                    "Pixel at index %d is invalid. Pixels must contain 3 elements: Red, Green and Blue" % index
                 )
 
             for element in pix:
                 if element > 255 or element < 0:
-                    raise ValueError(
-                        "Pixel at index %d is invalid. Pixel elements must be between 0 and 255"
-                        % index
-                    )
+                    raise ValueError("Pixel at index %d is invalid. Pixel elements must be between 0 and 255" % index)
 
         with open(self._fb_device, "wb") as f:
             map = self._pix_map[self._rotation]
@@ -475,10 +466,7 @@ class SenseHat(object):
             scroll_pixels.extend(letter_padding)
         scroll_pixels.extend(string_padding)
         # Recolour pixels as necessary
-        coloured_pixels = [
-            text_colour if pixel == [255, 255, 255] else back_colour
-            for pixel in scroll_pixels
-        ]
+        coloured_pixels = [text_colour if pixel == [255, 255, 255] else back_colour for pixel in scroll_pixels]
         # Shift right by 8 pixels per frame to scroll
         scroll_length = len(coloured_pixels) // 8
         for i in range(scroll_length - 8):
@@ -506,10 +494,7 @@ class SenseHat(object):
         pixel_list = [dummy_colour] * 8
         pixel_list.extend(self._get_char_pixels(s))
         pixel_list.extend([dummy_colour] * 16)
-        coloured_pixels = [
-            text_colour if pixel == [255, 255, 255] else back_colour
-            for pixel in pixel_list
-        ]
+        coloured_pixels = [text_colour if pixel == [255, 255, 255] else back_colour for pixel in pixel_list]
         self.set_pixels(coloured_pixels)
         self._rotation = previous_rotation
 
@@ -540,9 +525,7 @@ class SenseHat(object):
         """
 
         with open(self._fb_device) as f:
-            fcntl.ioctl(
-                f, self.SENSE_HAT_FB_FBIORESET_GAMMA, self.SENSE_HAT_FB_GAMMA_DEFAULT
-            )
+            fcntl.ioctl(f, self.SENSE_HAT_FB_FBIORESET_GAMMA, self.SENSE_HAT_FB_GAMMA_DEFAULT)
 
     @property
     def low_light(self):
@@ -584,11 +567,7 @@ class SenseHat(object):
     @low_light.setter
     def low_light(self, value):
         with open(self._fb_device) as f:
-            cmd = (
-                self.SENSE_HAT_FB_GAMMA_LOW
-                if value
-                else self.SENSE_HAT_FB_GAMMA_DEFAULT
-            )
+            cmd = self.SENSE_HAT_FB_GAMMA_LOW if value else self.SENSE_HAT_FB_GAMMA_DEFAULT
             fcntl.ioctl(f, self.SENSE_HAT_FB_FBIORESET_GAMMA, cmd)
 
     ####
