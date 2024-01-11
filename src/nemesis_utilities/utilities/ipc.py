@@ -40,8 +40,8 @@ class CallData:
     :attr:`loopback` Whether the call is meant to be received by the sender or not.
     :attr:`payload` The payload of the call.
     :attr:`concurrent` Whether the call is concurrent or not. If set to True, will run the function in a separate
-        thread. If set to False, will run the function in the listener thread, the listener will be blocked until the
-        function returns.
+    thread. If set to False, will run the function in the listener thread, the listener will be blocked until the
+    function returns.
     :attr:`blocking_response_channel` The channel to send the blocking response on if applicable.
     :attr:`blocking` Whether the call is blocking or not.
 
@@ -66,8 +66,8 @@ class CallData:
         :param loopback: Whether the call is meant to be received by the sender or not.
         :param payload: The payload of the call.
         :param concurrent: Whether the call is concurrent or not. If set to True, will run the function in a separate
-            thread. If set to False, will run the function in the listener thread, the listener will be blocked until
-            the function returns.
+        thread. If set to False, will run the function in the listener thread, the listener will be blocked until
+        the function returns.
         :param blocking_response_channel: The channel to send the blocking response on if applicable, defaults to None.
         """
 
