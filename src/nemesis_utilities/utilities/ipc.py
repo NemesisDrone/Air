@@ -377,10 +377,6 @@ class IpcNode(abstracts.IIpcSender):
         #: alive flag to kill the listener thread.
         self._alive = False
 
-        #: routes.
-        self._routes = []
-        self.bind_routes(self)
-
         #: blocking responses dict.
         self._blocking_responses = {}
 
@@ -388,6 +384,10 @@ class IpcNode(abstracts.IIpcSender):
         self._ipc_id = ipc_id
         self._logger = None
         self._redis = strict_redis
+
+        #: routes.
+        self._routes = []
+        self.bind_routes(self)
 
     def bind_routes(self, route_object: object) -> None:
         """Fetch every method of the given object with a route attribute and add the associated route to the routes
