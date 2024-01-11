@@ -7,7 +7,6 @@
 :meth:`run_component` called by the manager to run a component
 """
 
-import time
 import traceback
 
 import redis

@@ -344,7 +344,7 @@ class Route:
             self._call(call_data) if not call_data.blocking else self._call_blocking(call_data)
 
 
-class IpcNode(abstracts.IIpcSender):
+class IpcNode(abstracts.IIpcNode):
     """An IPC node, communicates with other IPC nodes through redis pub/sub.
 
     :attr:`logger` The :class:`Logger` instance.
@@ -520,7 +520,7 @@ class IpcNode(abstracts.IIpcSender):
         while self._alive:
             try:
                 call_data = self._fetch_call_data()
-            except ValueError as e:
+            except ValueError:
                 # Silent exception, ipc is closed.
                 self._alive = False
                 continue

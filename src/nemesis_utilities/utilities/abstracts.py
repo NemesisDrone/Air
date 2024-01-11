@@ -1,15 +1,31 @@
 """Abstract classes for the utilities module.
 
-:class:`IIpcSender` and :class:`IIpcNode` are abstract classes for the IPC sender and IPC node respectively.
+:class:`IIpcNode` are abstract classes for the IPC node.
 """
 import abc
 
 
-class IIpcSender(abc.ABC):
-    """Partial abstract class for the IPC sender.
+class IPartialIpcNode(abc.ABC):
+    """Partial abstract class for the IPC node.
 
+    :attr:`logger` is the logger instance.
+    :attr:`ipc_id` is the IPC ID.
     :meth:`send` sends a message to the IPC.
     """
+
+    @property
+    @abc.abstractmethod
+    def logger(self):
+        """The logger instance."""
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def ipc_id(self):
+        """The IPC ID."""
+
+        raise NotImplementedError
 
     @abc.abstractmethod
     def send(
@@ -30,27 +46,5 @@ class IIpcSender(abc.ABC):
             to receive it. Defaults to False.
         :param _nolog: Whether to log the request or not. Defaults to False.
         """
-
-        raise NotImplementedError
-
-
-class IIpcNode(IIpcSender, abc.ABC):
-    """Partial abstract class for the IPC node.
-
-    :attr:`logger` is the logger instance.
-    :attr:`ipc_id` is the IPC ID.
-    """
-
-    @property
-    @abc.abstractmethod
-    def logger(self):
-        """The logger instance."""
-
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def ipc_id(self):
-        """The IPC ID."""
 
         raise NotImplementedError

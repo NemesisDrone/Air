@@ -168,7 +168,7 @@ class Logger:
     ERROR: str = "ERROR"
     CRITICAL: str = "CRITICAL"
 
-    def __init__(self, ipc_node: abstracts.IIpcSender):
+    def __init__(self, ipc_node: abstracts.IIpcNode):
         """Initialize a logger object.
 
         :param ipc_node: The ipc node to use to send messages to ipc system.
