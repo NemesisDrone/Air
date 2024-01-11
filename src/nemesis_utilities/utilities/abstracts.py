@@ -5,7 +5,7 @@
 import abc
 
 
-class IPartialIpcNode(abc.ABC):
+class IIpcNode(abc.ABC):
     """Partial abstract class for the IPC node.
 
     :attr:`logger` is the logger instance.
