@@ -79,10 +79,12 @@ class PropulsionComponent(component.Component):
         self.logger.warning("[ESC] Arming ESC", self.NAME)
         self.pi.set_servo_pulsewidth(self.ESC_PIN, 0)
         time.sleep(1)
-        self.pi.set_servo_pulsewidth(self.ESC_PIN, self.max_value)
-        time.sleep(1)
-        self.pi.set_servo_pulsewidth(self.ESC_PIN, self.min_value)
-        time.sleep(1)
+        # TEST if this is necessary to arm the ESC
+        # self.pi.set_servo_pulsewidth(self.ESC_PIN, self.max_value)
+        # time.sleep(1)
+        # self.pi.set_servo_pulsewidth(self.ESC_PIN, self.min_value)
+        # time.sleep(1)
+
         self.logger.warning("[ESC] ESC ARMED | READY FOR DEPARTURE", self.NAME)
         self.redis.set("propulsion:speed", 0)
         self.is_armed = True
@@ -102,12 +104,11 @@ class PropulsionComponent(component.Component):
         self.is_armed = False
         self.redis.set("propulsion:armed", int(self.is_armed))
 
-    @ipc.Route(["propulsion:is_armed"], True).decorator
+    @ipc.Route(["propulsion:speed"], True).decorator
     def set_speed(self, call_data: ipc.CallData, payload: dict):
         """
         This method is used to set the speed of the ESC
         """
-        # TODO: payload is a dict, maybe some things to refacto ?
         self.logger.info(f"[ESC] Setting speed to {payload}", self.NAME)
         self.redis.set("propulsion:speed", json.dumps(payload))
 
