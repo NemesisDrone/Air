@@ -227,7 +227,7 @@ class Manager:
 
 
 if __name__ == "__main__":
-    r = redis.StrictRedis(host="redis", port=6379, db=0)
+    r = redis.StrictRedis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
     _ipc_node = ipc.IpcNode(
         "manager",
         r,

@@ -3,6 +3,7 @@ import threading
 import time
 import typing
 import unittest.mock
+import os
 
 import pytest
 from unittest.mock import Mock
@@ -91,7 +92,7 @@ def test_manager_integration():
     }
 
     # Init
-    r = redis.StrictRedis(host="redis", port=6379, db=0)
+    r = redis.StrictRedis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
     _ipc_node = ipc.IpcNode(
         "manager",
         r,

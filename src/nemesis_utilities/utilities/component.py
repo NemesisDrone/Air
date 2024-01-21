@@ -8,9 +8,8 @@
 """
 
 import traceback
-
+import os
 import redis
-
 from utilities import ipc, logger
 
 
@@ -168,7 +167,7 @@ def run_component(component_type: Component) -> None:
     :param component_type: The component class to run
     """
     # Ipc node setup
-    strict_redis = redis.StrictRedis("redis")
+    strict_redis = redis.StrictRedis(os.environ.get("REDIS_HOST"))
     ipc_node = ipc.IpcNode(
         ipc_id=component_type.NAME,
         strict_redis=strict_redis,
