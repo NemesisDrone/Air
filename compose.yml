@@ -5,8 +5,7 @@ services:
     ports:
       - "6379:6379"
     container_name: redis-nemesis-dev
-    networks:
-        - ground_network
+    network_mode: host
 
   dev:
     build:
@@ -31,9 +30,4 @@ services:
       - "/dev/i2c-1:/dev/i2c-1"
     # Temp fix to use IMU, otherwise there is only 0, and laser I guess ?
     user: root
-    networks:
-      - ground_network
-
-networks:
-    ground_network:
-      external: true
+    network_mode: host
