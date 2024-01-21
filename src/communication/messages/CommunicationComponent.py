@@ -1,4 +1,5 @@
 import json
+import pickle
 import socket
 import threading
 import os
@@ -18,6 +19,13 @@ def clear_route(_route: str) -> str:
         if splitted_route[0] == "log":
             return splitted_route[0]
     return _route
+
+
+def sanitize_log_data(data: dict) -> dict:
+    """
+    This method is used to sanitize data of IPC log message for base station
+    """
+    return pickle.loads(data)
 
 
 T = TypeVar('T')
@@ -75,11 +83,11 @@ class CommunicationComponent(component.Component):
         self.time_between_heartbeats = 1.5
 
         self.sensors = {
-            "sensors:gps": SensorEvent("gps", 1, 0),
+            "sensors:sim7600:gnss": SensorEvent("gps", 1, 0),
             "sensors:speed": SensorEvent("speed", 1, 0),
             "sensors:altitude": SensorEvent("altitude", 1, 0),
             "sensors:battery": SensorEvent("battery", 1, 0),
-            "sensors:full": SensorEvent("full", 0.2, 0, ["roll", "pitch", "yaw"]),
+            "sensors:sense_hat:data": SensorEvent("sense_hat", 0.5, 0, ["roll", "pitch", "yaw"]),
         }
 
     def start(self):
@@ -183,7 +191,15 @@ class CommunicationComponent(component.Component):
                 self.logger.error(f"Heartbeat emission error: {e}", self.NAME)
                 self.stop_threads = True
 
-    @ipc.Route(["sensors:*", "log:*", "state:*"], True).decorator
+    @ipc.Route([
+        "sensors:sense_hat:data",
+        "sensors:sim7600:gnss",
+        "log:CRITICAL:*",
+        "log:WARNING:*",
+        "log:ERROR:*",
+        "log:INFO:*",
+        "state:*"
+    ], True).decorator
     def handle_emission(self, call_data: ipc.CallData, payload: dict):
         """
         Method used to handle the emission of messages to the server.
@@ -199,6 +215,10 @@ class CommunicationComponent(component.Component):
                     return
 
                 data = self.sensors[_channel].sanitize_data(payload)
+
+            if _channel.startswith("log"):
+                _channel = clear_route(_channel)
+                data = sanitize_log_data(data)
 
             message = {
                 "type": _channel,
