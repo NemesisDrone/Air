@@ -3,7 +3,7 @@ import pickle
 import socket
 import threading
 import os
-from typing import Union, Generic, TypeVar, List
+from typing import Union, Generic, TypeVar, List, Callable
 from utilities import component, ipc
 import time
 from dataclasses import dataclass
@@ -41,6 +41,7 @@ class SensorEvent:
     time_between_events: float
     last_time: float
     necessary_data: Union[None, List[str]] = None
+    sanitize_method: Callable = None
 
     def can_send(self) -> bool:
         """
@@ -55,9 +56,14 @@ class SensorEvent:
         """
         This method is used to sanitize data of IPC message for base station. To send only the necessary data
         """
+        data = payload
         if self.necessary_data is not None and type(payload) == dict:
-            return {key: payload[key] for key in self.necessary_data}
-        return payload
+            data = {key: payload[key] for key in self.necessary_data}
+
+        if self.sanitize_method is not None:
+            data = self.sanitize_method(data)
+
+        return data
 
 
 class CommunicationComponent(component.Component):
@@ -87,7 +93,11 @@ class CommunicationComponent(component.Component):
             "sensors:speed": SensorEvent("speed", 1, 0),
             "sensors:altitude": SensorEvent("altitude", 1, 0),
             "sensors:battery": SensorEvent("battery", 1, 0),
-            "sensors:sense_hat:data": SensorEvent("sense_hat", 0.5, 0, ["roll", "pitch", "yaw"]),
+            "sensors:sense_hat:data": SensorEvent("sense_hat", 0.5, 0, ["roll", "pitch", "yaw"], lambda x: {
+                "roll": round(x["roll"], 2),
+                "pitch": round(x["pitch"], 2),
+                "yaw": round(x["yaw"], 2),
+            }),
         }
 
     def start(self):
