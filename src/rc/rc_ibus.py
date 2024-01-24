@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Tuple
 
 import serial
 import struct
@@ -31,7 +31,7 @@ class RcIbus:
         """
         self.serial = serial.Serial(self.port, self.baudrate)
 
-    def read(self) -> Union[tuple, int]:
+    def read(self) -> Union[Tuple, None]:
         """
         Read iBus data from serial port.
         :return: The iBus data.
@@ -49,7 +49,7 @@ class RcIbus:
         if self.validate(data):
             return self.unpack(data)
         else:
-            return 0
+            return None
 
     def validate(self, data: list) -> bool:
         """

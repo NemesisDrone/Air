@@ -1,7 +1,8 @@
 import json
 import threading
-from .rc_ibus import RcIbus
+from typing import Tuple
 
+from .rc_ibus import RcIbus
 from utilities import component, ipc
 
 
@@ -41,19 +42,38 @@ class RcComponent(component.Component):
         """
         return (value - 1000) / 10
 
+    def _update_channels(self, data: Tuple[int]) -> None:
+        """
+        Update the rc channels to rc:channels redis key
+        """
+        channels = {
+            "ch1": self._normalize_rc_channel(data[2]),
+            "ch2": self._normalize_rc_channel(data[3]),
+            "ch3": self._normalize_rc_channel(data[4]),
+            "ch4": self._normalize_rc_channel(data[5]),
+            "ch5": self._normalize_rc_channel(data[6]),
+            "ch6": self._normalize_rc_channel(data[7]),
+            "ch7": self._normalize_rc_channel(data[8]),
+            "ch8": self._normalize_rc_channel(data[9]),
+            "ch9": self._normalize_rc_channel(data[10]),
+            "ch10": self._normalize_rc_channel(data[11]),
+        }
+        self.redis.set("rc:channels", json.dumps(channels))
+
     def _rc_worker(self) -> None:
         """
         The rc worker
         """
         # Clear eventual previous data
-        self.redis.set("rc:data", "")
+        self.redis.set("rc:channels", "")
         self._update_custom_status()
 
         try:
             while self._worker_alive:
                 data = self._ibus.read()
-                if len(data) > 0:
-                    print(str(data), flush=True)
+                # If data checksum is valid
+                if data:
+                    self._update_channels(data)
 
         except Exception as e:
             self.logger.error(f"Rc worker stopped unexpectedly: {e}", self.NAME)
