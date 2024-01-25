@@ -168,9 +168,6 @@ class CommunicationComponent(component.Component):
         """
         Method used to handle the reception of messages from the server.
         """
-        # TODO: move this inside config component
-        self.ipc_node.send("config:get", payload={}, loopback=True)
-
         while not self.stop_threads:
             try:
                 message_length_bytes = self.client_socket.recv(4)

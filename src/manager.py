@@ -11,6 +11,10 @@ import hello as hello
 import sim7600.sim7600 as sim7600
 import vl53.vl53 as vl53
 import pi_sense_hat.pi_sense_hat as pi_sense_hat
+import communication.messages.CommunicationComponent as communication
+import propulsion.Propulsion as propulsion
+import rc.rc as rc
+import config.config as config
 
 #: The time in seconds to wait for the components to stop before killing them
 STOP_TIMOUT = 15
@@ -21,10 +25,14 @@ STOP_TIMOUT = 15
 components = {
     # name: class
     # Be careful to *always* use the name that you've used in your Component-inheriting class too!
+    "config": config.ConfigComponent,
     "hello": hello.HelloComponent,
     "sim7600": sim7600.Sim7600Component,
     "sense_hat": pi_sense_hat.SenseHatComponent,
     "vl53": vl53.Vl53Component,
+    "communication": communication.CommunicationComponent,
+    "propulsion": propulsion.PropulsionComponent,
+    "rc": rc.RcComponent,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -32,7 +40,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["sim7600", "sense_hat", "vl53"]
+    "default": ["communication", "config", "sim7600", "sense_hat", "vl53", "propulsion", "rc"],
     # "dev": ["test"],
 }
 
