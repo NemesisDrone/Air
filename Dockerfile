@@ -51,6 +51,9 @@ RUN python3 -m pip install -e .
 # --- Camera access ---
 RUN usermod -aG video nemesis
 
+# --- GST encoder for H264 (currently to enable simuling): vah264lpenc
+RUN apt install gstreamer1.0-plugins-bad -y
+
 # ----------------------------------------------------------------------------------------------------------------------
 #                                                EXECUTION
 # ----------------------------------------------------------------------------------------------------------------------

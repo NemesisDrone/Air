@@ -11,6 +11,7 @@ import hello as hello
 import sim7600.sim7600 as sim7600
 import vl53.vl53 as vl53
 import pi_sense_hat.pi_sense_hat as pi_sense_hat
+import nvs.nvs as nvs
 
 #: The time in seconds to wait for the components to stop before killing them
 STOP_TIMOUT = 15
@@ -25,6 +26,7 @@ components = {
     "sim7600": sim7600.Sim7600Component,
     "sense_hat": pi_sense_hat.SenseHatComponent,
     "vl53": vl53.Vl53Component,
+    "NVS": nvs.NVSComponent,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -32,7 +34,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["sim7600", "sense_hat", "vl53"]
+    "default": ["sim7600", "sense_hat", "vl53", "NVS"]
     # "dev": ["test"],
 }
 
