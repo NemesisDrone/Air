@@ -26,7 +26,7 @@ services:
       - redis
     command: [ "python3", "/app/src/manager.py"]
     env_file:
-      - ./src/.env
+      - ./.env
     devices:
       - "/dev/i2c-1:/dev/i2c-1"
     # Temp fix to use IMU, otherwise there is only 0, and laser I guess ?
