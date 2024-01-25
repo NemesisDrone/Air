@@ -168,6 +168,9 @@ class CommunicationComponent(component.Component):
         """
         Method used to handle the reception of messages from the server.
         """
+        # TODO: move this inside config component
+        self.ipc_node.send("config:get", payload={}, loopback=True)
+
         while not self.stop_threads:
             try:
                 message_length_bytes = self.client_socket.recv(4)
@@ -211,7 +214,8 @@ class CommunicationComponent(component.Component):
         "log:WARNING:*",
         "log:ERROR:*",
         "log:INFO:*",
-        "state:*"
+        "state:*",
+        "config:get",
         ], True).decorator
     def handle_emission(self, call_data: ipc.CallData, payload: dict):
         """
