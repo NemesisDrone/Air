@@ -1,0 +1,78 @@
+The Sim7600 component
+=====================
+
+Integration of the sim7600H raspberry pi hat for GNSS positioning and 4G connectivity.
+Component name: `sim7600`
+
+Custom Status
+-------------
+
+The component publishes and set a custom status message to `sensors:sim7600:status`.
+
+.. code-block::
+
+    {
+    "gnss_worker_alive": boolean,
+    "gnss_emulation": boolean
+    }
+
+The `gnss_worker_alive` field indicates if the GNSS worker is alive or not.
+
+.. warning::
+    Even if this field is set to `true`, the GNSS worker may still be initializing and so not broadcasting any position.
+    The value of the key/value storage would be an empty string in this case.
+
+The `gnss_emulation` field indicates if the GNSS worker is emulating a position or not. If this field is set to `true`,
+the sim7600 is not recognized and data is emulated.
+
+Data
+----
+
+The component publishes and set the data to `sensors:sim7600:gnss`.
+
+.. code-block::
+
+    {
+    "fixMode": int,
+    "gpsSat": int,
+    "gloSat": int,
+    "beiSat": int,
+    "lat": tuple[int, float],
+    "latInd": str,
+    "lon": tuple[int, float],
+    "lonInd": str,
+    "date": str,
+    "time": str,
+    "alt": float,
+    "speed": float,
+    "course": str,
+    "pdop": float,
+    "hdop": float,
+    "vdop": float,
+    "timestamp": float
+    }
+
+
+The `fixMode` field is not meaningful.
+
+The `gpsSat`, `gloSat` and `beiSat` fields are the number of satellites used for the fix.
+
+The `lat` and `lon` fields are the latitude and longitude in degrees and minutes, e.g. (48, 123.4567) for 48° 123.4567'.
+
+The `latInd` and `lonInd` fields are the latitude and longitude indicators, e.g. N and E.
+
+.. warning::
+    If the latitude indicator is S, the latitude degrees must be multiplied by -1.
+    If the longitude indicator is W, the longitude degrees must be multiplied by -1.
+
+The `date` and `time` fields are the date and time of the fix. The format is DDMMYY and HHMMSS.XX.
+
+The `alt` field is the altitude in meters.
+
+The `speed` field is the speed in km/h. This field is not tested and may be wrong.
+
+The `course` field is the course in degrees. This field is not tested and may be wrong.
+
+The `pdop`, `hdop` and `vdop` fields are the pdop, hdop and vdop.
+
+The `timestamp` field is the timestamp obtained with `time.time()`.

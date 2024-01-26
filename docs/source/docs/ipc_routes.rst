@@ -30,21 +30,11 @@ Logs
         completed with any additional filter. This route is used by the
         :meth:`src.nemesis_utilities.utilities.ipc.IpcNode.log` method.
 
-    * - stdout
-      - - "message": The log message
-      - Every single messages sent to the terminal (stdout) is sent to this route.
-        This route is used by the :meth:`src.nemesis_utilities.utilities.ipc._StdOverrider` class.
-
-    * - stderr
-      - - "message": The log message
-      - Every single messages sent to the terminal (stderr) is sent to this route.
-        This route is used by the :meth:`src.nemesis_utilities.utilities.ipc._StdOverrider` class.
-
 State
 ------
 
-Set
-~~~
+Update component state
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
     :header-rows: 1
@@ -67,6 +57,10 @@ Set
       - Ask the manager to restart the component <component>. If the component is already stopped, it will be started.
           If the component is already started, it will be stopped and started again.
 
+    * - state:start_all
+      - {}
+      - Ask the manager to start all components.
+
     * - state:stop_all
       - {}
       - Ask the manager to stop all components.
@@ -75,8 +69,8 @@ Set
       - {}
       - Ask the manager to restart all components.
 
-Events
-~~~~~~
+State changes event
+~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
     :header-rows: 1
@@ -118,10 +112,13 @@ Current state
 
     * - state:<component>:state
       - The state
-      - Sent by the component when it is started or stopped to update its current state.
+      - Set by the component when it is started or stopped to update its current state.
 
 Other
 ~~~~~
+
+.. note::
+    This route is not meant to be used directly.
 
 .. list-table::
     :header-rows: 1
@@ -135,61 +132,12 @@ Other
       - - "component": The component name
       - Sent by the manager to the component to ask it to stop.
 
-Custom States
-~~~~~~~~~~~~~
-
-.. note::
-    Custom states depends on the component and are used to give more accurate information about the component state.
-
-.. list-table::
-    :header-rows: 1
-    :stub-columns: 1
-
-    * - Route
-      - Data structure
-      - Purpose
-
-    * - state:laser:custom
-      - - "alive": True/False (If the component is reading data)
-        - "valid": True/False (If the component is working/detected)
-      - Sent by the laser component when its custom state is updated.
-
-    * - state:sensors:custom
-      - - "alive": True/False (If the component is reading data)
-        - "valid": True/False (If the component is working/detected)
-      - Sent by the sensors component when its custom state is updated.
-
-    * - state:sim7600:custom
-      - - "alive": True/False (If the component is reading data)
-        - "valid": True/False (If the component is working/detected)
-      - Sent by the sim7600 component when its custom state is updated.
-
-.. list-table::
-    :header-rows: 1
-    :stub-columns: 1
-
-    * - Key
-      - Data structure
-      - Purpose
-
-    * - state:laser:custom
-      - - "alive": True/False (If the component is reading data)
-        - "valid": True/False (If the component is working/detected)
-      - Set by the laser component when its custom state is updated.
-
-    * - state:sensors:custom
-      - - "alive": True/False (If the component is reading data)
-        - "valid": True/False (If the component is working/detected)
-      - Set by the sensors component when its custom state is updated.
-
-    * - state:sim7600:custom
-      - - "alive": True/False (If the component is reading data)
-        - "valid": True/False (If the component is working/detected)
-      - Set by the sim7600 component when its custom state is updated.
-
 Sensors
 -------
 
+Sensors custom status
+~~~~~~~~~~~~~~~~~~~~~
+
 .. list-table::
     :header-rows: 1
     :stub-columns: 1
@@ -198,62 +146,55 @@ Sensors
       - Data structure
       - Purpose
 
-    * - sensors:full
-      - - "timestamp": The timestamp
-        - "roll": The roll angle (-180° to +180°)
-        - "pitch": The pitch angle (-180° to +180°)
-        - "yaw": The yaw angle (-180° to +180°)
-        - "gyroRoll": The roll gyroscope value (Radians/s)
-        - "gyroPitch": The pitch gyroscope value (Radians/s)
-        - "gyroYaw": The yaw gyroscope value (Radians/s)
-        - "accelX": The X accelerometer value (G)
-        - "accelY": The Y accelerometer value (G)
-        - "accelZ": The Z accelerometer value (G)
-        - "compassX": The X compass value (uT Micro Teslas)
-        - "compassY": The Y compass value (uT Micro Teslas)
-        - "compassZ": The Z compass value (uT Micro Teslas)
-        - "pressure": The pressure value (Millibars /!\ Broken)
-        - "temperature": The temperature value (Celcius /!\ Broken)
-        - "humidity": The humidity value (Percentage /!\ Broken)
-      - Sensors data
+    * - sensors:sim7600:status
+      - - "gnss_worker_alive": if the gnss worker is currently fetching gps position
+        - "gnss_emulation": if the data is emulated or not (real data)
+      - Used by the sim7600 sensor to send its status.
 
-    * - sensors:laser:distance
-      - The distance (in ??)
-      - Used by the laser sensor to send the distance measured.
+    * - sensors:sense_hat:status
+      - - "sense_hat_worker_alive": if the sense worker is currently fetching sense_hat data
+        - "sense_hat_emulation": if the data is emulated or not (real data)
+      - Used by the sense_hat sensor to send its status.
 
-    * - sensors:sim7600:gnss
-      - - "fixMode": the fix mode (useless)
-        - "gpsSat": the number of GPS satellites
-        - "gloSat": the number of GLONASS satellites
-        - "beiSat": the number of BEIDOU satellites
-        - "lat": the latitude of format (degrees, minutes)
-        - "latInd": the latitude indicator (N or S) WARNING, multiply lat degrees by -1 if latInd is S
-        - "lon": the longitude of format (degrees, minutes)
-        - "lonInd": the longitude indicator (E or W) WARNING, multiply lon degrees by -1 if lonInd is W
-        - "date": the date of format DDMMYY
-        - "time": the time of format HHMMSS
-        - "alt": the altitude in meters
-        - "speed": the speed in km/h (not tested)
-        - "course": the course in degrees (not tested)
-        - "pdop": the pdop
-        - "hdop": the hdop
-        - "vdop": the vdop
+    * - sensors:vl53:status
+      - - "vl53_worker_alive": if the vl53 worker is currently fetching vl53 data
+        - "first_sensor_emulation": if the first sensor data is emulated or not (real data)
+        - "second_sensor_emulation": if the second sensor data is emulated or not (real data)
+      - Used by the vl53 sensor to send its status.
 
-      - Used by the sim7600 sensor to send the GNSS data.
-
-.. note::
-    Sensors data is also stored as key/value in the Redis db.
+Sensors data
+~~~~~~~~~~~~
 
 .. list-table::
     :header-rows: 1
     :stub-columns: 1
 
-    * - Key
+    * - Route
       - Data structure
       - Purpose
 
-    * - sensors:full
-      - - "timestamp": The timestamp
+    * - sensors:sim7600:gnss
+      - - "fixMode": the fix mode (useless)
+        - "gpsSat": the number of GPS satellites
+        - "gloSat": the number of GLONASS satellites
+        - "beiSat": the number of BEIDOU satellites
+        - "lat": the latitude of format (degrees, minutes)
+        - "latInd": the latitude indicator (N or S) WARNING, multiply lat degrees by -1 if latInd is S
+        - "lon": the longitude of format (degrees, minutes)
+        - "lonInd": the longitude indicator (E or W) WARNING, multiply lon degrees by -1 if lonInd is W
+        - "date": the date of format DDMMYY
+        - "time": the time of format HHMMSS.XX
+        - "alt": the altitude in meters
+        - "speed": the speed in km/h (not tested), may be empty
+        - "course": the course in degrees (not tested), may be empty
+        - "pdop": the pdop
+        - "hdop": the hdop
+        - "vdop": the vdop
+        - "timestamp": The timestamp (time.time())
+      - GNSS data uploaded by the GNSS worker of the sim7600 sensor.
+
+    * - sensors:sense_hat:data
+      - - "timestamp": The timestamp (time.time() for emulated data, currently unknown for real data, make some tests)
         - "roll": The roll angle (-180° to +180°)
         - "pitch": The pitch angle (-180° to +180°)
         - "yaw": The yaw angle (-180° to +180°)
@@ -269,29 +210,13 @@ Sensors
         - "pressure": The pressure value (Millibars /!\ Broken)
         - "temperature": The temperature value (Celcius /!\ Broken)
         - "humidity": The humidity value (Percentage /!\ Broken)
-      - Sensors data
+      - Sense hat data
 
-    * - sensors:laser:distance
-      - The distance (in ??)
-      - Used by the laser sensor to send the distance measured.
+    * - sensors:vl53:ranges
+      - - "first_range": The first range in mm
+        - "second_range": The second range in mm
+      - VL53L0X data
 
-    * - sensors:sim7600:gnss
-      - - "fixMode": the fix mode (useless)
-        - "gpsSat": the number of GPS satellites
-        - "gloSat": the number of GLONASS satellites
-        - "beiSat": the number of BEIDOU satellites
-        - "lat": the latitude of format (degrees, minutes)
-        - "latInd": the latitude indicator (N or S) WARNING, multiply lat degrees by -1 if latInd is S
-        - "lon": the longitude of format (degrees, minutes)
-        - "lonInd": the longitude indicator (E or W) WARNING, multiply lon degrees by -1 if lonInd is W
-        - "date": the date of format DDMMYY
-        - "time": the time of format HHMMSS
-        - "alt": the altitude in meters
-        - "speed": the speed in km/h (not tested)
-        - "course": the course in degrees (not tested)
-        - "pdop": the pdop
-        - "hdop": the hdop
-        - "vdop": the vdop
 
-      - Used by the sim7600 sensor to send the GNSS data.
-
+.. note::
+    Sensors data is also stored as key/value in the Redis db.

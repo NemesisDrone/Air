@@ -1,237 +1,184 @@
+"""Abstraction to create reusable microservices as components managed by the manager
+
+:class:`ComponentState` enum of possible component states
+
+:class:`Component` base class for components
+
+:meth:`run_component` called by the manager to run a component
 """
-Overview & Usage
-----------------
-This module implements a component, a component represents and handle a microservice running in its own process.
-Components are managed by the manager and are meant to be subclassed. The subclass should override the :meth:`start`
-and :meth:`stop` methods and the :attr:`NAME` attribute.
 
-.. code-block:: python
-
-    class TestComponent(Component):
-        NAME = "test"
-
-        def __init__(self):
-            super().__init__()  # Very important, do not forget this line
-
-            # Do some init stuff here
-            self.log("test init")
-
-        def start(self):
-            self.log("test start")
-            time.sleep(1)
-
-        def stop(self):
-            self.log("test stop")
-            time.sleep(1)
+import traceback
+import os
+import redis
+from utilities import ipc, logger
 
 
-    test = TestComponent()
-    test.start()
-    time.sleep(2)
-    test.stop()
+class ComponentState:
+    """Enum of possible component states
 
-    # Output without debug:
-    # [15-10-2023 12:35:56] INFO@test: test start
-    # [15-10-2023 12:35:59] INFO@test: test stop
-"""
-import dataclasses
-import time
-
-import utilities.ipc as ipc
-
-
-@dataclasses.dataclass
-class State:
-    """
-    Enumerations of all possible states of a component.
+    :cvar STOPPED: The component is stopped
+    :cvar STARTING: The component is starting
+    :cvar STARTED: The component is started
+    :cvar STOPPING: The component is stopping
     """
 
-    #: The component is starting up.
-    STARTING = "starting"
-    #: The component is running.
-    STARTED = "started"
-    #: The component is shutting down.
-    STOPPING = "stopping"
-    #: The component is not running.
     STOPPED = "stopped"
+    STARTING = "starting"
+    STARTED = "started"
+    STOPPING = "stopping"
 
 
-class Component(ipc.IpcNode):
+class Component:
+    """Base class for components
+
+    :cvar NAME: The name of the component, cannot be None, defaults to None
+
+    :attr:`logger` the logger instance
+    :attr:`redis` the redis instance
+    :attr:`ipc_node` the ipc node instance
+
+    :meth:`get_state` get the current redis state of a component
+    :meth:`init_state` set the redis state of a component to stopped
+    :meth:`start_component` start the component
+    :meth:`start` do some stuff when starting the component
+    :meth:`stop` do some stuff when stopping the component
     """
-    Represent a component. Components are managed by the manager and represents a single process.
 
-    .. note::
-        Components are not meant to be used directly, but rather to be subclassed. The subclass should override the
-        :meth:`start` and :meth:`stop` methods and the :attr:`NAME` attribute.
-    """
+    NAME = None
 
-    NAME = "component"
+    @staticmethod
+    def get_state(_redis: redis.Redis, component: str) -> str:
+        """Get the current redis state of a component
 
-    def __init__(self):
+        :param _redis: The redis instance to use
+        :param component: The component name to get the state of
+
+        :return: The state of the component, one of :class:`ComponentState`
         """
-        Create a new component. The component will be in the :attr:`State.STOPPED` state.
-        """
-        super().__init__(ipc_id=self.__class__.NAME)
-        #: The current state of the component, picked from the :class:`State <State>` class.
-        self.state = State.STOPPED
+        return _redis.get(f"state:{component}").decode()
 
-        # Override start & stop methods
-        self.start = self._start_method(self.start)
-        self.stop = self._stop_method(self.stop)
+    @staticmethod
+    def init_state(_redis: redis.Redis, component: str) -> None:
+        """Set the redis state of a component to stopped
 
-        # Override stop regex
-        self.regexes[f"^state:{self.NAME}:stop$"] = self.regexes.pop(
-            "^state:{NAME}:stop$"
-        )
+        :param _redis: The redis instance to use
+        :param component: The component name to set the state of
+        """
+        _redis.set(f"state:{component}", ComponentState.STOPPED)
 
-    @ipc.route("state:{NAME}:stop")
-    def _call_stop(self, payload: dict):
+    def __init__(self, ipc_node: ipc.IpcNode):
+        """Initialize the component
+        Do some initialization stuff, starting stuff is done in :meth:`start`.
+
+        :param ipc_node: The ipc node instance to use
         """
-        Route to stop the component, should only be used by the manager.
+        assert self.__class__.NAME is not None
+
+        #: The current state of the component, one of :class:`ComponentState`
+        self._state = ComponentState.STOPPED
+
+        #: The ipc node instance to use
+        self._ipc_node = ipc_node
+
+        #: The ipc route to stop the component
+        self._stop_component = ipc.Route([f"state:{self.NAME}:stop"], False).decorator(Component._stop_component)
+
+        # Route binding and ipc node start
+        self._ipc_node.bind_routes(self)
+        self._ipc_node.start()
+
+    @property
+    def logger(self) -> logger.Logger:
+        """The logger instance"""
+        return self._ipc_node.logger
+
+    @property
+    def redis(self) -> redis.Redis:
+        """The redis instance"""
+        return self._ipc_node.redis
+
+    @property
+    def ipc_node(self) -> ipc.IpcNode:
+        """The ipc node instance"""
+        return self._ipc_node
+
+    def _update_state(self, state: str, from_state: str) -> None:
+        """Update the state of the component
+
+        :param state: The new state of the component, one of :class:`ComponentState`
+        :param from_state: The state the component must be in to update the state, one of :class:`ComponentState`
         """
+        # Check current state is correct
+        assert self._state == from_state
+
+        # Local update
+        self._state = state
+
+        # Redis update
+        self._ipc_node.redis.set(f"state:{self.NAME}", state)
+        self._ipc_node.send(f"state:{self.NAME}:{state}", {"component": self.NAME})
+        self._ipc_node.logger.info(f"component is {state}", self.NAME, "state")
+
+    def _set_starting(self) -> None:
+        """Set the component state to starting"""
+        self._update_state(ComponentState.STARTING, ComponentState.STOPPED)
+
+    def _set_started(self) -> None:
+        """Set the component state to started"""
+        self._update_state(ComponentState.STARTED, ComponentState.STARTING)
+
+    def _set_stopping(self) -> None:
+        """Set the component state to stopping"""
+        self._update_state(ComponentState.STOPPING, ComponentState.STARTED)
+
+    def _set_stopped(self) -> None:
+        """Set the component state to stopped"""
+        self._update_state(ComponentState.STOPPED, ComponentState.STOPPING)
+        self._ipc_node.stop()
+
+    def start_component(self) -> None:
+        """Start the component"""
+        self._set_starting()
+        self.start()
+        self._set_started()
+
+    def _stop_component(self, call_data, payload) -> None:
+        """Stop the component
+
+        :param call_data: The call data of the call
+        :param payload: The payload of the call
+        """
+        self._set_stopping()
         self.stop()
+        self._set_stopped()
 
-    def _start_method(self, func):
-        def wrapper():
-            if self._set_starting():
-                r = func()
-                if not self._set_started():
-                    raise RuntimeError("Component failed to start.")
-                return r
-            else:
-                raise RuntimeError("Component is not stopped.")
+    def start(self) -> None:
+        """Do some stuff when starting the component"""
+        raise NotImplementedError()
 
-        return wrapper
-
-    def _stop_method(self, func):
-        def wrapper():
-            if self._set_stopping():
-                r = func()
-                if not self._set_stopped():
-                    raise RuntimeError("Component failed to stop.")
-                return r
-            else:
-                raise RuntimeError("Component is not started.")
-
-        return wrapper
-
-    def _set_starting(self) -> bool:
-        """
-        Low level method to set the component starting. Should be called by the :meth:`start` method when overriding.
-
-        :return: True if the component started successfully, False otherwise.
-        """
-        if self.state != State.STOPPED:
-            return False
-        super().start()
-        self.state = State.STARTING
-        self.send(
-            f"state:{self.__class__.NAME}:starting", {"component": self.__class__.NAME}
-        )
-        self.log(f"component starting", ipc.LogLevels.DEBUG, "state")
-        return True
-
-    def _set_started(self) -> bool:
-        """
-        Low level method to set the component started. Should be called by the :meth:`start` method when overriding.
-        """
-        if self.state != State.STARTING:
-            return False
-        self.state = State.STARTED
-        self.send(
-            f"state:{self.__class__.NAME}:started", {"component": self.__class__.NAME}
-        )
-        self.log(f"component started", ipc.LogLevels.DEBUG, "state")
-        return True
-
-    def _set_stopping(self) -> bool:
-        """
-        Low level method to set the component stopping. Should be called by the :meth:`stop` method when overriding.
-        """
-        if self.state != State.STARTED:
-            return False
-        self.state = State.STOPPING
-        self.send(
-            f"state:{self.__class__.NAME}:stopping", {"component": self.__class__.NAME}
-        )
-        self.log(f"component stopping", ipc.LogLevels.DEBUG, "state")
-        return True
-
-    def _set_stopped(self) -> bool:
-        """
-        Low level method to set the component stopped. Should be called by the :meth:`stop` method when overriding.
-        """
-        if self.state != State.STOPPING:
-            return False
-        self.state = State.STOPPED
-        self.send(
-            f"state:{self.__class__.NAME}:stopped", {"component": self.__class__.NAME}
-        )
-        self.log(f"component stopped", ipc.LogLevels.DEBUG, "state")
-        super().stop()
-        return True
-
-    def start(self):
-        """
-        Start the component. Should be overridden by the component.
-
-        .. danger::
-            This method should never send ipc messages to itself using the loopback parameter as this will cause a
-            deadlock.
-        """
-        pass
-
-    def stop(self):
-        """
-        Stop the component. Should be overridden by the component.
-
-        .. danger::
-            This method should never send ipc messages to itself using the loopback parameter as this will cause a
-            deadlock.
-        """
-        pass
-
-    # We reimplement this method, ignore the signature warning
-    # noinspection PyMethodOverriding
-    def log(
-        self, message: str, level: str = ipc.LogLevels.INFO, extra_route: str = None
-    ):
-        """
-        Log a message to stdout and to ipc system as "log.{level}.{component_name}" route.
-
-        :param str message: The message to log.
-        :param str level: The log level, pick it from :meth:`LogLevels <ipc.LogLevels>`, defaults to LogLevels.INFO.
-        :param str extra_route: An additional extra route that will be appended to the route, for example, if I give
-            `a.b.c` as extra route, the message will be sent to `log.{level}.{label}.a.b.c` route, defaults to "" (resulting in
-            `log.{level}.{component_name}` route).
-        """
-        super().log(message, level, self.__class__.NAME, extra_route)
+    def stop(self) -> None:
+        """Do some stuff when stopping the component"""
+        raise NotImplementedError()
 
 
-if __name__ == "__main__":
+def run_component(component_type: Component) -> None:
+    """Run a component
 
-    class TestComponent(Component):
-        NAME = "test"
+    :param component_type: The component class to run
+    """
+    # Ipc node setup
+    strict_redis = redis.StrictRedis(os.environ.get("REDIS_HOST"))
+    ipc_node = ipc.IpcNode(
+        ipc_id=component_type.NAME,
+        strict_redis=strict_redis,
+        pubsub=strict_redis.pubsub(),
+    )
+    ipc_node.set_logger(logger.Logger(ipc_node))
 
-        def __init__(self):
-            super().__init__()  # Very important, do not forget this line
-
-            # Do some init stuff here
-            self.log("test init")
-
-        def start(self):
-            self.log("test start")
-            time.sleep(1)
-
-        def stop(self):
-            self.log("test stop")
-            time.sleep(1)
-
-    test = TestComponent()
-    test.start()
-    time.sleep(2)
-    test.stop()
-
-    # Output without debug:
-    # [15-10-2023 12:35:56] INFO@test: test start
-    # [15-10-2023 12:35:59] INFO@test: test stop
+    try:
+        comp = component_type(ipc_node)
+        comp.start_component()
+    except Exception as e:
+        ipc_node.logger.error(f"Could not start component: {e}\n{traceback.format_exc()}", component_type.NAME)
+        ipc_node.stop()
+        return

@@ -1,496 +1,651 @@
+"""Abstracts Redis pub/sub to provide a simple IPC system allowing node to node communication through routes defined
+using regular expressions and implemented with a simple decorator.
+
+:class:`IpcTimeoutError` raised when a blocking call times out.
+
+:class:`CallData` represents the data of an IPC function call.
+
+:class:`Route` represents an IPC route used to route IPC function calls.
+
+:class:`IpcNode` represents an IPC node used to communicate with other IPC nodes through redis pub/sub.
 """
-Overview & Usage
-----------------
-This module implements a simple IPC and logging system based on Redis.
-
-The :meth:`IpcNode <IpcNode>` class allow you to communicate with other nodes with
-a route based system and to log messages. A route is a function decorated with
-:meth:`route <route>`, this function will be called when a message is
-received on the channel matching the regexes provided in the decorator.
-
-.. code-block:: python
-
-    class PingPongNode(IpcNode):
-
-        # I register a ping route, all messages sent to `ping` route will be received by this function
-        @route("ping")
-        def ping(self, payload: dict):
-            self.log("Ping!")
-        
-            # I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.
-            self.send("pong", {"extra_message": "Hello World!"}, loopback=True)
-
-        # I register a pong route, all messages sent to `pong` route will be received by this function
-        @route("pong")
-        def pong(self, payload: dict):
-            self.log("Pong!")
-            # I can access the data sent by the ping function
-            self.log(payload["extra_message"])
-
-        # I register a blocking route, all messages sent to `return_pi` route will be received by this function
-        # Value will be sent back to the sender
-        @route("return_pi", blocking=True, thread=True)
-        def return_pi(self, payload: dict):
-            return 3.14159265359
-
-
-    # I create a new node called `ipc-node-test`
-    n = PingPongNode("ipc-node-test")
-    # I start the node
-    n.start()
-    # I send a message to the `ping` route and use `loopback` since I want to receive it with the same node
-    n.send("ping", {}, loopback=True)
-    # I send a message to the `return_pi`  blocking route, this will wait for the response
-    n.log(n.send_blocking("return_pi", {}, loopback=True), level=LogLevels.DEBUG)
-    # I don't forget to stop the node !
-    n.stop()
-
-    '''
-    Output:
-    [15-10-2023 13:06:51] INFO@PingPongNode: Ping!
-    [15-10-2023 13:06:51] INFO@PingPongNode: Pong!
-    [15-10-2023 13:06:51] INFO@PingPongNode: Hello World!
-    '''
-
-.. tip::
-    For more advanced usage, see the documentation of :meth:`route <route>`
-    decorator and :meth:`IpcNode <IpcNode>` class bellow.
-"""
-import dataclasses
-import datetime
-import os
+import inspect
 import pickle
 import re
 import threading
-import sys
-import time
 import traceback
+import typing
 import uuid
 
 import redis
 
-IPC_BLOCKING_RESPONSE_ROUTE = "IPC_BLOCKING_RESPONSE_ROUTE_IGNORE_IT"
+from utilities import abstracts
+from utilities import logger as lg
 
 
-def route(
-    regex: str,
-    *args,
-    thread: bool = False,
-    blocking: bool = False,
-    get_route: bool = False,
-):
-    """
-    Decorate a method with this decorator to register it as a route.
+VERBOSE_PAYLOAD_LOGGING = False
 
-    .. warning::
-        The decorated method must have a single parameter called `payload` to receive the data sent by the sender.
 
-    :param regex: A regex to match the route. For example, if a message is sent to `a:b:c`, I can receive it by giving
-        `a:*:c` as regex to this function, this will also work by giving `a:*`, `a:b:*`, `a:b:c` and more.
-    :param args: Additional regexes, to listen to multiple routes.
-    :param thread: If True, the decorated function will be called in a new thread. If this parameter is set to False,
-        when the decorated function is called, the IPC node will not be able to receive new messages until the function
-        returns.
-    :param blocking: If true, the decorated function return value will be sent back to the sender, the sender will
-        wait for the response before continuing.
-    :param get_route: If true, the decorated function will receive the route as a second parameter.
+class IpcTimeoutError(Exception):
+    """Raised when a blocking call times out."""
 
-    .. warning::
-        With blocking mode, your function has to return None or a json serializable object only, otherwise a
-        warning will be printed and the function will return None.
+    pass
 
-        Be also sure that your blocking route is registered ONLY ONCE. If you register it multiple times, the sender
-        will receive only the first response, but multiple callbacks will be called.
-    .. note::
-        If your function raises an exception, the exception will be automatically raised on the sender side.
+
+class CallData:
+    """Call data of an IPC function call.
+
+    :attr:`channel` The channel the call was sent on.
+    :attr:`sender` The sender of the call (ipc node id).
+    :attr:`loopback` Whether the call is meant to be received by the sender or not.
+    :attr:`payload` The payload of the call.
+    :attr:`concurrent` Whether the call is concurrent or not. If set to True, will run the function in a separate
+    thread. If set to False, will run the function in the listener thread, the listener will be blocked until the
+    function returns.
+    :attr:`blocking_response_channel` The channel to send the blocking response on if applicable.
+    :attr:`blocking` Whether the call is blocking or not.
+
+    :meth:`dumps` Serialize the calldata into bytes.
+    :meth:`loads` Deserialize the calldata from bytes.
+
     """
 
-    def decorator(func):
-        def wrapper(self, payload, _route=None):
-            if blocking and IPC_BLOCKING_RESPONSE_ROUTE in payload:
-                blocking_route = payload.pop(IPC_BLOCKING_RESPONSE_ROUTE)
+    def __init__(
+        self,
+        channel: str,
+        sender: str,
+        loopback: bool,
+        payload: dict,
+        concurrent: bool = None,
+        blocking_response_channel: typing.Union[str, None] = None,
+    ):
+        """Create a new calldata.
 
-                try:
-                    if _route:
-                        r = func(self, payload, _route)
-                    else:
-                        r = func(self, payload)
-                except Exception as e:
-                    r = e
-                try:
-                    self.send(blocking_route, r, loopback=True)
-                except Exception as e:
-                    print(
-                        f"IpcNode[{self.ipc_id}][{self.__class__.__name__}] ERROR, blocking route {regex} "
-                        f"failed to send response: {e}",
-                        flush=True,
-                    )
-            else:
-                if _route:
-                    func(self, payload, _route)
-                else:
-                    func(self, payload)
-
-        wrapper.regexes = [regex, *args]
-        for i in range(len(wrapper.regexes)):
-            wrapper.regexes[i] = f"^{wrapper.regexes[i].replace('*', '.*')}$"
-
-        wrapper.thread = thread
-        wrapper.get_route = get_route
-
-        return wrapper
-
-    return decorator
-
-
-@dataclasses.dataclass
-class LogLevels:
-    """
-    An enum containing all log levels.
-    """
-
-    DEBUG: str = "DEBUG"
-    INFO: str = "INFO"
-    WARNING: str = "WARNING"
-    ERROR: str = "ERROR"
-    CRITICAL: str = "CRITICAL"
-
-
-class IpcNode:
-    """
-    An IPC node used to communicate with other nodes and to log messages.
-
-    .. note::
-        This class is not meant to be used directly except if you just need to send messages,
-        you should inherit from it and implement your own routes.
-    """
-
-    def __init__(self, ipc_id: str = None, host: str = None, port=6379, db=0, **kwargs):
+        :param channel: The channel the call was sent on.
+        :param sender: The sender of the call (ipc node id).
+        :param loopback: Whether the call is meant to be received by the sender or not.
+        :param payload: The payload of the call.
+        :param concurrent: Whether the call is concurrent or not. If set to True, will run the function in a separate
+        thread. If set to False, will run the function in the listener thread, the listener will be blocked until
+        the function returns.
+        :param blocking_response_channel: The channel to send the blocking response on if applicable, defaults to None.
         """
-        Create a new IPC node used to communicate with other nodes.
 
-        :param str ipc_id: IPC node id, if default value is used, a random uuid will be generated, defaults to None.
-        :param str host: Redis server hostname, when using IPC from container to container, use the container name,
-            defaults to 'redis-ipc'.
-        :param int port: Redis server port, defaults to 6379.
-        :param int db: Redis server db, defaults to 0.
+        # Fields are accessed through the properties to ensure immutability.
+        self._channel = channel
+        self._sender = sender
+        self._loopback = loopback
+        self._payload = payload
+        self._concurrent = concurrent
+        self._blocking_response_channel = blocking_response_channel
+
+    @property
+    def channel(self) -> str:
+        """Get the channel the call was sent on."""
+        return self._channel
+
+    @property
+    def sender(self) -> str:
+        """Get the sender of the call (ipc node id)."""
+        return self._sender
+
+    @property
+    def loopback(self) -> bool:
+        """Get whether the call is meant to be received by the sender or not."""
+        return self._loopback
+
+    @property
+    def payload(self) -> dict:
+        """Get the payload of the call."""
+        return self._payload
+
+    @property
+    def concurrent(self) -> typing.Union[bool, None]:
+        """Whether the call is concurrent or not. If set to True, will run the function in a separate thread. If set to
+        False, will run the function in the listener thread, the listener will be blocked until the function returns.
         """
-        super().__init__(**kwargs)  # Kwargs forwarding to allow multiple inheritance
+        return self._concurrent
 
-        #: :meth:`str` IPC node id
-        self.ipc_id = ipc_id if ipc_id is not None else "ipc-node-" + str(uuid.uuid4())
+    @property
+    def blocking_response_channel(self) -> typing.Union[str, None]:
+        """The channel to send the blocking response on if applicable."""
+        return self._blocking_response_channel
 
-        #: :meth:`redis.StrictRedis` Redis client
-        self.r = redis.StrictRedis(
-            host=host if host is not None else os.environ.get("REDIS_CONTAINER_NAME"),
-            port=port,
-            db=db,
+    @property
+    def blocking(self) -> bool:
+        """Whether the call is blocking or not."""
+        return self._blocking_response_channel is not None
+
+    def dumps(self) -> bytes:
+        """Serialize the calldata into bytes through pickle.
+
+        :return: The serialized calldata as bytes.
+        """
+        return pickle.dumps(
+            {
+                "channel": self._channel,
+                "sender": self._sender,
+                "loopback": self._loopback,
+                "payload": self._payload,
+                "concurrent": self._concurrent,
+                "blocking_response_channel": self._blocking_response_channel,
+            }
         )
 
-        #: :meth:`redis.client.PubSub` Redis pubsub client
-        self.pubsub = self.r.pubsub()
+    @staticmethod
+    def loads(data: bytes) -> "CallData":
+        """Deserialize the calldata from bytes through pickle.
 
-        #: :meth:`bool` Flag for the listen thread, while True, the listen thread will continue
-        #: to listen for new messages.
-        self.subscribed = False
-        #: :meth:`bool` Listening flag, while True, the listen thread is listening for new messages.
-        self.listening = False
+        :param data: The serialized calldata as bytes.
 
-        #: :meth:`dict` A dict mapping all regexes to their callbacks.
-        self.regexes = {}
-        for func in dir(self):
-            if hasattr(getattr(self, func), "regexes"):
-                for regex in getattr(getattr(self, func), "regexes"):
-                    self.regexes[regex] = (
-                        getattr(self, func),
-                        getattr(getattr(self, func), "thread"),
-                        getattr(getattr(self, func), "get_route"),
-                    )
-
-        #: :class:`dict` A dict mapping a blocking_response_route` to a semaphore and a response field in a list.
-        self.blocking_responses = {}
-
-    def _listen(self):
+        :return: The deserialized calldata as a :class:`CallData` instance.
         """
-        Listener thread, this thread will listen for new messages and call the appropriate callbacks.
-        """
-        self.listening = True
-        self.log(
-            f"{self.__class__.__name__}(IpcNode) listening on {self.ipc_id}",
-            level=LogLevels.DEBUG,
+
+        data = pickle.loads(data)
+
+        return CallData(
+            channel=data["channel"],
+            sender=data["sender"],
+            loopback=data["loopback"],
+            payload=data["payload"],
+            concurrent=data["concurrent"],
+            blocking_response_channel=data["blocking_response_channel"],
         )
-        while self.subscribed:
-            message = self.pubsub.get_message()
 
-            # No message
-            if message is None or message["type"] != "message":
-                time.sleep(0.001)
-                continue
+    def __str__(self):
+        return (
+            f"CallData(channel={self._channel}, sender={self._sender}, loopback={self._loopback}, "
+            f"payload={self._payload}, concurrent={self._concurrent}, "
+            f"blocking_response_channel={self._blocking_response_channel})"
+        )
 
+
+class Route:
+    """IPC route used to route IPC function calls.
+
+    :attr:`regexes` A list of regular expressions to match against.
+    :attr:`decorator` The decorator to wrap the function with.
+
+    :meth:`match` Check if the route matches the given channel.
+    :meth:`bind` Bind the route to an IpcNode instance and an object.
+    :meth:`call` Call the wrapped function.
+    """
+
+    def __init__(self, regexes: typing.List[str], concurrent: bool):
+        """Create a new IPC route.
+
+        :param regexes: A list of regular expressions to match against. e.g. ["a:b:c", "a:b:d:*", "a:*:c"]
+
+        .. warning::
+            Separators must be ':' and regexes must not contain special characters that would interfere with the
+            regex matching.
+
+        :param concurrent: Whether the route is concurrent or not. If the route is concurrent, the function will be
+            called in a separate thread. If not, the function will be called in the listener thread, the listener will
+            be blocked until the function returns. This parameter can be overridden by the call data.
+
+        .. warning::
+            If the route is not concurrent, the function must not send loopback blocking calls to itself as this will
+            cause a deadlock.
+        """
+
+        # A list of regular expressions to match against. e.g. ["a:b:c", "a:b:d:*", "a:*:c"]
+        self._regexes = self._parse_regexes(regexes)
+
+        # The wrapped function. Set when the decorator is called.
+        self._wrapped_function = None
+
+        # The Ipc Node instance.
+        self._ipc_node = None
+
+        # The Object associated with the self argument of the function.
+        self._object = None
+
+        # Accessible through property to ensure immutability.
+        self._concurrent = concurrent
+        self._decorator = self._wrap
+
+    @staticmethod
+    def _parse_regexes(regexes: typing.List[str]) -> typing.List[str]:
+        """Parse the given regexes to allow for simple from of given regexes."""
+        return [f"^{r.replace('*', '.*')}$" for r in regexes]
+
+    @property
+    def regexes(self) -> typing.List[str]:
+        """Get the regexes."""
+        return self._regexes
+
+    def match(self, channel: str) -> bool:
+        """Check if the route matches the channel.
+
+        :param channel: The channel to match against.
+
+        :return: True if the route matches the channel, False otherwise.
+        """
+        return any([re.match(r, channel) for r in self._regexes])
+
+    def bind(self, ipc_node: "IpcNode", route_object: object) -> None:
+        """Bind the route to an IpcNode instance and an object.
+
+        :param ipc_node: The :class:`IpcNode` instance.
+        :param route_object: The object associated with the self argument of the function.
+        """
+        self._ipc_node = ipc_node
+        self._object = route_object
+
+    @staticmethod
+    def _check_function_signature(function: typing.Callable) -> typing.Union[None, str]:
+        """Check the function signature. The function signature must have 3 named parameters: `self`, `calldata`,
+        `payload`.
+
+        :param function: The function to check.
+
+        :return: None if the function signature is valid, an error message otherwise.
+        """
+        signature = inspect.signature(function)
+
+        if len(signature.parameters) != 3 or not all(
+            [p in signature.parameters for p in ["self", "call_data", "payload"]]
+        ):
+            return (
+                f"Function must have 3 named parameters: self, call_data, payload. Your function has only "
+                f"{len(signature.parameters)} parameters: {', '.join(signature.parameters.keys())}"
+            )
+
+        return None
+
+    def _wrap(self, function: typing.Callable) -> typing.Callable:
+        """Disable direct function calls and save the wrapped function.
+
+        :param function: The function to wrap.
+
+        .. warning::
+            The function signature must have 3 named parameters: `self`, `call_data`, `payload`.
+
+        :return: The dead wrapper used to disable direct function calls.
+
+        :raises ValueError: If the function signature is invalid.
+        """
+        error = self._check_function_signature(function)
+        if error is not None:
+            raise ValueError(error)
+
+        self._wrapped_function = function
+
+        def dead_wrapper(_self, call_data: CallData, payload: dict) -> typing.Union[None, typing.Any]:
+            raise RuntimeError(
+                f"You can no longer call this function directly, call it using the following ipc routes "
+                f"instead: {', '.join(self._regexes)}"
+            )
+
+        dead_wrapper.__setattr__("route", self)
+
+        return dead_wrapper
+
+    @property
+    def decorator(self) -> typing.Callable:
+        """Get the route decorator.
+
+        :return: The route decorator.
+        """
+        return self._decorator
+
+    def _call(self, call_data: CallData) -> None:
+        """Call the wrapped function.
+
+        :param call_data: The call data.
+        """
+        try:
+            self._wrapped_function(self._object, call_data, call_data.payload)
+        except Exception as e:
+            self._ipc_node.logger.error(
+                f"IPC Node, an error occurred when calling a function.\n"
+                f"Call Data: {call_data}\n"
+                f"Exception: {''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
+                label=self._ipc_node.ipc_id,
+            )
+
+    def _call_blocking(self, call_data: CallData) -> None:
+        """Call the wrapped function and send the response.
+
+        :param call_data: The call data.
+        """
+        try:
+            r = self._wrapped_function(self._object, call_data, call_data.payload)
+        except Exception as e:
+            r = e
+
+        try:
+            self._ipc_node.send(call_data.blocking_response_channel, {"response": r}, loopback=True, _nolog=True)
+        except pickle.PicklingError as e:
+            self._ipc_node.logger.error(
+                f"IPC Node failed to pickle blocking request return value.\nReturn value: {r}\nException: {e}\n"
+                f"Initial Call Data: {call_data}",
+                label=self._ipc_node.ipc_id,
+            )
+            r = None
+            self._ipc_node.send(call_data.blocking_response_channel, {"response": r}, loopback=True, _nolog=True)
+
+    def call(self, call_data: CallData) -> None:
+        """Call the wrapped function.
+
+        :param call_data: The call data.
+        """
+        # Not bound yet.
+        assert self._ipc_node is not None
+        assert self._object is not None
+
+        if self._concurrent or call_data.concurrent:
+            thread = threading.Thread(
+                target=self._call_blocking if call_data.blocking else self._call, args=(call_data,)
+            )
+            thread.start()
+        else:
+            self._call(call_data) if not call_data.blocking else self._call_blocking(call_data)
+
+
+class IpcNode(abstracts.IIpcNode):
+    """An IPC node, communicates with other IPC nodes through redis pub/sub.
+
+    :attr:`logger` The :class:`Logger` instance.
+    :attr:`ipc_id` The IPC node unique id.
+    :attr:`redis` The redis client.
+
+    :meth:`set_logger` Set the logger instance.
+    :meth:`start` Start the IPC node.
+    :meth:`stop` Stop the IPC node.
+    :meth:`send` Send a message to the IPC.
+    :meth:`send_blocking` Send a blocking message to the IPC, wait for the response and return it.
+    """
+
+    def __init__(
+        self,
+        ipc_id: str,
+        strict_redis: redis.client.StrictRedis,
+        pubsub: redis.client.PubSub,
+    ):
+        """Create a new IPC node.
+
+        :param ipc_id: The IPC node unique id.
+        :param strict_redis: The redis client.
+        :param pubsub: The pubsub client.
+        """
+
+        #: pubsub client.
+        self._pubsub = pubsub
+
+        #: alive flag to kill the listener thread.
+        self._alive = False
+
+        #: blocking responses dict.
+        self._blocking_responses = {}
+
+        # Accessible through property to ensure immutability.
+        self._ipc_id = ipc_id
+        self._logger = None
+        self._redis = strict_redis
+
+        #: routes.
+        self._routes = []
+        self.bind_routes(self)
+
+    def bind_routes(self, route_object: object) -> None:
+        """Fetch every method of the given object with a route attribute and add the associated route to the routes
+            list.
+
+        :param route_object: The object to fetch the routes from.
+        """
+        routes = [
+            route_object.__getattribute__(attr).route
+            for attr in dir(route_object)
+            if hasattr(getattr(route_object, attr), "route") and isinstance(getattr(route_object, attr).route, Route)
+        ]
+        for route in routes:
+            route.bind(self, route_object)
+
+        self._routes += routes
+
+    @property
+    def logger(self) -> lg.Logger:
+        """Get the logger."""
+        return self._logger
+
+    @property
+    def ipc_id(self) -> str:
+        """Get the IPC node unique id."""
+        return self._ipc_id
+
+    @property
+    def redis(self) -> redis.client.StrictRedis:
+        """Get the redis client."""
+        return self._redis
+
+    def set_logger(self, logger: lg.Logger) -> None:
+        """Set the logger instance.
+
+        :param logger: The logger.
+        """
+        self._logger = logger
+
+    def _fetch_ipc(self) -> typing.Union[None, dict]:
+        """Fetch a message from redis pubsub.
+
+        :return: The message or None if no message was received.
+        """
+        try:
+            msg = self._pubsub.get_message(True, timeout=0.1)
+        except redis.exceptions.ConnectionError as e:
+            self._logger.warning(
+                f"IPC Node failed to fetch message from redis pubsub: '{e}'. "
+                f"Ignore this warning if it doesn't persist.",
+                label=self._ipc_id,
+            )
+            return None
+
+        if msg is None or msg["type"] != "message":
+            return None
+        return msg
+
+    def _parse_ipc(self, msg: typing.Union[None, dict]) -> typing.Union[None, CallData]:
+        """Cast a message received from redis pubsub into CallData.
+
+        :param msg: The message.
+
+        :return CallData: The CallData if the message is valid, None otherwise.
+
+        :raises Exception: If the message is malformed.
+        """
+        if msg is None:
+            return None
+
+        try:
+            call_data = CallData.loads(msg["data"])
+            if call_data.sender == self._ipc_id and not call_data.loopback:
+                return None
+        except Exception as e:
+            raise Exception(f"Failed to decode message: '{e}', raw message data is: '{msg['data']}'")
+
+        return call_data
+
+    def _fetch_call_data(self) -> typing.Union[None, CallData]:
+        """Run the messages pipeline and return call data or None if no message was received.
+
+        :return CallData: The CallData if the message is valid, None otherwise.
+        """
+        message = self._fetch_ipc()
+        call_data = None
+        try:
+            call_data = self._parse_ipc(message)
+        except Exception as e:
+            self._logger.error(
+                f"IPC Node error when parsing a message.\nMessage: {message}\nException: {e}", label=self._ipc_id
+            )
+
+        return call_data
+
+    def _handle_blocking_response(self, call_data: CallData) -> bool:
+        """Handle a blocking response.
+
+        :param call_data: The call data.
+        """
+        if call_data.channel in self._blocking_responses:
+            self._log_received_message(call_data)
+            self._blocking_responses[call_data.channel]["response"] = call_data
+            self._blocking_responses[call_data.channel]["lock"].release()
+            return True
+        return False
+
+    def _handle_message(self, call_data: CallData) -> None:
+        """Handle a message by matching it against the routes and calling the route if it matches.
+
+        :param call_data: The call data.
+        """
+        for route in self._routes:
+            if route.match(call_data.channel):
+                self._log_received_message(call_data)
+                route.call(call_data)
+
+    def _log_received_message(self, call_data: CallData) -> None:
+        """Log a received message.
+
+        :param call_data: The call data.
+        """
+        self._logger.debug(f"IPC Node received message.\n\tCall data: {call_data}", label=self._ipc_id)
+
+    def _listener(self) -> None:
+        """Listen for incoming messages and handle them."""
+
+        self.logger.debug("Starting IPC Node listener thread.", label=self._ipc_id)
+
+        while self._alive:
             try:
-                payload = pickle.loads(message["data"])
-                if (
-                    "sender" not in payload
-                    or "loopback" not in payload
-                    or "data" not in payload
-                    or "route" not in payload
-                ):
-                    raise Exception("Malformed request")
-                data = pickle.loads(payload["data"])
-            except Exception as e:
-                self.log(
-                    f"{self.__class__.__name__}(IpcNode) received malformed request: {message}, "
-                    f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
-                    level=LogLevels.ERROR,
-                )
+                call_data = self._fetch_call_data()
+            except ValueError:
+                # Silent exception, ipc is closed.
+                self._alive = False
                 continue
 
-            if not payload["loopback"] and payload["sender"] == self.ipc_id:
+            if call_data is None:
                 continue
 
-            if payload["route"] in self.blocking_responses:
-                self.log(
-                    f"{self.__class__.__name__}(IpcNode) received blocking request {payload['route']}:"
-                    f" {data}",
-                    level=LogLevels.DEBUG,
-                )
-                self.blocking_responses[payload["route"]][1] = data
-                self.blocking_responses[payload["route"]][0].release()
+            if self._handle_blocking_response(call_data):
+                continue
 
-            for regex in self.regexes:
-                if re.match(regex, payload["route"]) is not None:
-                    try:
-                        self.log(
-                            f"{self.__class__.__name__}(IpcNode) received request {payload['route']}:"
-                            f" {data}",
-                            level=LogLevels.DEBUG,
-                        )
+            self._handle_message(call_data)
 
-                        # If get_route is True, call the callback with the route as a second parameter
-                        callback_args = (
-                            (data, payload["route"])
-                            if self.regexes[regex][2]
-                            else (data,)
-                        )
+    def start(self) -> None:
+        """Start the IPC node."""
+        self._logger.debug("Starting IPC node.", label=self._ipc_id)
+        self._pubsub.subscribe("ipc")
+        self._alive = True
+        threading.Thread(target=self._listener).start()
 
-                        # If thread is True, call the callback in a new thread, else call it directly
-                        if self.regexes[regex][1]:
-                            threading.Thread(
-                                target=self.regexes[regex][0], args=callback_args
-                            ).start()
-                        else:
-                            self.regexes[regex][0](*callback_args)
-
-                    except Exception as e:
-                        self.log(
-                            f"{self.__class__.__name__}(IpcNode) failed to process request {regex} "
-                            f"{payload['route']}:  {data}, "
-                            f"Exception:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}",
-                            level=LogLevels.ERROR,
-                        )
-
-        self.listening = False
-
-    def start(self):
-        """
-        Start the ipc node.
-
-        .. warning::
-            Ensure this method is called when the node is stopped.
-        """
-        self.pubsub.subscribe("ipc")
-        self.subscribed = True
-        threading.Thread(target=self._listen).start()
-        while not self.listening:
-            time.sleep(0.001)
-
-    def stop(self):
-        """
-        Stop the ipc node.
-
-        .. warning::
-            Ensure this method is called when the node is started.
-        """
-        self.subscribed = False
-        self.pubsub.unsubscribe("ipc")
-        self.pubsub.close()
-        self.log(
-            f"{self.__class__.__name__}(IpcNode) stopped listening on {self.ipc_id}",
-            level=LogLevels.DEBUG,
-        )
-        self.r.close()
+    def stop(self) -> None:
+        """Stop the IPC node."""
+        self._logger.debug("Stopping IPC node.", label=self._ipc_id)
+        self._alive = False
+        self._pubsub.unsubscribe("ipc")
+        self._pubsub.close()
+        self._redis.close()
 
     def send(
-        self, route: str, data: object, loopback: bool = False, _nolog: bool = False
-    ):
-        """
-        Send a message to a route or a blocking route without waiting for the response.
+        self, channel: str, payload: dict, concurrent: bool = None, loopback: bool = False, _nolog: bool = False
+    ) -> None:
+        """Send a message to the IPC.
 
-        :param str route: The route that will be matched with regexes given in :meth:`route <route>` decorator.
-        :param object data: Extra data to send as a dict, this data will be passed to the callback function. This data
-            must be pickle serializable.
-        :param bool loopback: If True, this node will be able to receive the message. defaults to False.
+        :param channel: The channel to send the message on.
+        :param payload: The payload to send as a dict.
+        :param concurrent: Whether the message is concurrent or not. If set, will override the route concurrent
+            parameter. If set to True, will run the function in a separate thread. If set to False, will run the
+            function in the listener thread, the listener will be blocked until the function returns.
+        :param loopback: Whether the message is a loopback or not.
+        :param _nolog: Whether to log the message or not.
         """
-        req = {
-            "route": route,
-            "sender": self.ipc_id,
-            "loopback": loopback,
-            "data": pickle.dumps(data),
-        }
-        self.r.publish("ipc", pickle.dumps(req))
+
+        call_data = CallData(
+            channel=channel, sender=self._ipc_id, loopback=loopback, payload=payload, concurrent=concurrent
+        )
+
+        self._redis.publish("ipc", call_data.dumps())
+
         if not _nolog:
-            self.log(
-                f"{self.__class__.__name__}(IpcNode) sent request {req}",
-                level=LogLevels.DEBUG,
+            pass
+            self._logger.debug(f"Sent message, call data: {call_data}", label=self._ipc_id)
+
+    def _create_blocking_request_response_placeholder(self, call_data: CallData) -> None:
+        """Create a blocking request response placeholder.
+
+        :param call_data: The call data.
+        """
+        self._blocking_responses[call_data.blocking_response_channel] = {
+            "response": None,
+            "lock": threading.Semaphore(0),
+        }
+
+    def _wait_for_blocking_response(self, call_data: CallData, timeout: float = 5.0) -> typing.Union[None, CallData]:
+        """Wait for a blocking response.
+
+        :param call_data: The call data.
+        :param timeout: The timeout in seconds.
+
+        :return: The response call data / None.
+
+        :raises Exception: Any exception raised by the function.
+        """
+        r = self._blocking_responses[call_data.blocking_response_channel]["lock"].acquire(timeout=timeout)
+        if r:
+            response = self._blocking_responses[call_data.blocking_response_channel]["response"].payload["response"]
+            del self._blocking_responses[call_data.blocking_response_channel]
+
+            if isinstance(response, Exception):
+                raise response
+
+            return response
+        else:
+            raise TimeoutError(
+                f"Timeout when waiting for blocking response, try to increase timeout, " f"call data: {call_data}"
             )
 
     def send_blocking(
-        self, route: str, data: dict, loopback: bool = False, timeout: float = 5.0
-    ):
-        """
-        Send a message to a blocking route and wait for the response / raise the exception.
-
-        :param str route: The route that will be matched with regexes given in :meth:`route <route>` decorator.
-
-        .. warning::
-            The given route has to match only one blocking route regex, see :meth:`route <route>` decorator.
-
-        :param dict data: Extra data to send as a dict, this data will be passed to the callback function.
-        :param bool loopback: If True, this node will be able to receive the message. defaults to False.
-        :param float timeout: Timeout in seconds, defaults to 5.0, will return None if timeout is reached.
-
-        :return: The response data of the blocking callback, None if this was returned by the callback or if timeout
-            is reached or if an error occurred in the callback return value serialization.
-
-        .. warning::
-            Always correctly check the return value of this function and catch the exception if any.
-
-        :raises: The exception raised by the callback if any.
-        """
-        blocking_route = f"ipc-blocking-{str(uuid.uuid4())}"
-        req = {
-            "route": route,
-            "sender": self.ipc_id,
-            "loopback": loopback,
-            "data": pickle.dumps(data | {IPC_BLOCKING_RESPONSE_ROUTE: blocking_route}),
-        }
-        self.pubsub.subscribe(blocking_route)
-        self.blocking_responses[blocking_route] = [threading.Semaphore(0), None]
-        self.r.publish("ipc", pickle.dumps(req))
-        self.log(
-            f"{self.__class__.__name__}(IpcNode) sent blocking request {req}",
-            level=LogLevels.DEBUG,
-        )
-        self.blocking_responses[blocking_route][0].acquire(timeout=timeout)
-        self.pubsub.unsubscribe(blocking_route)
-        r = self.blocking_responses[blocking_route][1]
-        del self.blocking_responses[blocking_route]
-        if isinstance(r, Exception):
-            raise r
-        else:
-            return r
-
-    def log(
         self,
-        message: str,
-        level: str = LogLevels.INFO,
-        label: str = None,
-        extra_route: str = "",
-    ):
+        channel: str,
+        payload: dict,
+        concurrent: bool = None,
+        loopback: bool = False,
+        timeout: float = 5.0,
+        _nolog: bool = False,
+    ) -> typing.Union[None, CallData]:
+        """Send a blocking message to the IPC, wait for the response and return it.
+
+        :param channel: The channel to send the message on.
+        :param payload: The payload to send as a dict.
+        :param concurrent: Whether the message is concurrent or not. If set, will override the route concurrent
+            parameter. If set to True, will run the function in a separate thread. If set to False, will run the
+            function in the listener thread, the listener will be blocked until the function returns.
+        :param loopback: Whether the message is a loopback or not.
+        :param timeout: The timeout in seconds.
+        :param _nolog: Whether to log the message or not.
+
+        :return: The response call data / raise the exception.
+
+        :raises TimeoutError: If the timeout is reached.
+        :raises Exception: Any exception raised by the function.
         """
-        Log a message to stdout and to ipc system as "log.{level}.{label}" route.
-
-        :param str message: The message to log.
-        :param str level: The log level, pick it from :meth:`LogLevels <LogLevels>`, defaults to LogLevels.INFO.
-        :param str label: A label, generally the name of the service or the component that is logging the message,
-            defaults to class name.
-        :param str extra_route: An additional extra route that will be appended to the route, for example, if I give
-            `a:b:c` as extra route, the message will be sent to `log:{level}:{label}:a:b:c` route, defaults to ""
-            (resulting in `log:{level}:{label}` route).
-        """
-        label = label if label is not None else self.__class__.__name__
-        route = (
-            f"log:{level}:{label}:{extra_route}"
-            if extra_route != ""
-            else f"log:{level}:{label}"
+        call_data = CallData(
+            channel=channel,
+            sender=self._ipc_id,
+            loopback=loopback,
+            payload=payload,
+            concurrent=concurrent,
+            blocking_response_channel=f"{channel}:{self._ipc_id}:{str(uuid.uuid4())}",
         )
-        log = {
-            "label": label,
-            "level": level,
-            "message": message,
-            "timestamp": time.time(),
-        }
-        self.send(route, log, loopback=True, _nolog=True)
-        if not level == LogLevels.DEBUG or os.environ["DEBUG"] == "1":
-            print(
-                f"[{datetime.datetime.fromtimestamp(log['timestamp']).strftime('%d-%m-%Y %H:%M:%S')}] "
-                f"{level.upper()}@{label}: {message}\n",
-                flush=True,
-                end="",
-            )
 
+        self._create_blocking_request_response_placeholder(call_data)
 
-# Override stdout & stderr
-class _StdOverrider:
-    def __init__(self, target):
-        self.label = target
-        self.bkp = sys.stdout if target == "stdout" else sys.stderr  # Backup
-        self.r = redis.Redis(
-            host=os.environ.get("REDIS_CONTAINER_NAME"), port=6379, db=0
-        )
-        if target == "stdout":
-            sys.stdout = self
-        else:
-            sys.stderr = self
+        self._redis.publish("ipc", call_data.dumps())
 
-    def write(self, message):
-        req = {
-            "route": self.label,
-            "sender": "sys",
-            "loopback": False,
-            "data": pickle.dumps({"message": message}),
-        }
-        self.r.publish("ipc", pickle.dumps(req))
-        self.bkp.write(message)
+        if not _nolog:
+            pass
+            self._logger.debug(f"Sent blocking message, call data: {call_data}", label=self._ipc_id)
 
-    def flush(self):
-        self.bkp.flush()
-
-
-_StdOverrider("stdout")
-_StdOverrider("stderr")
-
-if __name__ == "__main__":
-
-    class PingPongNode(IpcNode):
-        # I register a ping route, all messages sent to `ping` route will be received by this function
-        @route("ping")
-        def ping(self, payload: dict):
-            self.log("Ping!")
-
-            # I send a message to the `pong` route, since I want this node to receive it, I set `loopback` to True.
-            self.send("pong", {"extra_message": "Hello World!"}, loopback=True)
-
-        # I register a pong route, all messages sent to `pong` route will be received by this function
-        @route("pong")
-        def pong(self, payload: dict):
-            self.log("Pong!")
-            # I can access the data sent by the ping function
-            self.log(payload["extra_message"])
-
-        # I register a blocking route, all messages sent to `return_pi` route will be received by this function
-        # Value will be sent back to the sender
-        @route("return_pi", blocking=True, thread=True)
-        def return_pi(self, payload: dict):
-            return 3.14159265359
-
-    # I create a new node called `ipc-node-test`
-    n = PingPongNode("ipc-node-test")
-    # I start the node
-    n.start()
-    # I send a message to the `ping` route and use `loopback` since I want to receive it with the same node
-    n.send("ping", {}, loopback=True)
-    # I send a message to the `return_pi`  blocking route, this will wait for the response
-    n.log(n.send_blocking("return_pi", {}, loopback=True), level=LogLevels.DEBUG)
-    # I don't forget to stop the node !
-    n.stop()
+        return self._wait_for_blocking_response(call_data, timeout=timeout)
