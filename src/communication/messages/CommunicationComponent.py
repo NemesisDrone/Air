@@ -89,14 +89,17 @@ class CommunicationComponent(component.Component):
         self.time_between_heartbeats = 1.5
 
         self.sensors = {
-            "sensors:sim7600:gnss": SensorEvent("gps", 1, 0),
+            # "sensors:sim7600:gnss": SensorEvent("gps", 1, 0),
             "sensors:speed": SensorEvent("speed", 1, 0),
             "sensors:altitude": SensorEvent("altitude", 1, 0),
             "sensors:battery": SensorEvent("battery", 1, 0),
-            "sensors:sense_hat:data": SensorEvent("sense_hat", 0.5, 0, ["roll", "pitch", "yaw"], lambda x: {
+            "sensors:sense_hat:data": SensorEvent("sense_hat", 0.2, 0, ["roll", "pitch", "yaw", "compassX", "compassY", "compassZ"], lambda x: {
                 "roll": round(x["roll"], 2),
                 "pitch": round(x["pitch"], 2),
                 "yaw": round(x["yaw"], 2),
+                "compassX": round(x["compassX"], 2),
+                "compassY": round(x["compassY"], 2),
+                "compassZ": round(x["compassZ"], 2),
             }),
         }
 
@@ -203,13 +206,14 @@ class CommunicationComponent(component.Component):
 
     @ipc.Route([
         "sensors:sense_hat:data",
-        "sensors:sim7600:gnss",
+        # "sensors:sim7600:gnss",
         "log:CRITICAL:*",
         "log:WARNING:*",
         "log:ERROR:*",
         "log:INFO:*",
-        "state:*"
-    ], True).decorator
+        "state:*",
+        "config:get",
+        ], True).decorator
     def handle_emission(self, call_data: ipc.CallData, payload: dict):
         """
         Method used to handle the emission of messages to the server.

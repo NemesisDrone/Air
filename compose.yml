@@ -6,6 +6,7 @@ services:
       - "6379:6379"
     container_name: redis-nemesis-dev
     network_mode: host
+    command: [sh, -c, "rm -f /data/dump.rdb && redis-server --save ''"]
 
   dev:
     build:
