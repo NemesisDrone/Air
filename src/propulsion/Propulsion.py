@@ -1,5 +1,6 @@
 import json
 import threading
+from typing import List
 
 from utilities import component, ipc
 import time
@@ -21,17 +22,17 @@ class PropulsionComponent(component.Component):
         super().__init__(ipc_node)
 
         self.alive = False
-        self.thread = threading.Thread(target=self.propulsion_work)
+        self.thread = threading.Thread(target=self._propulsion_work)
 
         os.system("pigpiod")
         time.sleep(3)
 
         self.ESC_PIN = 13
         self.pi = pigpio.pi()
-        self.pi.set_servo_pulsewidth(self.ESC_PIN, 0)
+        # self.pi.set_servo_pulsewidth(self.ESC_PIN, 0)
 
-        self.min_value = 700
-        self.max_value = 2500
+        self.min_value = 1225
+        self.max_value = 1800
 
         self.is_armed = False
         self.redis.set("propulsion:armed", int(self.is_armed))
@@ -112,7 +113,15 @@ class PropulsionComponent(component.Component):
         self.logger.info(f"[ESC] Setting speed to {payload}", self.NAME)
         self.redis.set("propulsion:speed", json.dumps(payload))
 
-    def propulsion_work(self):
+    def _calculate_pulsewidth(self, value: float) -> float:
+        """
+        This method is used to calculate the pulsewidth from a value between 0 and 100
+        """
+        if value <= 1:
+            return 0
+        return self.min_value + value * (self.max_value - self.min_value) / 100
+
+    def _propulsion_work(self):
         """
         This method is used to control the ESC.
         The desired speed is saved on the Redis database and is recovered here.
@@ -120,14 +129,28 @@ class PropulsionComponent(component.Component):
         self.logger.info("[ESC] Starting propulsion work", self.NAME)
         while self.alive:
             if self.is_armed:
-                desired_speed = self.redis.get("propulsion:speed")
-                if desired_speed is not None:
-                    desired_speed = int(desired_speed)
-                else:
-                    desired_speed = 0
+                channels = self.redis.get("rc:channels")
+                if not channels:
+                    return
+                channels = json.loads(channels)
+                print(channels)
 
-                self.pi.set_servo_pulsewidth(self.ESC_PIN, desired_speed)
-                time.sleep(0.05)
+                for i in range(1, 11):
+                    brushless_config: bytes = self.redis.get(f"config:brushless:canal:{i}")
+                    if not brushless_config:
+                        return
+                    brushless_config: dict = json.loads(brushless_config)
+
+                    gpios: List[int] = brushless_config["gpios"]
+                    if len(gpios) == 0:
+                        continue
+
+                    value = self._calculate_pulsewidth(channels[str(i)])
+                    print(value, flush=True)
+                    for gpio in gpios:
+                        self.pi.set_servo_pulsewidth(13, value)
+                        print(value, flush=True)
+                        time.sleep(0.05)
             else:
                 self.pi.set_servo_pulsewidth(self.ESC_PIN, 0)
                 time.sleep(0.05)
