@@ -158,12 +158,11 @@ class SenseHatComponent(component.Component):
         self._hat: typing.Union[SenseHat, None] = None
         try:
             self._hat = self._hat_setup()
+            for line in self._hat.dumps_settings().split("\n"):
+                self.logger.info(line, self.NAME)
         except Exception as e:
             self.logger.warning(f"Could not initialize sense hat, defaulting to emulated data: {e}", self.NAME)
             self._sense_emulation = True
-
-        for line in self._hat.dumps_settings().split("\n"):
-            self.logger.info(line, self.NAME)
 
         #: Imu poll interval
         self._imu_poll_interval = self._hat.get_imu_poll_interval() if self._hat is not None else 0.0
