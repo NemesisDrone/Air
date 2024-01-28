@@ -47,16 +47,16 @@ class RcComponent(component.Component):
         Update the rc channels to rc:channels redis key
         """
         channels = {
-            "ch1": self._normalize_rc_channel(data[2]),
-            "ch2": self._normalize_rc_channel(data[3]),
-            "ch3": self._normalize_rc_channel(data[4]),
-            "ch4": self._normalize_rc_channel(data[5]),
-            "ch5": self._normalize_rc_channel(data[6]),
-            "ch6": self._normalize_rc_channel(data[7]),
-            "ch7": self._normalize_rc_channel(data[8]),
-            "ch8": self._normalize_rc_channel(data[9]),
-            "ch9": self._normalize_rc_channel(data[10]),
-            "ch10": self._normalize_rc_channel(data[11]),
+            "1": self._normalize_rc_channel(data[2]),
+            "2": self._normalize_rc_channel(data[3]),
+            "3": self._normalize_rc_channel(data[4]),
+            "4": self._normalize_rc_channel(data[5]),
+            "5": self._normalize_rc_channel(data[6]),
+            "6": self._normalize_rc_channel(data[7]),
+            "7": self._normalize_rc_channel(data[8]),
+            "8": self._normalize_rc_channel(data[9]),
+            "9": self._normalize_rc_channel(data[10]),
+            "10": self._normalize_rc_channel(data[11]),
         }
         self.redis.set("rc:channels", json.dumps(channels))
 
