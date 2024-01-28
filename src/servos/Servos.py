@@ -28,21 +28,9 @@ class ServosComponent(component.Component):
     def start(self):
         self.alive = True
 
-        self.redis.set("servos:canal:1", 180)
-
+        # Set all servos to 90 degrees
         for i in range(1, self.nb_canals + 1):
-            angle = self.redis.get(f"servos:canal:{i}")
-            if not angle:
-                continue
-            # Get the gpio of the servo from the config
-            canal = json.loads(self.redis.get(f"config:canal:{i}"))
-            gpios: List[int] = canal["gpios"]
-
-            if len(gpios) == 0:
-                continue
-            # Set all servos to their middle position
-            for gpio in gpios:
-                self.pi.set_servo_pulsewidth(gpio, 1500)
+            self.redis.set(f"servos:canal:{i}", 90)
 
         threading.Thread(target=self.servos_work, daemon=True).start()
 
@@ -59,25 +47,46 @@ class ServosComponent(component.Component):
         """
         This method is used to update the angles of the all servos, based on the redis values
         """
+        """
+        Reminder: 
+        Channels is a dict of the form:
+        {
+            "1": 0,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0,
+            "6": 0,
+            "7": 0,
+            "8": 0,
+            "9": 0,
+            "10": 0,
+        }
+        """
+        channels = self.redis.get("rc:channels")
+        if not channels:
+            return
+        channels = json.loads(channels)
         for i in range(1, self.nb_canals + 1):
-            angle = self.redis.get(f"servos:canal:{i}")
-            if not angle:
-                continue
-            # Get the gpio of the servo from the config
-            canal = json.loads(self.redis.get(f"config:canal:{i}"))
-            gpios: List[int] = canal["gpios"]
+            # Get canal gpios
+            data: bytes = self.redis.get(f"config:servos:canal:{i}")
+            if not data:
+                return
+            data: dict = json.loads(data)
 
+            gpios: List[int] = data["gpios"]
             if len(gpios) == 0:
                 continue
 
-            # Change the angle of the servo
+            angle = channels[str(i)]
+            # angle = float(self.redis.get(f"servos:canal:{i}"))
+            angle = self.calculate_pulsewidth_from_angle(angle)
             for gpio in gpios:
-                self.pi.set_servo_pulsewidth(gpio, self.calculate_pulsewidth_from_angle(float(angle)))
+                self.pi.set_servo_pulsewidth(gpio, angle)
 
     def servos_work(self):
         while self.alive:
             self.update_angles()
-            time.sleep(0.005)
 
     def stop(self):
         self.pi.stop()
