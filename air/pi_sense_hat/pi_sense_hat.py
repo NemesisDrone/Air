@@ -195,6 +195,10 @@ class SenseHatComponent(component.Component):
             "roll": math.degrees(raw["fusionPose"][0]),  # -180 | +180
             "pitch": math.degrees(raw["fusionPose"][1]),  # -180 | +180
             "yaw": math.degrees(raw["fusionPose"][2]),  # -180 | +180
+            "q1": raw["fusionQPose"][0],  # Quaternion X
+            "q2": raw["fusionQPose"][1],  # Quaternion Y
+            "q3": raw["fusionQPose"][2],  # Quaternion Z
+            "q4": raw["fusionQPose"][3],  # Quaternion W
             "gyroRoll": math.degrees(raw["gyro"][0]),  # Radians/s
             "gyroPitch": math.degrees(raw["gyro"][1]),  # Radians/s
             "gyroYaw": math.degrees(raw["gyro"][2]),  # Radians/s
