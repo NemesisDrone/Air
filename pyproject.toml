@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools >= 69.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "air"
+version = "0.1.0"
+description = "Embeded software for nemesis"
+requires-python = ">=3.11.4"
+dependencies = [
+    "redis==5.0.1",
+    "PyGObject==3.46.0",
+    "websockets==12.0",
+    "adafruit-circuitpython-vl53l0x==3.6.11",
+    "RPi.GPIO==0.7.1",
+    "sense-hat==2.6.0",
+    "smbus2==0.4.3",
+    "pigpio==1.78",
+    "pydantic==2.5.3"
+]
+
+
+[tool.setuptools.packages.find]
+where = [""]
+exclude = ["tests", "config", "docs", "utils"]
+namespaces = false
+
+[tool.black]
+line-length = 120
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  # Exclude vendor directory
+  | vendor
+)
+'''
+
+[tool.isort]
+line_length = 120
+multi_line_output=0
+lines_after_imports=2
+skip_glob = ["**/.env*", "**/env/*", "**/.venv/*", "**/docs/*"]
+
+[tool.flake8]
+max-line-length = 120
+count = true
+
+[tool.pycln]
+all = true
+
+[tool.pytest.ini_options]
+log_cli = true
+testpaths = [
+    "tests",
+]

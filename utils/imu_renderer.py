@@ -3,16 +3,14 @@ import json
 import time
 
 import pygame
-from OpenGL.raw.GLU import gluPerspective
-from pygame.locals import *
+import redis
 from OpenGL.GL import *
 from OpenGL.GLUT import *
-
-import redis
+from OpenGL.raw.GLU import gluPerspective
+from pygame.locals import *
 
 
 class ImuViewer:
-
     def __init__(self):
         pygame.init()
         self.display = (1000, 800)
@@ -32,7 +30,7 @@ class ImuViewer:
 
     def _camera_setup(self):
         gluPerspective(45, (self.display[0] / self.display[1]), 0.1, 50.0)
-        glTranslatef(-.5, 0.0, -7)
+        glTranslatef(-0.5, 0.0, -7)
 
     @staticmethod
     def _define_mesh():
@@ -44,7 +42,7 @@ class ImuViewer:
             (1, -0.5, 1.5),  # 4
             (1, 0.5, 1.5),  # 5
             (-1, -0.5, 1.5),  # 6
-            (-1, 0.5, 1.5)  # 7
+            (-1, 0.5, 1.5),  # 7
         )
 
     @staticmethod
@@ -61,7 +59,7 @@ class ImuViewer:
             (6, 7),  # 8
             (5, 1),  # 9
             (5, 4),  # 10
-            (5, 7)  # 11
+            (5, 7),  # 11
         )
 
     @staticmethod
@@ -72,7 +70,7 @@ class ImuViewer:
             (6, 7, 5, 4),  # 2
             (4, 5, 1, 0),  # 3
             (1, 5, 7, 2),  # 4
-            (4, 0, 3, 6)  # 5
+            (4, 0, 3, 6),  # 5
         )
 
     @staticmethod
@@ -151,9 +149,9 @@ class ImuViewer:
 
 
 viewer = ImuViewer()
-r = redis.Redis(host='rpi2.dace-alpha.ts.net', port=6379, db=0)
+r = redis.Redis(host="rpi2.dace-alpha.ts.net", port=6379, db=0)
 
 while True:
-    data = json.loads(r.get('sensors:sense_hat:data'))
-    viewer.set_orientation(data['roll'], data['pitch'], data['yaw'])
+    data = json.loads(r.get("sensors:sense_hat:data"))
+    viewer.set_orientation(data["roll"], data["pitch"], data["yaw"])
     time.sleep(0.01)

@@ -1,7 +1,10 @@
-poetry==1.7.1
 black==23.12.1
 flake8==7.0.0
 isort==5.13.2
 pylint==3.0.3
 mypy==1.8.0
 pytest==7.4.4
+sphinx==7.2.6
+myst-parser==2.0.0
+sphinx_markdown_tables==0.0.17
+furo==2023.9.10

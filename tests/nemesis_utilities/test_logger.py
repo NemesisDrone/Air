@@ -1,9 +1,8 @@
 import os
+from datetime import datetime
+from unittest.mock import Mock, patch
 
 import pytest
-from unittest.mock import Mock, patch
-from datetime import datetime
-
 from utilities import logger as logger
 
 
@@ -21,12 +20,7 @@ def logger_obj(mock_ipc_node):
 
 @pytest.fixture
 def log_data():
-    return {
-        "message": "Test message",
-        "level": logger.Logger.DEBUG,
-        "label": "TestLabel",
-        "timestamp": None
-    }
+    return {"message": "Test message", "level": logger.Logger.DEBUG, "label": "TestLabel", "timestamp": None}
 
 
 @pytest.fixture
@@ -56,7 +50,7 @@ def test_log_dumps_and_loads(log):
 
 
 def test_log_str(log):
-    formatted_time = datetime.fromtimestamp(log.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+    formatted_time = datetime.fromtimestamp(log.timestamp).strftime("%Y-%m-%d %H:%M:%S")
     expected_str = (
         f"{logger.Colors.RESET}{formatted_time} "
         f"{logger.Colors.PURPLE + logger.Colors.BOLD + logger.Colors.UNDERLINE}{log.label}{logger.Colors.RESET + logger.Colors.WHITE + logger.Colors.BOLD}"
@@ -66,7 +60,7 @@ def test_log_str(log):
 
 
 def test_logger_log(logger_obj, mock_ipc_node):
-    with patch('builtins.print') as mock_print:
+    with patch("builtins.print") as mock_print:
         logger_obj.log("Test message", "TestLabel", logger.Logger.INFO, extra_channel="extra")
 
     mock_ipc_node.send.assert_called_once()
@@ -74,7 +68,7 @@ def test_logger_log(logger_obj, mock_ipc_node):
 
 
 def test_logger_debug(logger_obj, mock_ipc_node):
-    with patch('builtins.print') as mock_print:
+    with patch("builtins.print") as mock_print:
         logger_obj.debug("Test message", "TestLabel", extra_channel="extra")
 
     mock_ipc_node.send.assert_called_once()
@@ -85,7 +79,7 @@ def test_logger_debug(logger_obj, mock_ipc_node):
 
 
 def test_logger_info(logger_obj, mock_ipc_node):
-    with patch('builtins.print') as mock_print:
+    with patch("builtins.print") as mock_print:
         logger_obj.info("Test message", "TestLabel", extra_channel="extra")
 
     mock_ipc_node.send.assert_called_once()
@@ -93,7 +87,7 @@ def test_logger_info(logger_obj, mock_ipc_node):
 
 
 def test_logger_warning(logger_obj, mock_ipc_node):
-    with patch('builtins.print') as mock_print:
+    with patch("builtins.print") as mock_print:
         logger_obj.warning("Test message", "TestLabel", extra_channel="extra")
 
     mock_ipc_node.send.assert_called_once()
@@ -101,7 +95,7 @@ def test_logger_warning(logger_obj, mock_ipc_node):
 
 
 def test_logger_error(logger_obj, mock_ipc_node):
-    with patch('builtins.print') as mock_print:
+    with patch("builtins.print") as mock_print:
         logger_obj.error("Test message", "TestLabel", extra_channel="extra")
 
     mock_ipc_node.send.assert_called_once()
@@ -109,7 +103,7 @@ def test_logger_error(logger_obj, mock_ipc_node):
 
 
 def test_logger_critical(logger_obj, mock_ipc_node):
-    with patch('builtins.print') as mock_print:
+    with patch("builtins.print") as mock_print:
         logger_obj.critical("Test message", "TestLabel", extra_channel="extra")
 
     mock_ipc_node.send.assert_called_once()

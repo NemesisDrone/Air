@@ -1,12 +1,12 @@
+import os
 import threading
 import unittest.mock
-import os
-
-import pytest
 from unittest.mock import Mock
 
+import pytest
 import redis
-from utilities import component as component_module, logger, ipc
+from utilities import component as component_module
+from utilities import ipc, logger
 
 
 # --- Component States ---
@@ -84,7 +84,7 @@ def test_component_update_state(named_component):
 
         assert component._state == state["to"]
         mock_ipc_node.send.assert_called_once_with(f"state:component:{state['to']}", {"component": "component"})
-        mock_ipc_node.redis.set.assert_called_once_with("state:component", state['to'])
+        mock_ipc_node.redis.set.assert_called_once_with("state:component", state["to"])
         mock_ipc_node.logger.info.assert_called_once_with(f"component is {state['to']}", "component", "state")
         mock_ipc_node.logger.reset_mock()
         mock_ipc_node.redis.reset_mock()
@@ -232,11 +232,7 @@ def test_component_integration():
             self._alive = False
 
     r = redis.StrictRedis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
-    node = ipc.IpcNode(
-        "node",
-        r,
-        r.pubsub()
-    )
+    node = ipc.IpcNode("node", r, r.pubsub())
     node.set_logger(logger.Logger(node))
 
     component = TestComponent(node)

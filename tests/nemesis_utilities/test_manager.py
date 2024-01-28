@@ -1,16 +1,17 @@
 import multiprocessing
+import os
 import threading
 import time
 import typing
 import unittest.mock
-import os
-
-import pytest
 from unittest.mock import Mock
 
+import pytest
 import redis
 from src import manager as manager_module
-from utilities import component as component_module, logger, ipc, component
+from utilities import component
+from utilities import component as component_module
+from utilities import ipc, logger
 
 
 def test_manager_init():
@@ -93,11 +94,7 @@ def test_manager_integration():
 
     # Init
     r = redis.StrictRedis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
-    _ipc_node = ipc.IpcNode(
-        "manager",
-        r,
-        r.pubsub()
-    )
+    _ipc_node = ipc.IpcNode("manager", r, r.pubsub())
     _ipc_node.set_logger(logger.Logger(_ipc_node))
     manager = manager_module.Manager(_ipc_node)
 

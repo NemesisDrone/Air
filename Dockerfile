@@ -34,19 +34,10 @@ WORKDIR /tmp/nemesis/pigpio-master
 RUN make
 RUN make install
 
-# --- ADD ADDITIONAL DEPENDENCIES HERE TO AVOID INVALIDATING CACHE ---
-
-# --- Project Dependencies and files ---
+# --- Dev dependencies ---
 COPY ./requirements-dev.txt /app/requirements-dev.txt
-COPY ./requirements.txt /app/requirements.txt
 RUN apt install cmake -y
-RUN python3 -m pip install -r /app/requirements.txt
 RUN python3 -m pip install -r /app/requirements-dev.txt
-
-# --- Utilities ---
-COPY ./src/nemesis_utilities /app/src/nemesis_utilities
-WORKDIR /app/src/nemesis_utilities
-RUN python3 -m pip install -e .
 
 # --- Camera access ---
 RUN usermod -aG video nemesis
@@ -54,13 +45,13 @@ RUN usermod -aG video nemesis
 # --- GST encoder for H264 (currently to enable simuling): vah264lpenc
 RUN apt install gstreamer1.0-plugins-bad -y
 
-# ----------------------------------------------------------------------------------------------------------------------
-#                                                EXECUTION
-# ----------------------------------------------------------------------------------------------------------------------
+# --- App ---
 WORKDIR /app
-USER nemesis
 COPY . /app
+RUN chown -R nemesis:nemesis /app
+RUN python3 -m pip install -e .
 
-# CMD defined in compose.yml
+# Overriden in compose.yml
+USER nemesis
 CMD []
 ENTRYPOINT []

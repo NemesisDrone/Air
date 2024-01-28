@@ -1,8 +1,9 @@
-redis
-PyGObject
-websockets
-adafruit-circuitpython-vl53l0x
-RPi.GPIO
-sense-hat
-smbus2
-pigpio
+redis==5.0.1
+PyGObject==3.46.0
+websockets==12.0
+adafruit-circuitpython-vl53l0x==3.6.11
+RPi.GPIO==0.7.1
+sense-hat==2.6.0
+smbus2==0.4.3
+pigpio==1.78
+pydantic==2.5.3

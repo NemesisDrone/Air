@@ -1,10 +1,9 @@
+import os
 import time
 import unittest.mock
-import os
-
-import pytest
 from unittest.mock import Mock
 
+import pytest
 import redis
 from utilities import ipc
 from utilities import logger as lg
@@ -19,7 +18,7 @@ def calldata_kwargs():
         "loopback": True,
         "payload": {"key": "value"},
         "concurrent": True,
-        "blocking_response_channel": "response_channel"
+        "blocking_response_channel": "response_channel",
     }
 
 
@@ -58,10 +57,7 @@ def test_calldata_dumps_and_loads(calldata_kwargs, calldata):
 # --- Route --- #
 @pytest.fixture
 def route_kwargs():
-    return {
-        "regexes": ["a:b:c", "a:b:d:*"],
-        "concurrent": False
-    }
+    return {"regexes": ["a:b:c", "a:b:d:*"], "concurrent": False}
 
 
 @pytest.fixture
@@ -102,6 +98,7 @@ def test_route_decorator(route):
         pass
 
     with pytest.raises(ValueError):
+
         @route.decorator
         def invalid_function(self, payload):  # Missing 'call_data' parameter
             pass
@@ -127,22 +124,14 @@ def test_route_call(route):
     # Test basic call
     route.call(call_data)
 
-    mock_function.assert_called_once_with(
-        mock_ipc_node,
-        call_data,
-        {"a": "b"}
-    )
+    mock_function.assert_called_once_with(mock_ipc_node, call_data, {"a": "b"})
 
     # Test basic call with exception
     mock_function.reset_mock()
     mock_function.side_effect = Exception("test")
 
     route.call(call_data)
-    mock_function.assert_called_once_with(
-        mock_ipc_node,
-        call_data,
-        {"a": "b"}
-    )
+    mock_function.assert_called_once_with(mock_ipc_node, call_data, {"a": "b"})
     mock_ipc_node.logger.error.assert_called_once()
 
     # Test blocking call
@@ -150,11 +139,7 @@ def test_route_call(route):
     call_data._blocking_response_channel = "response_channel"
 
     route.call(call_data)
-    mock_function.assert_called_once_with(
-        mock_ipc_node,
-        call_data,
-        {"a": "b"}
-    )
+    mock_function.assert_called_once_with(mock_ipc_node, call_data, {"a": "b"})
     mock_ipc_node.send.assert_called_once()
 
     # Test blocking call with exception
@@ -162,22 +147,14 @@ def test_route_call(route):
     mock_function.side_effect = Exception("test")
 
     route.call(call_data)
-    mock_function.assert_called_once_with(
-        mock_ipc_node,
-        call_data,
-        {"a": "b"}
-    )
+    mock_function.assert_called_once_with(mock_ipc_node, call_data, {"a": "b"})
 
     # test concurrent call
     mock_function.reset_mock()
     call_data._concurrent = True
 
     route.call(call_data)
-    mock_function.assert_called_once_with(
-        mock_ipc_node,
-        call_data,
-        {"a": "b"}
-    )
+    mock_function.assert_called_once_with(mock_ipc_node, call_data, {"a": "b"})
 
 
 # --- IpcNode --- #
@@ -473,8 +450,9 @@ def test_ipc_node_send(ipc_node_kwargs):
 
         ipc_node.send(channel, payload, concurrent, loopback)
 
-        mock_call_data.assert_called_once_with(channel=channel, sender=ipc_node.ipc_id, loopback=loopback,
-                                               payload=payload, concurrent=concurrent)
+        mock_call_data.assert_called_once_with(
+            channel=channel, sender=ipc_node.ipc_id, loopback=loopback, payload=payload, concurrent=concurrent
+        )
         mock_call_data.return_value.dumps.assert_called_once()
         ipc_node._redis.publish.assert_called_once_with("ipc", "dumps")
         ipc_node.logger.debug.assert_called_once()
@@ -530,9 +508,11 @@ def test_ipc_node_send_blocking(ipc_node_kwargs):
 
     with unittest.mock.patch("utilities.ipc.CallData") as mock_call_data:
         with unittest.mock.patch(
-                "utilities.ipc.IpcNode._create_blocking_request_response_placeholder") as mock_create_blocking_request_response_placeholder:
+            "utilities.ipc.IpcNode._create_blocking_request_response_placeholder"
+        ) as mock_create_blocking_request_response_placeholder:
             with unittest.mock.patch(
-                    "utilities.ipc.IpcNode._wait_for_blocking_response") as mock_wait_for_blocking_response:
+                "utilities.ipc.IpcNode._wait_for_blocking_response"
+            ) as mock_wait_for_blocking_response:
                 mock_call_data.return_value = Mock()
                 mock_call_data.return_value.dumps.return_value = "dumps"
 
@@ -541,9 +521,14 @@ def test_ipc_node_send_blocking(ipc_node_kwargs):
                 r = ipc_node.send_blocking(channel, payload, concurrent, loopback, timeout)
 
                 # Assert was called with correct arguments, and blocking_response_channel can be anything
-                mock_call_data.assert_called_once_with(channel=channel, sender=ipc_node.ipc_id, loopback=loopback,
-                                                       payload=payload, concurrent=concurrent,
-                                                       blocking_response_channel=unittest.mock.ANY)
+                mock_call_data.assert_called_once_with(
+                    channel=channel,
+                    sender=ipc_node.ipc_id,
+                    loopback=loopback,
+                    payload=payload,
+                    concurrent=concurrent,
+                    blocking_response_channel=unittest.mock.ANY,
+                )
 
                 mock_call_data.return_value.dumps.assert_called_once()
                 ipc_node._redis.publish.assert_called_once_with("ipc", "dumps")
@@ -574,18 +559,14 @@ def test_ipc_integration():
 
     # Instantiate the IPC node
     r = redis.StrictRedis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"), db=0)
-    node = TestIpcNode(
-        "node",
-        r,
-        r.pubsub()
-    )
+    node = TestIpcNode("node", r, r.pubsub())
     node.set_logger(lg.Logger(node))
 
     # Usage
     node.start()
 
     node.send("ping", {}, loopback=True)
-    assert node.send_blocking('return_pi', {}, loopback=True) == 3.14159265359
+    assert node.send_blocking("return_pi", {}, loopback=True) == 3.14159265359
 
     node.stop()
 
