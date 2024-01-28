@@ -198,6 +198,10 @@ Sensors data
         - "roll": The roll angle (-180° to +180°)
         - "pitch": The pitch angle (-180° to +180°)
         - "yaw": The yaw angle (-180° to +180°)
+        - "q1": The quaternion X value
+        - "q2": The quaternion Y value
+        - "q3": The quaternion Z value
+        - "q4": The quaternion W value
         - "gyroRoll": The roll gyroscope value (Radians/s)
         - "gyroPitch": The pitch gyroscope value (Radians/s)
         - "gyroYaw": The yaw gyroscope value (Radians/s)

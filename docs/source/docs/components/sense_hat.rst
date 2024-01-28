@@ -34,6 +34,10 @@ The component publishes and set the data to `sensors:sense_hat:data`.
     "roll": float,
     "pitch": float,
     "yaw": float,
+    "q1": float,
+    "q2": float,
+    "q3": float,
+    "q4": float,
     "gyroRoll": float,
     "gyroPitch": float,
     "gyroYaw": float,
@@ -53,6 +57,8 @@ The `timestamp` field is the timestamp of the data. Obtained using time.time() f
 for raw data is not currently known.
 
 The `roll`, `pitch` and `yaw` fields are the orientation of the sense hat in degrees from +180 to -180.
+
+The `q1`, `q2`, `q3` and `q4` fields are the quaternion representation of the orientation of the sense hat.
 
 The `gyroRoll`, `gyroPitch` and `gyroYaw` fields are the raw gyroscopic data in radians per second.
 
