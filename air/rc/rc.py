@@ -22,7 +22,7 @@ class RcComponent(component.Component):
             self._ibus = RcIbus("/dev/serial0")
             self._worker_alive = True
         except Exception:
-            self.logger.warning(f"Could not initialize radio command")
+            self.logger.warning(f"Could not initialize radio command", self.NAME)
 
         self._update_custom_status()
 
