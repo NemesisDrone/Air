@@ -16,6 +16,9 @@ class SenseHatComponent(component.Component):
             hat.set_imu_config(True, True, True)
             hat._init_humidity()
             hat._init_pressure()
+
+            # hat.show_message("OK", text_colour=self.primary_color)
+
         except Exception as e:
             raise RuntimeError(f"Could not initialize SenseHat: {e}")
 
@@ -30,6 +33,7 @@ class SenseHatComponent(component.Component):
         self._sens_worker_thread = threading.Thread(target=self._sense_worker, daemon=True)
         #: Is the sense worker data valid or is it emulated data
         self._sense_emulation = False
+        self.primary_color = [34, 197, 94]
 
         try:
             self._hat = self._hat_setup()

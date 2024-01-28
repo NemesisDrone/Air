@@ -68,6 +68,7 @@ class SenseHat(object):
 
         # Load IMU settings and calibration data
         self._imu_settings = self._get_settings_file(imu_settings_file)
+        print(self._imu_settings.CompassCalMax)
         self._imu = RTIMU.RTIMU(self._imu_settings)
         self._imu_init = False  # Will be initialised as and when needed
         self._pressure = RTIMU.RTPressure(self._imu_settings)
@@ -159,9 +160,9 @@ class SenseHat(object):
         if system_exists and not home_exists:
             shutil.copyfile(system_file, home_file)
 
+        print(home_path,imu_settings_file)
         # return RTIMU.Settings(os.path.join(home_path, imu_settings_file))  # RTIMU will add .ini internally
-        print("RTIMU custom settings", flush=True)
-        return RTIMU.Settings("/app/src/pi_sense_hat/RTIMULib")
+        return RTIMU.Settings("/app/src/pi_sense_hat/RTIMULib")  # RTIMU will add .ini internally
 
     def _get_fb_device(self):
         """
