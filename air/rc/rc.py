@@ -1,10 +1,12 @@
 import json
 import threading
+import time
 from typing import Tuple
 
 from air.utilities import component, ipc
 
 from .rc_ibus import RcIbus
+from air.utilities.enums import FlightMode
 
 
 class RcComponent(component.Component):
@@ -46,7 +48,11 @@ class RcComponent(component.Component):
     def _update_channels(self, data: Tuple[int]) -> None:
         """
         Update the rc channels to rc:channels redis key
+        It only update when flight mode is manual
         """
+
+        flight_mode_channel = str(json.loads(self.redis.get("config:switch:flight_mode_channel")))
+
         channels = {
             "1": self._normalize_rc_channel(data[2]),
             "2": self._normalize_rc_channel(data[3]),
@@ -59,7 +65,19 @@ class RcComponent(component.Component):
             "9": self._normalize_rc_channel(data[10]),
             "10": self._normalize_rc_channel(data[11]),
         }
-        self.redis.set("rc:channels", json.dumps(channels))
+        pipe = self.redis.pipeline()
+        # print(channels, flush=True)
+
+        """
+        # When flight mode is manual, then channels are updated from the RC
+        # """
+        if channels[flight_mode_channel] > 50:
+            pipe.set("flight_mode", FlightMode.MANUAL.value)
+            pipe.set("channels", json.dumps(channels))
+        else:
+            pipe.set("flight_mode", FlightMode.AUTONOMOUS.value)
+
+        pipe.execute()
 
     def _rc_worker(self) -> None:
         """

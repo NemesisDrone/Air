@@ -56,7 +56,7 @@ class ServosComponent(component.Component):
         """
         This method is used to get the rc channels from redis
         """
-        data: bytes = self.redis.get("rc:channels")
+        data: bytes = self.redis.get("channels")
         if not data:
             return None
         return json.loads(data)

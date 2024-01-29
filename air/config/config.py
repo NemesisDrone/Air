@@ -2,6 +2,7 @@ import json
 import time
 
 from air.utilities import component, ipc
+from air.utilities.enums import FlightMode
 
 
 class ConfigComponent(component.Component):
@@ -14,7 +15,31 @@ class ConfigComponent(component.Component):
     def __init__(self, ipc_node: ipc.IpcNode):
         super().__init__(ipc_node)
 
+        self._set_default_config()
         self.ipc_node.send("config:ask", {}, loopback=True)
+
+    def _set_default_config(self):
+        """
+        This method is used to set the default config of the drone.
+        Before the config is updated, the drone will use this config.
+        """
+        self.redis.set("config:name", "default")
+
+        """
+        Save the config of the servos and brushless motors canals
+        """
+        for i in range(1, 11):
+            self.redis.set(f"config:servos:canal:{i}", json.dumps({"gpios": []}))
+            self.redis.set(f"config:brushless:canal:{i}", json.dumps({"gpios": []}))
+
+        """
+        Save switch config
+        Like flight mode channel
+        """
+        self.redis.set("config:switch:flight_mode_channel", 7)
+
+        # Flight mode
+        self.redis.set("flight_mode", FlightMode.AUTONOMOUS.value)
 
     @ipc.Route(["config:ask"], True).decorator
     def ask_for_config(self, call_data: ipc.CallData, payload: dict):
@@ -52,6 +77,12 @@ class ConfigComponent(component.Component):
         for i in range(1, canals_count + 1):
             self.redis.set(f"config:servos:canal:{i}", json.dumps(payload["servo_canals"][i - 1]))
             self.redis.set(f"config:brushless:canal:{i}", json.dumps(payload["brushless_canals"][i - 1]))
+
+        """
+        Save switch config
+        Like flight mode channel
+        """
+        self.redis.set("config:switch:flight_mode_channel", int(payload["flight_mode_channel"]))
 
         # Set the config to updated
         self.redis.set("config:updated", 1)

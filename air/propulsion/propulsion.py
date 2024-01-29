@@ -43,6 +43,8 @@ class PropulsionComponent(component.Component):
 
         for i in range(1, 11):
             brushless_config = self._get_canal_config(i)
+            if not brushless_config:
+                continue
 
             gpios: List[int] = brushless_config["gpios"]
             if len(gpios) == 0:
@@ -118,7 +120,7 @@ class PropulsionComponent(component.Component):
         """
         This method is used to get the rc channels from the redis database
         """
-        channels: bytes = self.redis.get("rc:channels")
+        channels: bytes = self.redis.get("channels")
         if not channels:
             return None
         return json.loads(channels)
@@ -146,7 +148,6 @@ class PropulsionComponent(component.Component):
 
                     for gpio in gpios:
                         self.pi.set_servo_pulsewidth(gpio, value)
-                        print(value, flush=True)
                         time.sleep(0.05)
             else:
                 # Disarm all the ESC
