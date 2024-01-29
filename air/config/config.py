@@ -25,17 +25,13 @@ class ConfigComponent(component.Component):
         """
         self.redis.set("config:name", "default")
 
-        """
-        Save the config of the servos and brushless motors canals
-        """
+        # Save the config of the servos and brushless motors canals
         for i in range(1, 11):
             self.redis.set(f"config:servos:canal:{i}", json.dumps({"gpios": []}))
             self.redis.set(f"config:brushless:canal:{i}", json.dumps({"gpios": []}))
 
-        """
-        Save switch config
-        Like flight mode channel
-        """
+        # Save switch config
+        # Like flight mode channel
         self.redis.set("config:switch:flight_mode_channel", 7)
 
         # Flight mode

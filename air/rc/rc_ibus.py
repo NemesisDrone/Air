@@ -6,7 +6,8 @@ import serial
 
 class RcIbus:
     """
-    This class is used to read and write iBus packages from/to serial port. Especially for the FlySky i6X.
+    This class is used to read and write iBus packages from/to serial port.
+    Especially for the FlySky i6X.
     """
 
     IBUS_START = b"\x20"
@@ -48,8 +49,7 @@ class RcIbus:
 
         if self.validate(data):
             return self.unpack(data)
-        else:
-            return None
+        return None
 
     def validate(self, data: list) -> bool:
         """

@@ -58,7 +58,7 @@ class SensorEvent:
         This method is used to sanitize data of IPC message for base station. To send only the necessary data
         """
         data = payload
-        if self.necessary_data is not None and type(payload) == dict:
+        if self.necessary_data is not None and isinstance(payload, dict):
             data = {key: payload[key] for key in self.necessary_data}
 
         if self.sanitize_method is not None:

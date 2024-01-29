@@ -3,6 +3,7 @@ import time
 
 from air.utilities import component, ipc
 
+
 class HelloComponent(component.Component):
     NAME = "hello"
 

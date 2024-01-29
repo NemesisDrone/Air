@@ -1,12 +1,13 @@
-import threading
-import time
-from typing import List, Union
-
-from air.utilities import component as component, ipc
-from time import sleep
-import os
 import json
+import os
+import threading
+from typing import List, Union
 import pigpio
+
+from air.utilities import component as component
+from air.utilities import ipc
+
+
 os.system("pigpiod")
 
 
@@ -15,6 +16,7 @@ class ServosComponent(component.Component):
     This component is responsible for controlling the servos
 
     """
+
     NAME = "servos"
 
     def __init__(self, ipc_node: ipc.IpcNode):
@@ -66,7 +68,7 @@ class ServosComponent(component.Component):
         This method is used to update the angles of the all servos, based on the redis values
         """
         """
-        Reminder: 
+        Reminder:
         Channels is a dict of the form:
         {
             "1": 0,
@@ -97,9 +99,7 @@ class ServosComponent(component.Component):
                 continue
 
             # TODO: handle manual or autonome
-            angle = self._calculate_pulsewidth_from_angle(
-                channels[str(i)]
-            )
+            angle = self._calculate_pulsewidth_from_angle(channels[str(i)])
             for gpio in gpios:
                 self.pi.set_servo_pulsewidth(gpio, angle)
 

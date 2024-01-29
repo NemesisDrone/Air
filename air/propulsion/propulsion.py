@@ -1,11 +1,12 @@
 import json
+import os
 import threading
+import time
 from typing import List, Union
 
-from air.utilities import component, ipc
-import time
 import pigpio
-import os
+
+from air.utilities import component, ipc
 
 
 class PropulsionComponent(component.Component):
@@ -16,6 +17,7 @@ class PropulsionComponent(component.Component):
      - propulsion:armed: The state of the ESC
 
     """
+
     NAME = "propulsion"
 
     def __init__(self, ipc_node: ipc.IpcNode):

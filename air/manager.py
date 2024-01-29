@@ -4,17 +4,20 @@ import signal
 import threading
 import typing
 
-from air.communication.messages import CommunicationComponent as communication
+import redis
+
 from air import hello
+from air.communication.messages import CommunicationComponent as communication
+from air.config import config
 from air.pi_sense_hat import pi_sense_hat
 from air.propulsion import propulsion
 from air.rc import rc
+from air.servos import servos
 from air.sim7600 import sim7600
+from air.utilities import component as component_module
+from air.utilities import ipc, logger
 from air.vl53 import vl53
-from air.utilities import component as component_module, ipc, logger
-from air.config import config
 
-import redis
 
 #: The time in seconds to wait for the components to stop before killing them
 STOP_TIMOUT = 15
@@ -33,6 +36,7 @@ components = {
     "communication": communication.CommunicationComponent,
     "propulsion": propulsion.PropulsionComponent,
     "rc": rc.RcComponent,
+    "servos": servos.ServosComponent,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -40,8 +44,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["communication", "config", "sim7600", "sense_hat", "vl53", "propulsion", "rc"],
-    # "dev": ["test"],
+    "default": ["communication", "config", "servos", "sense_hat", "propulsion", "rc", "sim7600", "vl53"],
 }
 
 

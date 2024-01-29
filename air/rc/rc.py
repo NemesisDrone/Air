@@ -1,15 +1,17 @@
 import json
 import threading
-import time
 from typing import Tuple
 
 from air.utilities import component, ipc
+from air.utilities.enums import FlightMode
 
 from .rc_ibus import RcIbus
-from air.utilities.enums import FlightMode
 
 
 class RcComponent(component.Component):
+    """
+    This component is responsible for receiving the channels value from the RC to control the drone
+    """
     NAME = "rc"
 
     def __init__(self, ipc_node: ipc.IpcNode) -> None:
@@ -23,8 +25,8 @@ class RcComponent(component.Component):
         try:
             self._ibus = RcIbus("/dev/serial0")
             self._worker_alive = True
-        except Exception:
-            self.logger.warning(f"Could not initialize radio command", self.NAME)
+        except Exception as e:
+            self.logger.warning(f"Could not initialize radio command: {e}", self.NAME)
 
         self._update_custom_status()
 
@@ -69,8 +71,8 @@ class RcComponent(component.Component):
         # print(channels, flush=True)
 
         """
-        # When flight mode is manual, then channels are updated from the RC
-        # """
+        When flight mode is manual, then channels are updated from the RC
+        """
         if channels[flight_mode_channel] > 50:
             pipe.set("flight_mode", FlightMode.MANUAL.value)
             pipe.set("channels", json.dumps(channels))
