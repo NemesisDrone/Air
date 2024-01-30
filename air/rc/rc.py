@@ -67,19 +67,19 @@ class RcComponent(component.Component):
             "9": self._normalize_rc_channel(data[10]),
             "10": self._normalize_rc_channel(data[11]),
         }
-        pipe = self.redis.pipeline()
-        # print(channels, flush=True)
+        # pipe = self.redis.pipeline()
+        print(channels, flush=True)
+        # self.redis.set("channels", json.dumps(channels))
 
-        """
-        When flight mode is manual, then channels are updated from the RC
-        """
-        if channels[flight_mode_channel] > 50:
-            pipe.set("flight_mode", FlightMode.MANUAL.value)
-            pipe.set("channels", json.dumps(channels))
-        else:
-            pipe.set("flight_mode", FlightMode.AUTONOMOUS.value)
+        # """
+        # When flight mode is manual, then channels are updated from the RC
+        # """
+        # if channels[flight_mode_channel] > 50:
+        #     pipe.set("flight_mode", FlightMode.MANUAL.value)
+        # else:
+        #     pipe.set("flight_mode", FlightMode.AUTONOMOUS.value)
 
-        pipe.execute()
+        # pipe.execute()
 
     def _rc_worker(self) -> None:
         """
