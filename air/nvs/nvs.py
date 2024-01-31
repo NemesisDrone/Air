@@ -1,11 +1,12 @@
 import os
 
 import gi
+
 from air.utilities import component, ipc
+from gi.repository import Gst
 
 
 gi.require_version("Gst", "1.0")
-from gi.repository import Gst
 
 
 RESOLUTIONS = [

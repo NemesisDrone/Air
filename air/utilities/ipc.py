@@ -18,7 +18,9 @@ import typing
 import uuid
 
 import redis
-from air.utilities import abstracts, logger as lg
+
+from air.utilities import abstracts
+from air.utilities import logger as lg
 
 
 VERBOSE_PAYLOAD_LOGGING = False

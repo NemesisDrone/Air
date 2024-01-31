@@ -1,12 +1,11 @@
 import json
 import os
 import threading
-import time
-from time import sleep
-from typing import List
-
+from typing import List, Union
 import pigpio
-from air.utilities import component, ipc
+
+from air.utilities import component as component
+from air.utilities import ipc
 
 
 os.system("pigpiod")
@@ -31,26 +30,14 @@ class ServosComponent(component.Component):
     def start(self):
         self.alive = True
 
-        self.redis.set("servos:canal:1", 180)
-
+        # Set all servos to 90 degrees
         for i in range(1, self.nb_canals + 1):
-            angle = self.redis.get(f"servos:canal:{i}")
-            if not angle:
-                continue
-            # Get the gpio of the servo from the config
-            canal = json.loads(self.redis.get(f"config:canal:{i}"))
-            gpios: List[int] = canal["gpios"]
-
-            if len(gpios) == 0:
-                continue
-            # Set all servos to their middle position
-            for gpio in gpios:
-                self.pi.set_servo_pulsewidth(gpio, 1500)
+            self.redis.set(f"servos:canal:{i}", 90)
 
         threading.Thread(target=self.servos_work, daemon=True).start()
 
     @staticmethod
-    def calculate_pulsewidth_from_angle(angle: float) -> float:
+    def _calculate_pulsewidth_from_angle(angle: float) -> float:
         """
         This method is used to calculate the pulsewidth from an angle.
         The minimum pulsewidth is 500 and the maximum is 2500
@@ -58,29 +45,67 @@ class ServosComponent(component.Component):
         # return int(angle / )
         return 500 + angle * 2000 / 180
 
-    def update_angles(self) -> None:
+    def _get_canal_config(self, canal: int) -> Union[dict, None]:
+        """
+        This method is used to get the canal config from redis
+        """
+        data: bytes = self.redis.get(f"config:servos:canal:{canal}")
+        if not data:
+            return None
+        return json.loads(data)
+
+    def _get_rc_channels(self) -> Union[dict, None]:
+        """
+        This method is used to get the rc channels from redis
+        """
+        data: bytes = self.redis.get("channels")
+        if not data:
+            return None
+        return json.loads(data)
+
+    def _update_angles(self) -> None:
         """
         This method is used to update the angles of the all servos, based on the redis values
         """
-        for i in range(1, self.nb_canals + 1):
-            angle = self.redis.get(f"servos:canal:{i}")
-            if not angle:
-                continue
-            # Get the gpio of the servo from the config
-            canal = json.loads(self.redis.get(f"config:canal:{i}"))
-            gpios: List[int] = canal["gpios"]
+        """
+        Reminder:
+        Channels is a dict of the form:
+        {
+            "1": 0,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0,
+            "6": 0,
+            "7": 0,
+            "8": 0,
+            "9": 0,
+            "10": 0,
+        }
+        """
+        channels = self._get_rc_channels()
+        # TODO: Change condition when autonome mode is implemented
+        if not channels:
+            return
 
+        for i in range(1, self.nb_canals + 1):
+            # Get canal gpios
+            canal = self._get_canal_config(i)
+            if not canal:
+                continue
+
+            gpios: List[int] = canal["gpios"]
             if len(gpios) == 0:
                 continue
 
-            # Change the angle of the servo
+            # TODO: handle manual or autonome
+            angle = self._calculate_pulsewidth_from_angle(channels[str(i)])
             for gpio in gpios:
-                self.pi.set_servo_pulsewidth(gpio, self.calculate_pulsewidth_from_angle(float(angle)))
+                self.pi.set_servo_pulsewidth(gpio, angle)
 
     def servos_work(self):
         while self.alive:
-            self.update_angles()
-            time.sleep(0.005)
+            self._update_angles()
 
     def stop(self):
         self.pi.stop()

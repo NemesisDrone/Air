@@ -3,11 +3,15 @@ import threading
 from typing import Tuple
 
 from air.utilities import component, ipc
+from air.utilities.enums import FlightMode
 
 from .rc_ibus import RcIbus
 
 
 class RcComponent(component.Component):
+    """
+    This component is responsible for receiving the channels value from the RC to control the drone
+    """
     NAME = "rc"
 
     def __init__(self, ipc_node: ipc.IpcNode) -> None:
@@ -21,8 +25,8 @@ class RcComponent(component.Component):
         try:
             self._ibus = RcIbus("/dev/serial0")
             self._worker_alive = True
-        except Exception:
-            self.logger.warning(f"Could not initialize radio command", self.NAME)
+        except Exception as e:
+            self.logger.warning(f"Could not initialize radio command: {e}", self.NAME)
 
         self._update_custom_status()
 
@@ -46,20 +50,36 @@ class RcComponent(component.Component):
     def _update_channels(self, data: Tuple[int]) -> None:
         """
         Update the rc channels to rc:channels redis key
+        It only update when flight mode is manual
         """
+
+        flight_mode_channel = str(json.loads(self.redis.get("config:switch:flight_mode_channel")))
+
         channels = {
-            "ch1": self._normalize_rc_channel(data[2]),
-            "ch2": self._normalize_rc_channel(data[3]),
-            "ch3": self._normalize_rc_channel(data[4]),
-            "ch4": self._normalize_rc_channel(data[5]),
-            "ch5": self._normalize_rc_channel(data[6]),
-            "ch6": self._normalize_rc_channel(data[7]),
-            "ch7": self._normalize_rc_channel(data[8]),
-            "ch8": self._normalize_rc_channel(data[9]),
-            "ch9": self._normalize_rc_channel(data[10]),
-            "ch10": self._normalize_rc_channel(data[11]),
+            "1": self._normalize_rc_channel(data[2]),
+            "2": self._normalize_rc_channel(data[3]),
+            "3": self._normalize_rc_channel(data[4]),
+            "4": self._normalize_rc_channel(data[5]),
+            "5": self._normalize_rc_channel(data[6]),
+            "6": self._normalize_rc_channel(data[7]),
+            "7": self._normalize_rc_channel(data[8]),
+            "8": self._normalize_rc_channel(data[9]),
+            "9": self._normalize_rc_channel(data[10]),
+            "10": self._normalize_rc_channel(data[11]),
         }
-        self.redis.set("rc:channels", json.dumps(channels))
+        # pipe = self.redis.pipeline()
+        print(channels, flush=True)
+        # self.redis.set("channels", json.dumps(channels))
+
+        # """
+        # When flight mode is manual, then channels are updated from the RC
+        # """
+        # if channels[flight_mode_channel] > 50:
+        #     pipe.set("flight_mode", FlightMode.MANUAL.value)
+        # else:
+        #     pipe.set("flight_mode", FlightMode.AUTONOMOUS.value)
+
+        # pipe.execute()
 
     def _rc_worker(self) -> None:
         """

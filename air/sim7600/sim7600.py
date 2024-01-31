@@ -6,6 +6,7 @@ import time
 import typing
 
 import serial
+
 from air.utilities import component, ipc
 
 
@@ -22,7 +23,7 @@ class Sim7600:
         """
         try:
             ser = serial.Serial("/dev/ttyS0", 115200, timeout=2)
-        except Exception as e:
+        except Exception:
             # For RPI 2
             try:
                 ser = serial.Serial("/dev/ttyAMA0", 115200, timeout=2)
