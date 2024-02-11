@@ -2,6 +2,8 @@ import json
 import threading
 from typing import Tuple
 
+import serial
+
 from air.utilities import component, ipc
 from air.utilities.enums import FlightMode
 
@@ -58,16 +60,22 @@ class RcComponent(component.Component):
         self.redis.set("rc:channels", "")
         self._update_custom_status()
 
-        try:
-            while self._worker_alive:
+        while self._worker_alive:
+            try:
                 data = self._ibus.read()
                 # If data checksum is valid
                 if data:
                     self._rc_data = data
 
-        except Exception as e:
-            self.logger.error(f"Rc worker stopped unexpectedly: {e}", self.NAME)
-            self._worker_alive = False
+            except serial.SerialException:
+                """
+                No RC Controller connected
+                """
+                continue
+
+            except Exception as e:
+                self.logger.error(f"Rc worker stopped unexpectedly: {e}", self.NAME)
+                self._worker_alive = False
 
         self._update_custom_status()
 
