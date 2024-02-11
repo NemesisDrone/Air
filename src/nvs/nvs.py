@@ -35,11 +35,10 @@ def build_caps(w, h, fr) -> str:
 
 def build_pipeline(sset: int, framerate: int, address: str, port: str) -> str:
     global RESOLUTIONS
-    #pipeline = "libcamerasrc camera-name=\"" + r"/base/soc/i2c0mux/i2c\@1/ov5647\@36" + "\""
-    pipeline = "videotestsrc"
-    pipeline += " ! capsfilter name=capper caps="
+    pipeline = os.environ.get("STREAMING_CAMERA")
+    pipeline += " ! capsfilter caps="
     pipeline += build_caps(RESOLUTIONS[sset][0], RESOLUTIONS[sset][1], framerate)
-    pipeline += " ! vah264lpenc ! rtph264pay ! udpsink host=" + address + " port=" + port
+    pipeline += " ! openh264enc ! rtph264pay ! udpsink host=" + address + " port=" + port
 
     return pipeline
 
@@ -50,9 +49,10 @@ class NVSState(int):
     """
     GstInitFail: int = 0
     PipelineCreationFail: int = 1
-    Unknown = 2
-    Initialized: int = 3
-    Streaming: int = 4
+    PipelinePlayFail: int = 2
+    Unknown = 3
+    Initialized: int = 4
+    Streaming: int = 5
 
 
 class NVSComponent(component.Component):
@@ -66,7 +66,7 @@ class NVSComponent(component.Component):
 
         self.nvs_state = NVSState.Unknown
         self.pipeline = None
-        self.gst_pipeline_str: str = build_pipeline(4, 30, os.environ.get("STREAMING_BASE_HOST"), os.environ.get("STREAMING_BASE_PORT"))
+        self.gst_pipeline_str: str = build_pipeline(2, 20, os.environ.get("STREAMING_BASE_HOST"), os.environ.get("STREAMING_BASE_PORT"))
 
         if not Gst.init_check(None):  # init gstreamer
             self.logger.critical("Could not initialize GStreamer.", self.NAME)
@@ -101,7 +101,12 @@ class NVSComponent(component.Component):
         if self.nvs_state != NVSState.Initialized:
             return False
 
-        self.pipeline.set_state(Gst.State.PLAYING)
+        ret = self.pipeline.set_state(Gst.State.PLAYING)
+        if ret == Gst.StateChangeReturn.FAILURE:
+            self.logger.critical("Failed to make the pipeline play.", self.NAME)
+            self.set_nvs_state(NVSState.PipelinePlayFail)
+            return
+
         self.set_nvs_state(NVSState.Streaming)
 
     def stop(self):
