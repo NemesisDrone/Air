@@ -15,6 +15,8 @@ import communication.messages.CommunicationComponent as communication
 import propulsion.Propulsion as propulsion
 import rc.rc as rc
 import config.config as config
+import nvs.nvs as nvs
+
 
 #: The time in seconds to wait for the components to stop before killing them
 STOP_TIMOUT = 15
@@ -33,6 +35,7 @@ components = {
     "communication": communication.CommunicationComponent,
     "propulsion": propulsion.PropulsionComponent,
     "rc": rc.RcComponent,
+    "NVS": nvs.NVSComponent,
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -40,7 +43,7 @@ components = {
 # ----------------------------------------------------------------------------------------------------------------------
 profiles = {
     # name: [list of components]
-    "default": ["communication", "config", "sim7600", "sense_hat", "vl53", "propulsion", "rc"],
+    "default": ["communication", "config", "sim7600", "sense_hat", "vl53", "propulsion", "rc", "NVS"],
     # "dev": ["test"],
 }
 
