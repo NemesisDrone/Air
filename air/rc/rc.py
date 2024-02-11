@@ -21,6 +21,9 @@ class RcComponent(component.Component):
         self._worker_alive = False
         #: The rc thread
         self._worker_thread = threading.Thread(target=self._rc_worker, daemon=True)
+        self._rc_data = None
+        # The update channels worker thread
+        self._update_channels_worker_thread = threading.Thread(target=self._update_channels_worker, daemon=True)
 
         try:
             self._ibus = RcIbus("/dev/serial0")
@@ -47,40 +50,6 @@ class RcComponent(component.Component):
         """
         return (value - 1000) / 10
 
-    def _update_channels(self, data: Tuple[int]) -> None:
-        """
-        Update the rc channels to rc:channels redis key
-        It only update when flight mode is manual
-        """
-
-        flight_mode_channel = str(json.loads(self.redis.get("config:switch:flight_mode_channel")))
-
-        channels = {
-            "1": self._normalize_rc_channel(data[2]),
-            "2": self._normalize_rc_channel(data[3]),
-            "3": self._normalize_rc_channel(data[4]),
-            "4": self._normalize_rc_channel(data[5]),
-            "5": self._normalize_rc_channel(data[6]),
-            "6": self._normalize_rc_channel(data[7]),
-            "7": self._normalize_rc_channel(data[8]),
-            "8": self._normalize_rc_channel(data[9]),
-            "9": self._normalize_rc_channel(data[10]),
-            "10": self._normalize_rc_channel(data[11]),
-        }
-        # pipe = self.redis.pipeline()
-        print(channels, flush=True)
-        # self.redis.set("channels", json.dumps(channels))
-
-        # """
-        # When flight mode is manual, then channels are updated from the RC
-        # """
-        # if channels[flight_mode_channel] > 50:
-        #     pipe.set("flight_mode", FlightMode.MANUAL.value)
-        # else:
-        #     pipe.set("flight_mode", FlightMode.AUTONOMOUS.value)
-
-        # pipe.execute()
-
     def _rc_worker(self) -> None:
         """
         The rc worker
@@ -94,7 +63,7 @@ class RcComponent(component.Component):
                 data = self._ibus.read()
                 # If data checksum is valid
                 if data:
-                    self._update_channels(data)
+                    self._rc_data = data
 
         except Exception as e:
             self.logger.error(f"Rc worker stopped unexpectedly: {e}", self.NAME)
@@ -102,10 +71,54 @@ class RcComponent(component.Component):
 
         self._update_custom_status()
 
+    def _update_channels_worker(self) -> None:
+        """
+        Update the rc channels to rc:channels redis key
+        It only update when flight mode is manual
+        """
+
+        try:
+            while self._worker_alive:
+                if not self._rc_data:
+                    continue
+
+                flight_mode_channel = str(json.loads(self.redis.get("config:switch:flight_mode_channel")))
+
+                channels = {
+                    "1": self._normalize_rc_channel(self._rc_data[2]),
+                    "2": self._normalize_rc_channel(self._rc_data[3]),
+                    "3": self._normalize_rc_channel(self._rc_data[4]),
+                    "4": self._normalize_rc_channel(self._rc_data[5]),
+                    "5": self._normalize_rc_channel(self._rc_data[6]),
+                    "6": self._normalize_rc_channel(self._rc_data[7]),
+                    "7": self._normalize_rc_channel(self._rc_data[8]),
+                    "8": self._normalize_rc_channel(self._rc_data[9]),
+                    "9": self._normalize_rc_channel(self._rc_data[10]),
+                    "10": self._normalize_rc_channel(self._rc_data[11]),
+                }
+                pipe = self.redis.pipeline()
+
+                """
+                When flight mode is manual, then channels are updated from the RC
+                """
+                if channels[flight_mode_channel] > 50:
+                    pipe.set("flight_mode", FlightMode.MANUAL.value)
+                    self.redis.set("channels", json.dumps(channels))
+                else:
+                    pipe.set("flight_mode", FlightMode.AUTONOMOUS.value)
+
+                pipe.execute()
+
+        except Exception as e:
+            self.logger.error(f"Rc worker stopped unexpectedly: {e}", self.NAME)
+            self._worker_alive = False
+
     def start(self) -> None:
         self._worker_alive = True
         self._worker_thread.start()
+        self._update_channels_worker_thread.start()
 
     def stop(self) -> None:
         self._worker_alive = False
         self._worker_thread.join()
+        self._update_channels_worker_thread.join()

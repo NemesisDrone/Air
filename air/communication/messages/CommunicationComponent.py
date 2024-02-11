@@ -96,16 +96,13 @@ class CommunicationComponent(component.Component):
             "sensors:battery": SensorEvent("battery", 1, 0),
             "sensors:sense_hat:data": SensorEvent(
                 "sense_hat",
-                0.2,
+                0.5,
                 0,
-                ["roll", "pitch", "yaw", "compassX", "compassY", "compassZ"],
+                ["roll", "pitch", "yaw"],
                 lambda x: {
                     "roll": round(x["roll"], 2),
                     "pitch": round(x["pitch"], 2),
                     "yaw": round(x["yaw"], 2),
-                    "compassX": round(x["compassX"], 2),
-                    "compassY": round(x["compassY"], 2),
-                    "compassZ": round(x["compassZ"], 2),
                 },
             ),
         }
