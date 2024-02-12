@@ -11,7 +11,6 @@ from air.utilities import component, ipc
 
 
 GNSS_POLL_SLEEP_TIME = 0.05
-SIGQUAL_POLL_SLEEP_TIME = 0.1 # [TODO] Check if it's enough
 
 
 class Sim7600:
@@ -67,32 +66,6 @@ class Sim7600:
                 time.sleep(0.25)
                 self._send_command("AT+CGPS=1,2")
                 r = self._flush_output()
-
-    def get_signal_quality(self) -> typing.Union[typing.Dict[str, typing.Union[int]], None]:
-        self._send_command("AT+CSQ")
-        r = self._flush_output()
-
-        try:
-            if "ERROR" in r:
-                raise RuntimeError(f"Unable to get SIGQ info: {r}")
-
-            r = r.split("+CSQ ")[1].split("\r\n")[0]
-            r = r.split(",")
-
-            labels = [
-                "rssi",
-                "ber",
-            ]
-
-
-            data: typing.Dict[str, typing.Union[int]] = {
-                labels[i]: int(r[i]) for i in range(len(r))
-            }
-
-            return data
-
-        except Exception as e:
-            raise RuntimeError(f"Unable to get SIGQ info: {e}\n\tData: {r}")
 
     def get_gnss_info(self) -> typing.Union[typing.Dict[str, typing.Union[int, float, str, tuple[int, float]]], None]:
         self._send_command("AT+CGNSSINFO")
@@ -155,18 +128,18 @@ class Sim7600Component(component.Component):
         super().__init__(ipc_node)
 
         #: Is the gnss worker alive
-        self._worker_alive = False
+        self._gnss_worker_alive = False
         #: The gnss worker thread
-        self._worker_thread = threading.Thread(target=self._worker, daemon=True)
+        self._gnss_worker_thread = threading.Thread(target=self._gnss_worker, daemon=True)
         #: Is the gnss worker data valid or is it emulated data
-        self._emulation = False
+        self._gnss_emulation = False
 
         try:
             self._sim = Sim7600()
             self._sim.toggle_gps()
         except Exception as e:
             self.logger.warning(f"Could not initialize SIM7600, defaulting to emulated data: {e}", self.NAME)
-            self._emulation = True
+            self._gnss_emulation = True
 
         self._update_custom_status()
 
@@ -176,11 +149,11 @@ class Sim7600Component(component.Component):
         """
         self.redis.set(
             "sensors:sim7600:status",
-            json.dumps({"worker_alive": self._worker_alive, "emulation": self._emulation}),
+            json.dumps({"gnss_worker_alive": self._gnss_worker_alive, "gnss_emulation": self._gnss_emulation}),
         )
         self.ipc_node.send(
             "sensors:sim7600:status",
-            {"worker_alive": self._worker_alive, "emulation": self._emulation},
+            {"gnss_worker_alive": self._gnss_worker_alive, "gnss_emulation": self._gnss_emulation},
         )
 
     def _update_gnss_data(self):
@@ -189,21 +162,11 @@ class Sim7600Component(component.Component):
 
         :raises RuntimeError: If the GNSS data is unavailable
         """
-        assert not self._emulation
+        assert not self._gnss_emulation
         data = self._sim.get_gnss_info()
         if isinstance(data, dict):
             self.ipc_node.send("sensors:sim7600:gnss", data)
             self.redis.set("sensors:sim7600:gnss", json.dumps(data))
-
-    def _update_signal_data(self):
-        """
-        Update the network signal's quality data to sensors:sim7600:sigqual
-
-        : raises RuntimeError: If the signal quality data is unavailable
-        """
-        quality = self._sim.get_signal_quality()
-        self.ipc_node.send("sensors:sim7600:sigqual", quality)
-        self.redis.set("sensors:sim7600:sigqual", quality)
 
     def _update_emulated_gnss_data(self):
         data = {
@@ -228,46 +191,33 @@ class Sim7600Component(component.Component):
         self.redis.set("sensors:sim7600:gnss", json.dumps(data))
         self.ipc_node.send("sensors:sim7600:gnss", data)
 
-    def _update_emulated_signal_data(self):
-        data = {
-            "rssi": 22,
-            "ber": 0
-        }
-        self.ipc_node.send("sensors:sim7600:sigqual", data)
-        self.redis.set("sensors:sim7600:sigqual", data)
-
-    def _worker(self):
+    def _gnss_worker(self):
         # Clear eventual previous data
         self.redis.set("sensors:sim7600:gnss", "")
-        self.redis.set("sensors:sim7600:sigqual", "")
 
         # Update the new alive state
         self._update_custom_status()
 
         try:
-            while self._worker_alive:
-                if not self._emulation:
+            while self._gnss_worker_alive:
+                if not self._gnss_emulation:
                     self._update_gnss_data()
                     time.sleep(GNSS_POLL_SLEEP_TIME)
-                    self._update_signal_data()
-                    time.sleep(SIGQUAL_POLL_SLEEP_TIME)
 
                 else:
                     self._update_emulated_gnss_data()
                     time.sleep(GNSS_POLL_SLEEP_TIME)
-                    self._update_emulated_signal_data()
-                    time.sleep(SIGQUAL_POLL_SLEEP_TIME)
 
         except Exception as e:
             self.logger.error(f"GNSS worker stopped unexpectedly: {e}", self.NAME)
-            self._worker_alive = False
+            self._gnss_worker_alive = False
 
         self._update_custom_status()
 
     def start(self):
-        self._worker_alive = True
-        self._worker_thread.start()
+        self._gnss_worker_alive = True
+        self._gnss_worker_thread.start()
 
     def stop(self):
-        self._worker_alive = False
-        self._worker_thread.join()
+        self._gnss_worker_alive = False
+        self._gnss_worker_thread.join()

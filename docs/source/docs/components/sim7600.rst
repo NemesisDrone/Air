@@ -16,87 +16,19 @@ The component publishes and set a custom status message to `sensors:sim7600:stat
     "gnss_emulation": boolean
     }
 
-The `worker_alive` field indicates if the GNSS worker is alive or not.
+The `gnss_worker_alive` field indicates if the GNSS worker is alive or not.
 
 .. warning::
     Even if this field is set to `true`, the GNSS worker may still be initializing and so not broadcasting any position.
     The value of the key/value storage would be an empty string in this case.
 
-The `emulation` field indicates if the GNSS worker is emulating a position or not. If this field is set to `true`,
+The `gnss_emulation` field indicates if the GNSS worker is emulating a position or not. If this field is set to `true`,
 the sim7600 is not recognized and data is emulated.
 
 Data
 ----
 
-The component publishes and set the data to `sensors:sim7600:gnss` and `sensors:sim7600:sigqual`.
-`sensors:sim7600:sigqual`:
-
-.. code-block::
-
-    {
-    "rssi": int,
-    "ber": int
-    }
-
-The `rssi` field is the Received Signal Strength Indicator. Possible values and what they refer to can be found in SIM7600 AT commands doc. Here is the listing:
-
-.. list-table:: Possible RSSI values
-    :header-rows: 1
-    * - Value(s)
-      - Associated dBm value(s)
-
-    * - 0
-      - <= 113 dBm
-    * - 1
-      - 111 dBm
-    * - 2 ... 30
-      - -109 ... -53 dBm
-    * - 31
-      - >= -51 dBm
-    * - 99
-      - Unknown/Undetectable
-    * - 0 ... 99
-      - RSSI, 3G, 2G, LTE
-    * - 100
-      - <= -116 dBm
-    * - 101 ... 191
-      - -115 ... -26 dBm
-    * - 191
-      - >= -25dBm
-    * - 199
-      - Unknown/Undetectable
-    * - 100 ... 199
-      - TDSCDMA, RSCP received, 3G-only
-
-For more information about network signal quality, you can refer to `this page <https://help.venntelecom.com/support/solutions/articles/44001930601-how-to-interpret-ec-io-sinr-rssi-rscp-rsrp-rsrq-parameters-in-2g-3g-lte-routers>`.
-
-The `ber` field is counter for the Bit Error Ratio on the last 8 sent data. You can also refer to the SIM7600 doc here too for more information.
-
-.. list-table:: Possible RSSI values
-    :header-rows: 1
-    * - Value(s)
-      - Associated loss percentage(s)
-
-    * - 0
-      - < 0.01%
-    * - 1
-      - 0.01 ... 0.1%
-    * - 2
-      - 0.1 ... 0.5%
-    * - 3
-      - 0.5 ... 1.0%
-    * - 4
-      - 1.0 ... 2.0%
-    * - 5
-      - 2.0 ... 4.0%
-    * - 6
-      - 4.0 ... 8.0%
-    * - 7
-      - >= 8.0%
-    * - 99
-      - Unknown/Undetectable
-
-`sensors:sim7600:gnss`:
+The component publishes and set the data to `sensors:sim7600:gnss`.
 
 .. code-block::
 
