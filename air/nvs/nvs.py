@@ -34,7 +34,7 @@ async def functionWrap(func):
 
 
 def build_caps(w, h, fr) -> str:
-    return "video/x-raw,width=" + str(w) + ",height=" + str(h) + ",framerate=" + str(int(fr)) + "/1,fromat=YUY2"
+    return "video/x-raw,width=" + str(w) + ",height=" + str(h) + ",framerate=" + str(int(fr)) + "/1"
 
 
 def build_pipeline(sset: int, framerate: int, address: str, port: str) -> str:
@@ -43,7 +43,7 @@ def build_pipeline(sset: int, framerate: int, address: str, port: str) -> str:
     pipeline = "videotestsrc"
     pipeline += " ! capsfilter name=capper caps="
     pipeline += build_caps(RESOLUTIONS[sset][0], RESOLUTIONS[sset][1], framerate)
-    pipeline += " ! vah264lpenc ! rtph264pay ! udpsink host=" + address + " port=" + port
+    pipeline += " ! v4l2h264enc ! capsfilter caps=video/x-h264,level=(string)3 ! rtph264pay ! udpsink host=" + address + " port=" + port
 
     return pipeline
 
