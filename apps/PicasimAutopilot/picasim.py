@@ -7,14 +7,13 @@ from enum import Enum
 import numpy as np
 import math
 
-
 """
 Install Modified picaSim before running this code
 
 PICASIM Port: 7777
 -> Options 2 -> Advanced.
     -> Enable socket controller
-    
+
 Pause
 Unpause
 Reset
@@ -27,6 +26,7 @@ Control 1 0.3 [Sets channel 1 to 0.3]
 Control 0 -1 [Sets channel 0 to -1]
 RequestTelemetry 0.1 [Requests data every 0.1 seconds. Send 0 to stop it.]
 """
+
 
 class Channels(Enum):
     AILERON = 0
@@ -109,12 +109,12 @@ class PicaSimConnectorClass:
 
     @staticmethod
     def calculate_roll(
-        face_dir_x: float,
-        face_dir_y: float,
-        face_dir_z: float,
-        up_dir_x: float,
-        up_dir_y: float,
-        up_dir_z: float,
+            face_dir_x: float,
+            face_dir_y: float,
+            face_dir_z: float,
+            up_dir_x: float,
+            up_dir_y: float,
+            up_dir_z: float,
     ) -> float:
         """
         Calculates the roll angle from the face and up direction vectors
@@ -169,7 +169,7 @@ class PicaSimConnectorClass:
             roll=roll,
             pitch=pitch,
             yaw=yaw,
-            altitude=float(_data[18]),
+            altitude=round(float(_data[18]), 2),
         )
 
         return telemetry
