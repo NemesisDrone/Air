@@ -1,7 +1,7 @@
 from picasim import Plane
-from model1 import AutopilotModel1
+from low_level_pid_model import LowLevelPid
 
 
-autopilot = AutopilotModel1(Plane())
+autopilot = LowLevelPid(Plane())
 autopilot.run()
 
