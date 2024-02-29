@@ -12,14 +12,14 @@ class SimpleAutoPilotWingLevel:
 
     def __init__(self, plane: Plane):
         self.plane = plane
-        self.CRUISING_ALTITUDE = 20
+        self.CRUISING_ALTITUDE = 30
 
     def run(self):
         self.plane.take_control()
 
-        roll_pid = Pid(0.05, 0.001, 0.0)
+        roll_pid = Pid(0.01, 0.001, 0.0)
         pitch_pid = Pid(0.1, 0.01, 0.0, revert=True)
-        altitude_pid = Pid(0.5, 0.05, 0, lowest=-25, highest=25)
+        altitude_pid = Pid(1, 0.5, 0, lowest=-25, highest=25)
 
         roll_pid.set_target(0)
         pitch_pid.set_target(2)
