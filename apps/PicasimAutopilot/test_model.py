@@ -20,8 +20,8 @@ class TestAutoPilot:
 
     def __init__(self, plane: Plane):
         self.plane = plane
-        self.CRUISING_ALTITUDE = 30
-        self.YAW_DIRECTION = 45
+        self.CRUISING_ALTITUDE = 40
+        self.YAW_DIRECTION = -60
 
         self.plane_state = PlaneStates.CRUISING
 
@@ -69,11 +69,11 @@ class TestAutoPilot:
     def update(self):
         self.plane.take_control()
 
-        pitch_pid = Pid(0.1, 0.01, 0.0, revert=True)
-        altitude_pid = Pid(1, 0.05, 0, lowest=-25, highest=25)
+        pitch_pid = Pid(0.05, 0.00, 0.7, revert=True)
+        altitude_pid = Pid(1.0, 0.1, 0.4, lowest=-25, highest=25)
 
-        roll_pid = Pid(0.05, 0.01, 0.0)
-        yaw_pid = Pid(0.6, 0.05, 0, lowest=-25, highest=25, revert=True)
+        roll_pid = Pid(0.05, 0.00, 0.0)
+        yaw_pid = Pid(0.6, 0.00, 0.5, lowest=-25, highest=25, revert=True)
 
         roll_pid.set_target(0)
         pitch_pid.set_target(2)
