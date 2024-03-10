@@ -87,6 +87,19 @@ class ConfigComponent(component.Component):
         self.redis.set("config:updated", 1)
         self.logger.info("Config was updated", self.NAME)
 
+    @ipc.Route(["config:objectives"], False).decorator
+    def update_objectives(self, call_data: ipc.CallData, payload: dict):
+        """
+        This method is used to update the objectives of the drone.
+        """
+        print(payload)
+        pipe = self.redis.pipeline()
+        pipe.set("config:objectives:altitude", payload["altitude"])
+        pipe.set("config:objectives:direction", json.dumps(payload["direction"]))
+        pipe.execute()
+
+        self.logger.info("Objectives were updated", self.NAME)
+
     def start(self):
         pass
 
