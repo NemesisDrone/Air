@@ -60,6 +60,9 @@ class ConfigComponent(component.Component):
         """
         This method is used to update the config of the drone.
         """
+        if not payload:
+            self.logger.critical("No config provided", self.NAME)
+            return
         self.redis.set("config:name", payload["name"])
 
         canals_count = len(payload["servo_canals"])  # Canal count as to be the same for servos and brushless
