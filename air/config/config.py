@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 
 from air.utilities import component, ipc
@@ -17,6 +18,17 @@ class ConfigComponent(component.Component):
 
         self._set_default_config()
         self.ipc_node.send("config:ask", {}, loopback=True)
+
+        self.alive = False
+        self.thread_worker = threading.Thread(target=self._worker)
+
+    def _worker(self):
+        """
+        This the worker take care of asking for objectives
+        """
+        while self.alive:
+            self.ipc_node.send("config:objectives:get", {})
+            time.sleep(15)
 
     def _set_default_config(self):
         """
@@ -47,6 +59,7 @@ class ConfigComponent(component.Component):
         self.redis.set("config:updated", 0)
 
         asking_since = time.time()
+
         while int(self.redis.get("config:updated")) == 0:
             self.ipc_node.send("config:get", {})
 
@@ -60,6 +73,9 @@ class ConfigComponent(component.Component):
         """
         This method is used to update the config of the drone.
         """
+        if not payload:
+            self.logger.critical("No config provided", self.NAME)
+            return
         self.redis.set("config:name", payload["name"])
 
         canals_count = len(payload["servo_canals"])  # Canal count as to be the same for servos and brushless
@@ -84,8 +100,21 @@ class ConfigComponent(component.Component):
         self.redis.set("config:updated", 1)
         self.logger.info("Config was updated", self.NAME)
 
+    @ipc.Route(["config:objectives"], False).decorator
+    def update_objectives(self, call_data: ipc.CallData, payload: dict):
+        """
+        This method is used to update the objectives of the drone.
+        """
+        pipe = self.redis.pipeline()
+        pipe.set("config:objectives:altitude", payload["altitude"])
+        pipe.set("config:objectives:direction", json.dumps(payload["direction"]))
+        pipe.execute()
+
+        self.logger.info("Objectives were updated", self.NAME)
+
     def start(self):
-        pass
+        self.alive = True
+        self.thread_worker.start()
 
     def stop(self):
-        pass
+        self.alive = False

@@ -216,6 +216,7 @@ class CommunicationComponent(component.Component):
             "log:INFO:*",
             "state:*",
             "config:get",
+            "config:objectives:get",
         ],
         True,
     ).decorator
