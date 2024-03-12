@@ -2,7 +2,7 @@ import threading
 import time
 from enum import Enum
 
-from utils.utils import normalize
+from utils.utils import normalize, fastest_correction
 from picasim import Plane, Channels
 from utils.pid import Pid
 
@@ -70,7 +70,7 @@ class TestAutoPilot:
         self.plane.take_control()
 
         pitch_pid = Pid(0.05, 0.00, 0.7, revert=True)
-        altitude_pid = Pid(1.0, 0.1, 0.4, lowest=-25, highest=25)
+        altitude_pid = Pid(1.0, 0.00, 0.6, lowest=-25, highest=25)
 
         roll_pid = Pid(0.05, 0.00, 0.0)
         yaw_pid = Pid(0.6, 0.00, 0.5, lowest=-25, highest=25, revert=True)
@@ -105,14 +105,26 @@ class TestAutoPilot:
 
             # Roll handling.
 
-            yaw_pid.set_target(self.YAW_DIRECTION)
-            yaw_control = yaw_pid.get_control(data.yaw)
+            ################################################################################
 
-            roll_pid.set_target(yaw_control)
-            roll_control = normalize(roll_pid.get_control(data.roll), _min=-limited_roll, _max=limited_roll)
+            yaw_pid.set_target(self.YAW_DIRECTION)
+            correction = fastest_correction(self.YAW_DIRECTION, data.yaw)
+            if correction > 0 and correction < 180:
+                yaw_control = yaw_pid.get_control(data.yaw)
+                roll_pid.set_target(yaw_control)
+                roll_control = normalize(roll_pid.get_control(data.roll), _min=-limited_roll, _max=limited_roll)
+
+
+            if correction < 0 and correction > -180:
+                yaw_control = yaw_pid.get_control(data.yaw)
+                roll_pid.set_target(yaw_control)
+                roll_control = normalize(roll_pid.get_control(data.roll), _min=-limited_roll, _max=limited_roll)
+
+            #################################################################################
 
             self.plane.control(Channels.AILERON, roll_control)
 
-            print("Yaw objective:", self.YAW_DIRECTION, "Yaw:", data.yaw, "Altitude objective:", self.CRUISING_ALTITUDE, "Altitude:", data.altitude)
+            print("Yaw objective:", self.YAW_DIRECTION, "Yaw:", data.yaw, "Correction:", correction,
+                  "Altitude objective:", self.CRUISING_ALTITUDE, "Altitude:", data.altitude)
 
             time.sleep(0.01)
