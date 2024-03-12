@@ -104,27 +104,15 @@ class TestAutoPilot:
             self.plane.control(Channels.ELEVATOR, pitch_control)
 
             # Roll handling.
-
-            ################################################################################
-
-            yaw_pid.set_target(self.YAW_DIRECTION)
             correction = fastest_correction(self.YAW_DIRECTION, data.yaw)
-            if correction > 0 and correction < 180:
-                yaw_control = yaw_pid.get_control(data.yaw)
-                roll_pid.set_target(yaw_control)
-                roll_control = normalize(roll_pid.get_control(data.roll), _min=-limited_roll, _max=limited_roll)
-
-
-            if correction < 0 and correction > -180:
-                yaw_control = yaw_pid.get_control(data.yaw)
-                roll_pid.set_target(yaw_control)
-                roll_control = normalize(roll_pid.get_control(data.roll), _min=-limited_roll, _max=limited_roll)
-
-            #################################################################################
+            yaw_pid.set_target(data.yaw + correction)
+            yaw_control = yaw_pid.get_control(data.yaw)
+            roll_pid.set_target(yaw_control)
+            roll_control = normalize(roll_pid.get_control(data.roll), _min=-limited_roll, _max=limited_roll)
 
             self.plane.control(Channels.AILERON, roll_control)
 
-            print("Yaw objective:", self.YAW_DIRECTION, "Yaw:", data.yaw, "Correction:", correction,
+            print("Yaw objective:", self.YAW_DIRECTION, "Yaw:", data.yaw,
                   "Altitude objective:", self.CRUISING_ALTITUDE, "Altitude:", data.altitude)
 
             time.sleep(0.01)
