@@ -149,9 +149,9 @@ class ImuViewer:
 
 
 viewer = ImuViewer()
-r = redis.Redis(host="rpi2.dace-alpha.ts.net", port=6379, db=0)
+r = redis.Redis(host="100.91.134.10", port=6379, db=0)
 
 while True:
-    data = json.loads(r.get("sensors:sense_hat:data"))
+    data = json.loads(r.get("sensors:imu:data"))
     viewer.set_orientation(data["roll"], data["pitch"], data["yaw"])
     time.sleep(0.01)
